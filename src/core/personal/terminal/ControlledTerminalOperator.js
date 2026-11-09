@@ -152,3 +152,4 @@ export class ControlledTerminalOperator {
     return this.auditLog.slice(-limit);
   }
 }
+
