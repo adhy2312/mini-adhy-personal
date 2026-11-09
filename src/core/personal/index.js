@@ -33,5 +33,6 @@ export * from './voice/VoiceSynthesisNexus';
 export * from './vision/PerceptualVisionAgent';
 export * from './radar/LocalNetworkRadar';
 export * from './workspace/WorkspaceGuardian';
+export * from './native/PolyglotNexus';
 export * from './executive/PersonalExecutiveAgent';
 
