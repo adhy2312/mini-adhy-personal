@@ -1,0 +1,513 @@
+/* ═══════════════════════════════
+   HERO V200 — DECONSTRUCTED GLITCH
+   Pure CSS, 60fps, hardware-accelerated
+═══════════════════════════════ */
+.hero-minimal {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 1.5rem 60px;
+  background-color: transparent;
+}
+
+/* Giant ghost typography */
+.hero-minimal::before {
+  content: 'ADHY';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-heading);
+  font-size: 35vw;
+  font-weight: 900;
+  color: #000;
+  opacity: 0.04;
+  z-index: 0;
+  pointer-events: none;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+#tsparticles { display: none; }
+
+/* ── Top row: greeting left, status right ── */
+.hero-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.hero-greeting-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Status row (availability + clock) ── */
+.hero-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── Availability badge ── */
+.hero-availability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #1a7a3a;
+  background: rgba(46, 204, 113, 0.1);
+  border: 1.5px solid rgba(46, 204, 113, 0.3);
+  border-radius: 50px;
+  padding: 6px 14px 6px 10px;
+}
+
+.avail-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2ecc71;
+  display: inline-block;
+  animation: avail-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+  flex-shrink: 0;
+}
+
+@keyframes avail-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.5); }
+  70%  { box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+
+/* ── Kerala time badge ── */
+.hero-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  color: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 50px;
+  padding: 6px 14px;
+}
+
+.hero-time-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3498db;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.hero-time-text {
+  opacity: 0.55;
+}
+
+.hero-time-clock {
+  font-weight: 700;
+  color: rgba(0,0,0,0.65);
+  letter-spacing: 1.5px;
+}
+
+/* ── Content wrapper ── */
+.hero-minimal-content {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  width: 100%;
+  max-width: var(--container-width);
+}
+
+/* ── Executive Chairperson Badge ── */
+.hero-executive-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #111111;
+  background: linear-gradient(135deg, #f4d03f 0%, #e67e22 100%);
+  border: 2px solid #000;
+  padding: 8px 18px;
+  box-shadow: 4px 4px 0px #000;
+  border-radius: 4px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+body.dark-mode .hero-executive-badge {
+  color: #000000;
+  box-shadow: 4px 4px 0px rgba(244, 208, 63, 0.4), 0 0 20px rgba(244, 208, 63, 0.2);
+}
+
+.hero-executive-badge:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+
+.badge-crown {
+  font-size: 1.1rem;
+  color: #000;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+  animation: crown-wiggle 4s ease-in-out infinite;
+}
+
+@keyframes crown-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(12deg) scale(1.1); }
+}
+
+/* ── Greeting badge — sleek stamp ── */
+.hero-greeting {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid #000;
+  border-radius: 4px;
+  padding: 10px 24px;
+  box-shadow: 5px 5px 0px #000;
+  margin-bottom: 0;
+  display: inline-block;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+body.dark-mode .hero-greeting {
+  background: rgba(20, 20, 28, 0.85);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 5px 5px 0px rgba(255, 255, 255, 0.8);
+}
+
+.hero-greeting:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0px #000;
+}
+
+/* ── Giant Name — massive brutalist typography ── */
+.hero-name-giant {
+  font-family: var(--font-heading);
+  font-size: clamp(4rem, 14vw, 13rem);
+  font-weight: 900;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  line-height: 0.85;
+  text-transform: uppercase;
+  position: relative;
+  border-bottom: none;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  animation: hero-title-float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes hero-title-float {
+  0%   { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(0, -10px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.hero-name-word {
+  display: inline-block;
+  white-space: nowrap;
+  margin: 0 8px;
+}
+
+/* ── Each character — thick stroke + solid offset shadow for POP ── */
+.metallic-char {
+  display: inline-block;
+  color: var(--bg-primary);
+  -webkit-text-stroke: 4px #000;
+  text-shadow:
+    8px 8px 0px #000,
+    -2px -2px 0px var(--accent-brutal-pink);
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset; /* standard property alongside webkit for compatibility */
+  -webkit-text-fill-color: unset;
+  padding: 0;
+  position: relative;
+  transition: transform var(--transition-fast), text-shadow var(--transition-fast);
+  cursor: default;
+}
+
+/* Typographic Majesty: Weight Contrast */
+.hero-name-word:nth-child(1) .metallic-char {
+  font-weight: 900;
+}
+
+.hero-name-word:nth-child(2) .metallic-char {
+  color: #000;
+  -webkit-text-stroke: 0px;
+  font-weight: 300;
+  margin-right: 0.05em; /* Tracked out */
+  text-shadow: 6px 6px 0px rgba(0,0,0,0.2); /* Softer shadow for lighter weight */
+}
+
+.metallic-char:hover {
+  color: var(--accent-brutal-yellow);
+  transform: translate(-4px, -6px) !important;
+  text-shadow:
+    10px 10px 0px #000,
+    -3px -3px 0px var(--accent-brutal-blue);
+}
+
+/* ── CSS Glitch effect on name (pseudo-elements, clip-path driven) ── */
+.hero-name-giant::before,
+.hero-name-giant::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-transform: inherit;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+}
+
+.hero-name-giant:hover::before {
+  opacity: 0.6;
+  color: var(--accent-brutal-pink);
+  -webkit-text-stroke: 2px var(--accent-brutal-pink);
+  animation: glitch-shift-1 0.3s steps(2) infinite;
+}
+
+.hero-name-giant:hover::after {
+  opacity: 0.6;
+  color: var(--accent-brutal-blue);
+  -webkit-text-stroke: 2px var(--accent-brutal-blue);
+  animation: glitch-shift-2 0.3s steps(2) infinite;
+}
+
+@keyframes glitch-shift-1 {
+  0%   { clip-path: inset(20% 0 60% 0); transform: translate(-4px, 2px); }
+  25%  { clip-path: inset(60% 0 10% 0); transform: translate(3px, -1px); }
+  50%  { clip-path: inset(40% 0 30% 0); transform: translate(-2px, 3px); }
+  75%  { clip-path: inset(10% 0 70% 0); transform: translate(4px, -2px); }
+  100% { clip-path: inset(50% 0 20% 0); transform: translate(-3px, 1px); }
+}
+
+@keyframes glitch-shift-2 {
+  0%   { clip-path: inset(50% 0 20% 0); transform: translate(4px, -2px); }
+  25%  { clip-path: inset(10% 0 70% 0); transform: translate(-3px, 1px); }
+  50%  { clip-path: inset(30% 0 40% 0); transform: translate(2px, -3px); }
+  75%  { clip-path: inset(70% 0 5% 0);  transform: translate(-4px, 2px); }
+  100% { clip-path: inset(20% 0 60% 0); transform: translate(3px, -1px); }
+}
+
+.metallic-reveal {
+  overflow: visible;
+}
+
+/* ── Tagline — brutalist code-style badge ── */
+.hero-tagline-premium {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #000;
+  background: #fff;
+  border: var(--border-heavy);
+  border-radius: 0;
+  box-shadow: 6px 6px 0px #000;
+  margin-top: 3rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  position: relative;
+  padding: 14px 28px;
+  display: inline-block;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.hero-tagline-premium:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0px #000;
+}
+
+/* ── Typewriter Cursors ── */
+.typewriter-cursor-active {
+  display: inline-block;
+  color: var(--accent-brutal-pink);
+  font-weight: 800;
+  animation: cursor-flicker 0.15s infinite alternate;
+  font-family: var(--font-mono);
+  vertical-align: baseline;
+  margin-left: 8px;
+}
+
+.typewriter-cursor-complete {
+  display: inline-block;
+  color: #000;
+  font-weight: 800;
+  animation: cursor-blink 1.2s step-end infinite;
+  font-family: var(--font-mono);
+  vertical-align: baseline;
+  margin-left: 8px;
+}
+
+@keyframes cursor-blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes cursor-flicker {
+  0% { opacity: 0.55; }
+  100% { opacity: 1; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .hero-minimal {
+    /* 80px = navbar height on mobile (~60px) + 20px breathing room */
+    padding: 88px 1rem 40px;
+  }
+  .hero-name-giant {
+    font-size: clamp(3rem, 14vw, 4.5rem);
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .metallic-char {
+    -webkit-text-stroke: 2px #000;
+    text-shadow:
+      4px 4px 0px #000,
+      -1px -1px 0px var(--accent-brutal-pink);
+    transform: none !important;
+  }
+  .metallic-char:hover {
+    transform: translate(-2px, -3px) !important;
+    text-shadow:
+      6px 6px 0px #000,
+      -2px -2px 0px var(--accent-brutal-blue);
+  }
+  .hero-tagline-premium {
+    letter-spacing: 1px !important;
+    font-size: 0.7rem;
+    padding: 10px 18px;
+    box-shadow: 4px 4px 0px #000;
+  }
+  .hero-greeting {
+    font-size: 0.55rem;
+    padding: 6px 12px;
+    box-shadow: 4px 4px 0px #000;
+  }
+  /* Disable glitch pseudo-elements on mobile for performance */
+  .hero-name-giant::before,
+  .hero-name-giant::after {
+    display: none;
+  }
+}
+
+/* ── High-Performance CSS Particles (V200 — variable size) ── */
+.hero-css-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.css-star {
+  position: absolute;
+  top: var(--top);
+  left: var(--left);
+  width: var(--size, 16px);
+  height: var(--size, 16px);
+  background: var(--accent-brutal-pink);
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0px #000;
+  opacity: 0.2;
+  animation: floatShape var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+
+.css-star:nth-child(3n+1) {
+  background: var(--accent-brutal-pink);
+  border-radius: 0;
+}
+.css-star:nth-child(3n+2) {
+  background: var(--accent-brutal-blue);
+  border-radius: 50%;
+  opacity: 0.15;
+}
+.css-star:nth-child(3n) {
+  background: var(--accent-brutal-yellow);
+  border-radius: 0;
+  transform: rotate(45deg);
+  opacity: 0.18;
+}
+.css-star:nth-child(5n) {
+  background: var(--accent-brutal-green, #2ecc71);
+  border-radius: 3px;
+  opacity: 0.12;
+}
+
+@keyframes floatShape {
+  0%   { transform: translateY(0) rotate(0deg);    opacity: 0.1; }
+  100% { transform: translateY(-40px) rotate(200deg); opacity: 0.35; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  /* Note: padding-top in first block (88px) applies — this block refines other styles */
+  .hero-minimal { padding: 88px 1rem 80px; } /* extra bottom padding prevents dock overlap */
+  .hero-top-row { flex-direction: column; gap: 0.75rem; }
+  .hero-status-row { flex-direction: column; gap: 8px; }
+  .hero-time-badge { display: none; } /* Clock hidden on mobile for clean layout */
+  .hero-name-giant {
+    font-size: clamp(3rem, 14vw, 4.5rem);
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .metallic-char {
+    -webkit-text-stroke: 2px #000;
+    text-shadow: 4px 4px 0px #000, -1px -1px 0px var(--accent-brutal-pink);
+    transform: none !important;
+  }
+  .metallic-char:hover {
+    transform: translate(-2px, -3px) !important;
+    text-shadow: 6px 6px 0px #000, -2px -2px 0px var(--accent-brutal-blue);
+  }
+  .hero-tagline-premium {
+    letter-spacing: 1px !important;
+    font-size: 0.7rem;
+    padding: 10px 18px;
+    box-shadow: 4px 4px 0px #000;
+  }
+  .hero-greeting { font-size: 0.55rem; padding: 6px 12px; box-shadow: 4px 4px 0px #000; }
+  /* Disable glitch pseudo-elements on mobile */
+  .hero-name-giant::before, .hero-name-giant::after { display: none; }
+}
+

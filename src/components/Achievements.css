@@ -1,0 +1,105 @@
+/* ═══════════════════════════════
+   ACHIEVEMENTS SECTION
+   (Neo Brutalism)
+═══════════════════════════════ */
+.achievements {
+  padding: var(--section-padding);
+  background-color: var(--bg-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.ach-header {
+  margin-bottom: 3rem;
+}
+
+/* ── Grid ── */
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.3rem;
+}
+
+/* ── Card — Brutalist Panel ── */
+.ach-card {
+  padding: 2rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  background: var(--bg-card) !important;
+  border: var(--border-brutal) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--shadow-brutal) !important;
+}
+
+.ach-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-brutal-deep) !important;
+}
+
+.ach-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 8px;
+  background: var(--ach-accent, var(--accent-primary));
+}
+
+/* Icon */
+.ach-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  width: 52px;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-brutal-yellow);
+  border: var(--border-brutal);
+  border-radius: 0;
+  margin-bottom: 0.5rem;
+  box-shadow: 3px 3px 0px #000;
+}
+
+.ach-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* Text */
+.ach-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #000;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.ach-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .ach-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .ach-grid {
+    grid-template-columns: 1fr;
+  }
+  .ach-card {
+    box-shadow: 4px 4px 0px #000 !important;
+  }
+}

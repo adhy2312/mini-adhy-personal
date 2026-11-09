@@ -1,0 +1,28 @@
+export default {
+  name: 'footer',
+  title: 'Footer Settings',
+  type: 'document',
+  fields: [
+    { name: 'tagline', title: 'Tagline', type: 'text' },
+    { name: 'email', title: 'Email Address', type: 'string' },
+    { name: 'whatsapp', title: 'WhatsApp Number', type: 'string' },
+    { name: 'location', title: 'Location', type: 'string' },
+    { name: 'buildVersion', title: 'Build Version', type: 'string', description: 'e.g. v8.5 (Overrides the hardcoded version in the footer)' },
+    { 
+      name: 'socialLinks', 
+      title: 'Social Links', 
+      type: 'array', 
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'platform', type: 'string' },
+            { name: 'url', type: 'url' },
+            { name: 'iconName', type: 'string' }
+          ]
+        }
+      ] 
+    },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
+  ]
+}

@@ -1,0 +1,1668 @@
+/* Fonts are loaded in index.html to avoid duplicate requests. Only @font-face overrides here. */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+
+@font-face {
+  font-family: 'Sterion';
+  src: url('./assets/fonts/Sterion.otf') format('opentype');
+  font-display: swap;
+}
+
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+
+
+:root {
+  /* Core Palette - SLEEK EXECUTIVE BENTO */
+  --bg-primary: #f2f2ee; /* Warm executive alabaster */
+  --bg-secondary: #e6e6e2;
+  --bg-tertiary: #dadad6;
+  --bg-card: rgba(255, 255, 255, 0.75); /* Glassy card */
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+
+  /* Accent Colors (Refined Champagne Gold & Tech Cyan) */
+  --accent-primary: #e5c158;
+  --accent-primary-rgb: 229, 193, 88;
+  --button-text: #000000;
+  --accent-brutal-yellow: #f4d03f;
+  --accent-brutal-blue: #3498db;
+  --accent-brutal-pink: #ff6b6b;
+  --accent-brutal-green: #2ecc71;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #111111 0%, #333333 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+  --gradient-gold: linear-gradient(135deg, #f4d03f 0%, #e67e22 100%);
+  
+  /* Text */
+  --text-primary: #0d0d11;
+  --text-secondary: #2c2c34;
+  --text-muted: #666672;
+
+  /* Borders & Shadows (Refined Depth) */
+  --border-subtle: 1px solid #111111;
+  --border-brutal: 2px solid #111111;
+  --border-heavy: 3px solid #111111;
+  --border-radius-bento: 12px;
+  
+  --shadow-brutal: 5px 5px 0px #111111, 0 10px 30px rgba(0,0,0,0.08);
+  --shadow-brutal-hover: 2px 2px 0px #111111, 0 5px 20px rgba(229,193,88,0.2);
+  --shadow-brutal-deep: 10px 10px 0px #111111, 0 20px 40px rgba(0,0,0,0.15);
+
+  /* Spacing */
+  --section-padding: 120px 0;
+  --container-width: 1200px;
+  --bento-gap: 24px;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-bounce: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Typography Scale */
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+  --font-editorial: 'Playfair Display', serif;
+
+  /* Real-Time Solar Lighting */
+  --solar-x: 0px;
+  --solar-y: 10px;
+  --solar-blur: 20px;
+  --solar-opacity: 0.05;
+  --solar-shadow: var(--solar-x) var(--solar-y) var(--solar-blur) rgba(0,0,0,var(--solar-opacity));
+
+  /* Dynamic Font */
+  --dynamic-weight: 800;
+  --dynamic-slant: 0deg;
+}
+
+/* ═══════════════════════════════════════════
+   DARK MODE OVERRIDES (DEEP OBSIDIAN & GOLD)
+═══════════════════════════════════════════ */
+body.dark-mode {
+  --bg-primary: #0b0c10;
+  --bg-secondary: #12131a;
+  --bg-tertiary: #191b24;
+  --bg-card: rgba(22, 24, 34, 0.75);
+  --bg-card-hover: rgba(30, 33, 48, 0.95);
+
+  --accent-primary: #f4d03f;
+  --accent-primary-rgb: 244, 208, 63;
+  --button-text: #000000;
+
+  --gradient-primary: linear-gradient(135deg, #ffffff 0%, #d4af37 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(30,33,48,0.8) 0%, rgba(20,22,32,0.4) 100%);
+  
+  --text-primary: #f5f5f7;
+  --text-secondary: #c5c5d0;
+  --text-muted: #8e8ea0;
+
+  --border-subtle: 1px solid rgba(255,255,255,0.15);
+  --border-brutal: 2px solid rgba(255,255,255,0.7);
+  --border-heavy: 3px solid #ffffff;
+  
+  --shadow-brutal: 5px 5px 0px rgba(244, 208, 63, 0.7), 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-brutal-hover: 2px 2px 0px rgba(244, 208, 63, 0.9), 0 5px 25px rgba(244,208,63,0.25);
+  --shadow-brutal-deep: 10px 10px 0px rgba(244, 208, 63, 0.8), 0 20px 40px rgba(0,0,0,0.7);
+}
+
+/* ═══════════════════════════════════════════
+   SPOTIFY AMBIENT LIGHTING: SOFT DIFFUSED AMBIENCE
+   Soft, atmospheric light blooms behind elements — NO sharp colored edges
+═══════════════════════════════════════════ */
+body.spotify-ambient-active.spotify-playing {
+  --shadow-brutal: 5px 5px 0px #111111, 0 12px 35px var(--spotify-ambient-glow-card), 0 0 50px var(--spotify-ambient-glow);
+  --shadow-brutal-hover: 2px 2px 0px #111111, 0 16px 45px var(--spotify-ambient-glow-card-deep), 0 0 65px var(--spotify-ambient-glow);
+  --shadow-brutal-deep: 10px 10px 0px #111111, 0 24px 60px var(--spotify-ambient-glow-card-deep), 0 0 80px var(--spotify-ambient-glow);
+}
+
+body.dark-mode.spotify-ambient-active.spotify-playing {
+  --shadow-brutal: 5px 5px 0px #000000, 0 12px 35px var(--spotify-ambient-glow-card), 0 0 50px var(--spotify-ambient-glow);
+  --shadow-brutal-hover: 2px 2px 0px #000000, 0 16px 45px var(--spotify-ambient-glow-card-deep), 0 0 65px var(--spotify-ambient-glow);
+  --shadow-brutal-deep: 10px 10px 0px #000000, 0 24px 60px var(--spotify-ambient-glow-card-deep), 0 0 80px var(--spotify-ambient-glow);
+}
+
+
+/* ═══════════════════════════════════════════
+   GLOBAL SOUL ILLUMINATION (Subtle Grid)
+═══════════════════════════════════════════ */
+.App::before {
+  content: '';
+  position: fixed; 
+  inset: 0;
+  display: var(--grid-display, block);
+  background-image:
+    linear-gradient(rgba(0,0,0,var(--grid-opacity, 0.03)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,var(--grid-opacity, 0.03)) 1px, transparent 1px);
+  background-size: var(--grid-size, 40px) var(--grid-size, 40px);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+body.dark-mode .App::before {
+  background-image:
+    linear-gradient(rgba(255,255,255,var(--grid-opacity, 0.03)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,var(--grid-opacity, 0.03)) 1px, transparent 1px);
+}
+
+/* ═══════════════════════════════════════════
+   CINEMATIC AMBIENT DEPTH & CORNER VIGNETTE
+   Ultra-low weight, fixed GPU compositor layer (0 JS, 0 repaints)
+═══════════════════════════════════════════ */
+.App::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: 
+    radial-gradient(ellipse at center, transparent 65%, rgba(0, 0, 0, 0.22) 100%),
+    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.03) 0%, transparent 60%);
+}
+
+body.dark-mode .App::after {
+  background: 
+    radial-gradient(ellipse at center, transparent 60%, rgba(3, 4, 7, 0.45) 100%),
+    radial-gradient(circle at 50% 0%, rgba(244, 208, 63, 0.025) 0%, transparent 65%),
+    radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.02) 0%, transparent 55%),
+    radial-gradient(circle at 15% 70%, rgba(6, 182, 212, 0.015) 0%, transparent 50%);
+}
+
+
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-width: 100%;
+  width: 100%;
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  overscroll-behavior-y: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  transition: background-color 0.8s ease, color 0.8s ease;
+  counter-reset: brutal-section; /* Initialize section counter */
+}
+
+/* Global Film Grain Noise Layer Removed to fix massive GPU lag */
+body::after {
+  display: none;
+}
+
+body.darkroom-active {
+  background-color: #0a0a0a;
+  color: #f0f0f0;
+}
+
+.App {
+  overflow-x: clip;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
+  backface-visibility: hidden;
+  touch-action: pan-y;
+}
+
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}
+
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY — SECTION HEADING SYSTEM
+   Clean stacked layout: Label → Title → Divider → Desc
+═══════════════════════════════════════════ */
+.section-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  font-weight: 700;
+  display: flex; /* THIS MUST BE FLEX, NOT INLINE-FLEX */
+  width: max-content;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 5px 14px 5px 10px;
+  /* Retro recessed label plate with better light-mode contrast */
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid var(--accent-primary);
+  border-radius: 0;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-label::after {
+  content: '';
+  display: block;
+  width: 100%;
+}
+
+.section-label-container {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+}
+.section-label-container.center {
+  justify-content: center;
+}
+
+body.dark-mode .section-label {
+  background: rgba(var(--accent-primary-rgb), 0.06);
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.15);
+  border-top: 4px solid var(--accent-primary);
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+  color: #fff;
+}
+
+/* Center the section label in centered headers */
+.skills-header .section-label,
+.trusted-header .section-label,
+.photo-header .section-label {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* LED dot before label text */
+.section-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 4px var(--accent-primary), 0 0 8px var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.section-title {
+  position: relative;
+  display: inline-block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.6rem, 7vw, 3rem);
+  font-weight: var(--dynamic-weight, 700);
+  transform: skewX(var(--dynamic-slant, 0deg));
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin-bottom: 0;
+  max-width: 100%;
+  word-wrap: break-word;
+  text-shadow: var(--solar-shadow);
+  transition: font-weight 0.3s ease-out, transform 0.3s ease-out, text-shadow 1s linear;
+}
+
+.section-title-wrapper {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Center title wrapper in centered headers */
+.skills-header .section-title-wrapper,
+.trusted-header .section-title-wrapper,
+.photo-header .section-title-wrapper,
+.works-header .section-title-wrapper,
+.experience-header .section-title-wrapper,
+.testimonials-header .section-title-wrapper {
+  justify-content: center;
+}
+
+.story-btn {
+  opacity: 0;
+  transform: translateX(-10px);
+  background: rgba(108, 99, 255, 0.1);
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  color: #c4b5fd;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  position: relative;
+}
+
+/* Bridge the gap so hover doesn't flicker */
+.story-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -16px;
+  width: 16px;
+}
+
+.section-title:hover ~ .story-btn,
+.story-btn:hover {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.story-btn:hover {
+  background: rgba(108, 99, 255, 0.2);
+  border-color: rgba(108, 99, 255, 0.6);
+  color: #fff;
+  transform: translateX(0) scale(1.05);
+}
+
+.section-title-inner {
+  display: inline-block;
+}
+
+.section-title[data-hover] {
+  cursor: pointer;
+}
+
+.section-title-hover-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  color: var(--accent-primary);
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+.section-title[data-hover]:hover .section-title-content {
+  opacity: 0;
+  transform: translateY(-15px);
+}
+
+.section-title[data-hover]:hover .section-title-hover-text {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section-title span {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-desc {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 560px;
+  line-height: 1.8;
+  margin-top: 0;
+}
+
+/* Ambient blobs removed */
+
+/* Fallback for performance breathing overlay removal */
+.performance-breathing-overlay {
+  display: none;
+}
+
+/* --- Late Night Loneliness Mode --- */
+.late-night-mode {
+  --bg-primary: #f2f2f5;
+  --text-primary: #1a1a24;
+  --transition-smooth: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  --glow-primary: rgba(0, 0, 0, 0.05);
+}
+
+.late-night-mode .digital-breathing-overlay {
+  animation-duration: 16s; /* Deeper, slower breathing at night */
+  box-shadow: 
+    inset 0 0 150px rgba(80, 70, 150, 0.1),
+    inset 0 0 40px rgba(80, 70, 150, 0.05);
+}
+.late-night-mode .section-title {
+  letter-spacing: 1px; /* Subtly relaxed typography at night */
+}
+
+.glass-card {
+  position: relative;
+  background: var(--bg-card);
+  /* Removed heavy backdrop-filter blur for massive scroll perf boost */
+  border: var(--border-brutal);
+  border-radius: 0; /* Brutalism prefers square edges, overriding bento */
+  box-shadow: var(--shadow-brutal);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-smooth);
+  overflow: hidden;
+  /* will-change removed — permanently promoting all cards creates too many GPU layers */
+  transform: translateZ(0); /* Cheap compositing hint without layer explosion */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Interior crosshatch texture for cards */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  z-index: 0;
+  background-image: 
+    repeating-linear-gradient(45deg, transparent, transparent 10px, #000 10px, #000 11px),
+    repeating-linear-gradient(-45deg, transparent, transparent 10px, #000 10px, #000 11px);
+}
+
+@media (max-width: 768px) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.75);
+  }
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-hover);
+}
+
+.glass-card:active {
+  transform: translate(6px, 6px);
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background-color: var(--accent-primary);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: var(--border-brutal);
+  border-radius: var(--border-radius-bento);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-brutal);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+
+.btn-primary:hover {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-hover);
+  background-color: var(--accent-brutal-blue);
+  color: #000;
+}
+
+.btn-primary:active {
+  transform: translate(6px, 6px);
+  box-shadow: none;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 32px;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: var(--border-brutal);
+  border-radius: var(--border-radius-bento);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-brutal);
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.btn-outline:hover {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-hover);
+  background-color: var(--accent-brutal-yellow);
+  color: #000;
+}
+
+.btn-outline:active {
+  transform: translate(6px, 6px);
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════
+   SECTION CONTAINER
+═══════════════════════════════════════════ */
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.2rem;
+  }
+}
+
+/* Grid overlay styling moved and consolidated above */
+/* Mobile: keep but make it even more subtle */
+@media (max-width: 768px) {
+  .App::before {
+    opacity: 0.6;
+  }
+}
+
+
+/* ═══════════════════════════════════════════
+   DIVIDER — Retro Cassette-tape Style
+═══════════════════════════════════════════ */
+.section-container {
+  width: 100%;
+  max-width: 100%;
+  min-height: auto;
+  position: relative;
+  overflow-x: clip;
+  overflow-y: visible;
+  touch-action: pan-y;
+  transform: skewY(var(--doppler-skew, 0deg));
+  transition: transform 0.1s linear;
+  counter-increment: brutal-section;
+}
+
+/* Dashed ruled line between sections */
+.section-container + .section-container::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg, var(--accent-primary) 0px, var(--accent-primary) 40px, transparent 40px, transparent 50px
+  );
+  z-index: 10;
+}
+
+/* Giant ghost numbers */
+.section-container::after {
+  content: '0' counter(brutal-section);
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  font-family: var(--font-mono);
+  font-size: clamp(8rem, 20vw, 20rem);
+  font-weight: 900;
+  color: var(--accent-primary);
+  opacity: 0.03;
+  line-height: 0.8;
+  pointer-events: none;
+  z-index: 0;
+  letter-spacing: -0.05em;
+}
+
+/* Used for sections like Footer/KineticMarquee that should auto-size */
+.lazy-section-auto {
+  width: 100%;
+  position: relative;
+  /* No min-height — collapses to content height */
+}
+
+/* ─── V60 Anisotropic Metallic Surfaces ─── */
+.anisotropic-surface {
+  position: relative;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.anisotropic-surface::after {
+  content: '';
+  position: absolute;
+  inset: -100%; /* Large enough to cover rotation */
+  background: conic-gradient(
+    from var(--anisotropy-angle, 0deg) at 50% 50%,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.1) 45deg,
+    transparent 90deg,
+    rgba(255, 255, 255, 0.15) 135deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.1) 225deg,
+    transparent 270deg,
+    rgba(255, 255, 255, 0.15) 315deg,
+    transparent 360deg
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+}
+
+.anisotropic-surface:hover::after {
+  opacity: 1;
+}
+
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  margin: 16px 0 32px 0;
+  position: relative;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  transform: translateY(-50%);
+  box-shadow: 0 0 6px var(--accent-primary);
+}
+
+.section-divider::before { left: -2px; }
+.section-divider::after { right: -2px; }
+
+/* ═══════════════════════════════════════════
+   TOPOGRAPHIC CONTOUR LINE TEXTURES
+═══════════════════════════════════════════ */
+
+/* Topo contour background — add to any section */
+.topo-texture {
+  position: relative;
+}
+
+.topo-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='1'%3E%3Cellipse cx='300' cy='300' rx='280' ry='200'/%3E%3Cellipse cx='300' cy='300' rx='240' ry='170'/%3E%3Cellipse cx='300' cy='300' rx='200' ry='140'/%3E%3Cellipse cx='300' cy='300' rx='160' ry='110'/%3E%3Cellipse cx='300' cy='300' rx='120' ry='80'/%3E%3Cellipse cx='300' cy='300' rx='80' ry='50'/%3E%3Cellipse cx='300' cy='300' rx='40' ry='25'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 400px 400px;
+  background-repeat: repeat;
+}
+
+/* Crosshatch texture — subtle engineering paper */
+.crosshatch-texture {
+  position: relative;
+}
+
+.crosshatch-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.018;
+  z-index: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(var(--accent-primary-rgb), 0.5) 10px,
+      rgba(var(--accent-primary-rgb), 0.5) 11px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(var(--accent-primary-rgb), 0.5) 10px,
+      rgba(var(--accent-primary-rgb), 0.5) 11px
+    );
+}
+
+/* Concentric ring pattern — radar/sonar feel */
+.radar-rings {
+  position: relative;
+}
+
+.radar-rings::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 800px;
+  height: 800px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.025;
+  z-index: 0;
+  background: 
+    radial-gradient(circle, transparent 60px, rgba(var(--accent-primary-rgb),0.3) 61px, transparent 62px),
+    radial-gradient(circle, transparent 120px, rgba(var(--accent-primary-rgb),0.25) 121px, transparent 122px),
+    radial-gradient(circle, transparent 180px, rgba(var(--accent-primary-rgb),0.2) 181px, transparent 182px),
+    radial-gradient(circle, transparent 240px, rgba(var(--accent-primary-rgb),0.15) 241px, transparent 242px),
+    radial-gradient(circle, transparent 300px, rgba(var(--accent-primary-rgb),0.1) 301px, transparent 302px),
+    radial-gradient(circle, transparent 360px, rgba(var(--accent-primary-rgb),0.08) 361px, transparent 362px);
+}
+
+/* ═══════════════════════════════════════════
+   TAG / BADGE
+═══════════════════════════════════════════ */
+.tech-tag {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 50px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  background: rgba(var(--accent-primary-rgb), 0.12);
+  color: var(--accent-secondary);
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.25);
+  transition: var(--transition-fast);
+}
+
+.tech-tag:hover {
+  background: rgba(var(--accent-primary-rgb), 0.22);
+  border-color: var(--accent-primary);
+}
+
+/* ═══════════════════════════════════════════
+   NEON GLOW UTILITY
+═══════════════════════════════════════════ */
+.glow-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══════════════════════════════════════════
+   HERO NAME WRAPPING
+   ═══════════════════════════════════════════ */
+.hero-name-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .hero-name-word {
+    display: block; /* Force "Mohan" to next line */
+  }
+  .hero-name-spacer {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   PERFORMANCE UTILITIES
+   ═══════════════════════════════════════════ */
+.optimize-gpu {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.low-perf-hide {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+/* Content-visibility for lazy rendering of below-fold sections */
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+/* ═══════════════════════════════════════════
+   SELECTION COLOR
+═══════════════════════════════════════════ */
+::selection {
+  background: rgba(var(--accent-primary-rgb), 0.4);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════
+   SKEUOMORPHIC RETRO COMPONENTS
+═══════════════════════════════════════════ */
+
+/* --- Retro LED Indicator --- */
+.retro-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--retro-led-green);
+  box-shadow: 
+    0 0 4px var(--retro-led-green),
+    0 0 12px var(--retro-led-green),
+    inset 0 -1px 2px rgba(0,0,0,0.4);
+  animation: ledPulse 2s ease-in-out infinite;
+}
+
+.retro-led--amber {
+  background: var(--retro-led-amber);
+  box-shadow: 
+    0 0 4px var(--retro-led-amber),
+    0 0 12px var(--retro-led-amber),
+    inset 0 -1px 2px rgba(0,0,0,0.4);
+}
+
+@keyframes ledPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* --- Retro Embossed Panel --- */
+.retro-panel {
+  background: var(--retro-bezel);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: var(--retro-outset);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.retro-panel::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* --- Retro Inset Display (like a VU meter well) --- */
+.retro-inset {
+  background: #0d0d1a;
+  border-radius: 8px;
+  box-shadow: var(--retro-inset);
+  border: 1px solid rgba(0,0,0,0.3);
+}
+
+/* --- Retro Knob --- */
+.retro-knob {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3a5c, #1a1a2e 70%);
+  border: 2px solid rgba(255,255,255,0.06);
+  box-shadow: 
+    3px 3px 8px rgba(0,0,0,0.6),
+    -1px -1px 4px rgba(255,255,255,0.03),
+    inset 0 0 6px rgba(0,0,0,0.4);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.retro-knob::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 8px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 1px;
+}
+
+.retro-knob:hover {
+  transform: rotate(30deg);
+}
+
+/* --- CRT Scanline overlay for terminal --- */
+.crt-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  z-index: 5;
+  border-radius: inherit;
+}
+
+/* --- Retro Rocker Switch --- */
+.retro-switch {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  background: #0d0d1a;
+  box-shadow: var(--retro-inset);
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.retro-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #4a4a6a, #2a2a3e 70%);
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.5), -1px -1px 3px rgba(255,255,255,0.04);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.retro-switch.active {
+  background: rgba(var(--accent-primary-rgb), 0.15);
+}
+
+.retro-switch.active .retro-switch-thumb {
+  transform: translateX(24px);
+  background: radial-gradient(circle at 40% 35%, var(--accent-primary), #4a3acd 70%);
+  box-shadow: 0 0 8px var(--glow-primary), 2px 2px 6px rgba(0,0,0,0.5);
+}
+
+/* --- Retro VU Meter Bar --- */
+.retro-vu-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #0d0d1a;
+  box-shadow: var(--retro-inset);
+  overflow: hidden;
+  position: relative;
+}
+
+.retro-vu-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, 
+    var(--retro-led-green) 0%, 
+    var(--retro-led-green) 60%, 
+    var(--retro-led-amber) 80%, 
+    var(--retro-led-red) 100%);
+  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 0 6px rgba(57, 255, 20, 0.3);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  :root {
+    --section-padding: 80px 0;
+  }
+  .section-title {
+    font-size: 1.8rem;
+  }
+  .container {
+    padding: 0 1.2rem;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   EASTER EGG ANIMATION
+═══════════════════════════════════════════ */
+.spin-easter-egg {
+  animation: barrelRoll 3s ease-in-out forwards;
+}
+
+@keyframes barrelRoll {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(360deg) scale(0.5); }
+  100% { transform: rotate(720deg) scale(1); }
+}
+
+/* ═══════════════════════════════════════════
+   SMOOTH SECTION REVEAL
+═══════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   REDUCED MOTION PREFERENCES
+═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   FUNNY EASTER EGG EFFECTS
+═══════════════════════════════════════════ */
+
+/* Barrel Roll — whole page spins once */
+.egg-barrelroll {
+  animation: appBarrelRoll 1.2s cubic-bezier(0.45, 0, 0.55, 1) forwards !important;
+  transform-origin: center center;
+}
+@keyframes appBarrelRoll {
+  0%   { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(90deg) scale(0.88); }
+  50%  { transform: rotate(180deg) scale(0.82); }
+  75%  { transform: rotate(270deg) scale(0.88); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Gravity — sections slide off screen */
+.egg-gravity { overflow: hidden; }
+.egg-gravity section {
+  animation: gravityFall 2.5s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
+}
+.egg-gravity section:nth-child(1) { animation-delay: 0.00s; }
+.egg-gravity section:nth-child(2) { animation-delay: 0.10s; }
+.egg-gravity section:nth-child(3) { animation-delay: 0.18s; }
+.egg-gravity section:nth-child(4) { animation-delay: 0.26s; }
+.egg-gravity section:nth-child(5) { animation-delay: 0.34s; }
+.egg-gravity section:nth-child(6) { animation-delay: 0.42s; }
+.egg-gravity section:nth-child(7) { animation-delay: 0.50s; }
+.egg-gravity section:nth-child(8) { animation-delay: 0.58s; }
+@keyframes gravityFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120vh) rotate(8deg); opacity: 0; }
+}
+/* Zoom Out — Ant-Man shrink-and-return */
+.egg-zoomout {
+  animation: appZoomOut 3s ease-in-out forwards !important;
+  transform-origin: center center;
+}
+@keyframes appZoomOut {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(0.06) rotate(8deg); }
+  62%  { transform: scale(0.06) rotate(-8deg); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   REM SLEEP / CELLULAR DEGENERATION (Dream State)
+═══════════════════════════════════════════ */
+html.dream-state .App {
+  filter: blur(1.5px) contrast(1.1) saturate(0.8) hue-rotate(5deg);
+  transition: filter 4s ease-in-out;
+}
+
+html.dream-state .glass-card {
+  animation: dreamFloat 8s infinite alternate ease-in-out;
+}
+
+html.dream-state .section-title, html.dream-state p {
+  opacity: 0.7;
+  transform: translateY(2px);
+  transition: opacity 3s ease, transform 3s ease;
+}
+
+/* Waking up gasp */
+html:not(.dream-state) .App {
+  transition: filter 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes dreamFloat {
+  0% { transform: translateY(0px) rotate(0deg); opacity: 0.9; }
+  100% { transform: translateY(-12px) rotate(1deg); opacity: 0.5; }
+}
+
+/* ═══════════════════════════════════════════
+   MENTAL TRANCE MODE (Hidden Footer Easter Egg)
+═══════════════════════════════════════════ */
+.trance-mode {
+  animation: trance-hue 12s infinite linear;
+}
+
+.trance-overlay-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998; /* Below cursor, above UI */
+}
+
+.trance-channel {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.trance-red {
+  background: rgba(255, 0, 80, 0.15);
+  mix-blend-mode: screen;
+  animation: trance-split-red 1.8s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 0 150px rgba(255, 0, 80, 0.2);
+}
+
+.trance-cyan {
+  background: rgba(0, 255, 255, 0.15);
+  mix-blend-mode: exclusion;
+  animation: trance-split-cyan 2.4s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 0 150px rgba(0, 255, 255, 0.2);
+}
+
+@keyframes trance-hue {
+  0% { filter: hue-rotate(0deg) contrast(1.1) saturate(1.4); }
+  100% { filter: hue-rotate(360deg) contrast(1.1) saturate(1.4); }
+}
+
+@keyframes trance-split-red {
+  0% { transform: translateX(-4px) scale(1.01); opacity: 0.4; }
+  100% { transform: translateX(8px) scale(1.04); opacity: 0.8; }
+}
+
+@keyframes trance-split-cyan {
+  0% { transform: translateX(4px) scale(1.01); opacity: 0.4; }
+  100% { transform: translateX(-8px) scale(1.03); opacity: 0.8; }
+}
+
+/* ═══════════════════════════════════════════
+   ACCESSIBILITY MODE OVERRIDES
+═══════════════════════════════════════════ */
+
+/* Reduced Motion — kills all animations */
+.a11y-reduced-motion *,
+.a11y-reduced-motion *::before,
+.a11y-reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+.a11y-reduced-motion .performance-breathing-overlay,
+.a11y-reduced-motion .trance-overlay-container,
+.a11y-reduced-motion .digital-texture-overlay { display: none !important; }
+
+/* Low GPU — strips blur, shadows, and heavy compositing */
+.a11y-low-gpu * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  will-change: auto !important;
+}
+.a11y-low-gpu .performance-breathing-overlay,
+.a11y-low-gpu .hero-kinetic-spotlight,
+.a11y-low-gpu .digital-texture-overlay { display: none !important; }
+.a11y-low-gpu .glass-card {
+  background: var(--bg-card) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* High Readability — larger text, max contrast */
+.a11y-high-readability {
+  font-size: 120% !important;
+}
+.a11y-high-readability p:not(.site-mode-panel *),
+.a11y-high-readability span:not(.site-mode-panel *),
+.a11y-high-readability li:not(.site-mode-panel *),
+.a11y-high-readability a:not(.site-mode-panel *) {
+  line-height: 1.9 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Exempt the settings panel from breaking */
+.a11y-high-readability .site-mode-panel {
+  font-size: 16px !important;
+}
+.a11y-high-readability .section-desc,
+.a11y-high-readability .footer-simple-tagline,
+.a11y-high-readability .timeline-desc {
+  font-size: 1.1rem !important;
+  color: rgba(255,255,255,0.9) !important;
+}
+
+/* Simplified Interaction — no custom cursor, no magnetic */
+.a11y-simplified * { cursor: auto !important; }
+.a11y-simplified .liquid-cursor { display: none !important; }
+.a11y-simplified .magnetic-btn { pointer-events: auto !important; }
+.a11y-simplified .magnetic-btn:hover { transform: none !important; }
+
+/* ═══════════════════════════════════════════
+   NORMAL MODE — Fast, standard experience
+═══════════════════════════════════════════ */
+/* Surgery: Kill heavy full-screen GPU composites in Normal mode to guarantee 60fps */
+.mode-normal .digital-texture-overlay::after {
+  display: none !important; /* Kills the 3px repeating scanline gradient (GPU killer) */
+}
+.mode-normal .performance-breathing-overlay,
+.mode-normal .App::after {
+  display: none !important; /* Kills the inset box-shadow breathing composite and floating particles */
+}
+
+/* ═══════════════════════════════════════════
+   RECRUITER MODE — Clean, focused portfolio
+═══════════════════════════════════════════ */
+.mode-recruiter .performance-breathing-overlay,
+.mode-recruiter .digital-texture-overlay,
+.mode-recruiter .trance-overlay-container,
+.mode-recruiter .hero-kinetic-spotlight { display: none !important; }
+
+.mode-recruiter .site-mode-fab {
+  background: rgba(15, 15, 25, 0.95);
+  border-color: rgba(255, 200, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════════
+   EXPERT MODE — Full technical depth
+═══════════════════════════════════════════ */
+.mode-expert [data-xray]::after {
+  content: attr(data-xray);
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.5rem;
+  color: rgba(0, 240, 255, 0.3);
+  white-space: pre;
+  pointer-events: none;
+  z-index: 999;
+  line-height: 1.3;
+  max-width: 200px;
+}
+
+/* ═══════════════════════════════════════════
+   EXPERIMENTAL LAB MODE — Heavy effects
+═══════════════════════════════════════════ */
+.mode-experimental .glass-card {
+  backdrop-filter: blur(8px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1) !important;
+}
+
+.mode-experimental .performance-breathing-overlay {
+  box-shadow: 
+    inset 0 0 200px rgba(108, 99, 255, 0.2),
+    inset 0 0 100px rgba(255, 60, 100, 0.15) !important;
+}
+
+/* ═══════════════════════════════════════════
+   LIVELY ATMOSPHERE — Floating ambient particles
+═══════════════════════════════════════════ */
+@keyframes floatParticle {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+}
+
+.App::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  background-image: 
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.15), transparent),
+    radial-gradient(1px 1px at 30% 60%, rgba(108,99,255,0.12), transparent),
+    radial-gradient(1px 1px at 50% 40%, rgba(255,255,255,0.1), transparent),
+    radial-gradient(1px 1px at 70% 80%, rgba(0,240,255,0.08), transparent),
+    radial-gradient(1px 1px at 90% 30%, rgba(255,255,255,0.12), transparent),
+    radial-gradient(1px 1px at 20% 90%, rgba(124,58,237,0.1), transparent),
+    radial-gradient(1.5px 1.5px at 80% 10%, rgba(255,255,255,0.08), transparent),
+    radial-gradient(1px 1px at 40% 70%, rgba(255,60,100,0.06), transparent);
+  animation: ambientDrift 25s linear infinite alternate;
+  opacity: var(--subconscious-atmosphere);
+  transition: opacity 2s ease-in-out;
+}
+
+@keyframes ambientDrift {
+  0% { transform: translateY(0) translateX(0); }
+  100% { transform: translateY(-30px) translateX(15px); }
+}
+
+/* Kill atmosphere in low GPU mode */
+.a11y-low-gpu .App::after { display: none !important; }
+.a11y-reduced-motion .App::after { animation: none !important; }
+
+/* ─── Section Wave Dividers Removed per user request ─── */
+
+/* ═══════════════════════════════════════════
+   MOBILE IMPROVEMENTS
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Disable breathing and heavy overlays on mobile */
+  .performance-breathing-overlay { display: none !important; }
+  .digital-texture-overlay { opacity: 0.3 !important; }
+  .App::after { display: none !important; }
+  
+  /* Better section padding — do not use !important on lateral padding so component CSS controls it */
+  section { padding: 60px 0; }
+  
+  /* Stack the footer CTA tighter */
+  .footer-3d-popup { padding: 2rem !important; margin-bottom: 3rem !important; }
+  
+  /* Ensure mode panel is usable */
+  .site-mode-panel { max-height: 60vh !important; }
+  
+  /* Improve scroll wrapper on mobile */
+  .timeline-scroll-wrapper { padding: 30px 0 40px 0 !important; }
+
+  /* Fix section-container blocking scrollable experience on touch devices */
+  .section-container {
+    min-height: auto !important;
+    max-width: 100% !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+    touch-action: pan-y !important;
+  }
+
+  /* Ensure no horizontal overflow from bento cards and standard cards */
+  .bento-grid { 
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    overflow: hidden; 
+    width: 100%;
+  }
+  
+  /* Fix shadow overflow causing horizontal scrolling on mobile */
+  .glass-card {
+    max-width: 100%;
+    box-sizing: border-box;
+    /* Limit shadow width on mobile so it doesn't push the viewport */
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.1) !important;
+  }
+  
+  body.dark-mode .glass-card {
+    box-shadow: 2px 2px 0px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.4) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  .hero-name-text { font-size: clamp(2rem, 12vw, 4rem) !important; }
+  .footer-3d-popup h3 { font-size: 1.4rem !important; }
+  .stack-metrics-bar { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .metric-value { font-size: 1.4rem !important; }
+}
+
+/* ═══════════════════════════════════════════
+   PERFORMANCE ENHANCEMENTS
+═══════════════════════════════════════════ */
+/* content-visibility: auto removed — was causing blank white sections on scroll in mobile/some browsers */
+section {
+  contain-intrinsic-size: auto 600px;
+}
+
+.glass-card {
+  will-change: transform;
+}
+
+/* ═══════════════════════════════════════════
+   BENTO BOX GRID SYSTEM (BRUTAL BENTO)
+═══════════════════════════════════════════ */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--bento-gap);
+  width: 100%;
+}
+
+.bento-item-span-2 {
+  grid-column: span 2;
+}
+
+.bento-item-span-3 {
+  grid-column: span 3;
+}
+
+.bento-item-row-2 {
+  grid-row: span 2;
+}
+
+@media (max-width: 768px) {
+  .bento-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .bento-item-span-2,
+  .bento-item-span-3 {
+    grid-column: span 1 !important; /* Stack on mobile */
+  }
+}
+
+/* ═══════════════════════════════════════════
+   V200 GLOBAL ADDITIONS
+   New keyframes, tokens, and utilities
+═══════════════════════════════════════════ */
+
+/* ── V200 Extended Design Tokens ── */
+:root {
+  /* Accent greens for availability indicators */
+  --accent-brutal-green: #2ecc71;
+  --accent-brutal-green-rgb: 46, 204, 113;
+  --accent-cyan: #4FC3F7;
+  --accent-gold: #F5A623;
+  --accent-magenta: #E040FB;
+
+  /* Retro LED colors */
+  --retro-led-green: #39FF14;
+  --retro-led-amber: #FFB300;
+
+  /* Retro panel */
+  --retro-bezel: #1e1e2e;
+  --retro-outset: 3px 3px 6px rgba(0,0,0,0.5), -1px -1px 4px rgba(255,255,255,0.02);
+  --retro-inset: inset 2px 2px 4px rgba(0,0,0,0.5), inset -1px -1px 3px rgba(255,255,255,0.02);
+
+  /* Performance tier gates */
+  --tier-shadows: 1;
+  --tier-blur: 1;
+  --tier-animations: 1;
+}
+
+/* ── neuralPulse — used for living indicators ── */
+@keyframes neuralPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(108,99,255,0.5), 0 0 0 0 rgba(108,99,255,0.2); }
+  50%  { box-shadow: 0 0 0 8px rgba(108,99,255,0), 0 0 0 16px rgba(108,99,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(108,99,255,0), 0 0 0 0 rgba(108,99,255,0); }
+}
+
+/* ── textGlitch — for DigitalScars titles ── */
+@keyframes textGlitch {
+  0%   { clip-path: inset(40% 0 61% 0); transform: translate(-2px, 2px);  }
+  20%  { clip-path: inset(92% 0 1%  0); transform: translate(1px,  -1px); }
+  40%  { clip-path: inset(43% 0 44% 0); transform: translate(-1px, 3px);  }
+  60%  { clip-path: inset(25% 0 58% 0); transform: translate(3px,  1px);  }
+  80%  { clip-path: inset(54% 0 7%  0); transform: translate(-3px, -2px); }
+  100% { clip-path: inset(58% 0 43% 0); transform: translate(2px,  -3px); }
+}
+
+/* ── scanlineFlicker — for terminal / dark section vibes ── */
+@keyframes scanlineFlicker {
+  0%, 100% { opacity: 0.015; }
+  25%       { opacity: 0.03;  }
+  50%       { opacity: 0.01;  }
+  75%       { opacity: 0.025; }
+}
+
+/* ── bloomPulse — used for glowing elements ── */
+@keyframes bloomPulse {
+  0%, 100% { filter: brightness(1)   drop-shadow(0 0 4px  currentColor); }
+  50%      { filter: brightness(1.2) drop-shadow(0 0 12px currentColor); }
+}
+
+/* ── V200 shimmer utility — for skill bars etc. ── */
+@keyframes shimmerSweep {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.shimmer-active {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(255,255,255,0.3) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 1.8s ease-in-out infinite;
+}
+
+/* ── V200 glass-dark utility ── */
+.glass-dark {
+  background: rgba(10, 11, 30, 0.6);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── V200 glass-frosted utility ── */
+.glass-frosted {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* ── V200: contact-availability (used in Contact.js) ── */
+.contact-availability {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #1a7a3a;
+  letter-spacing: 0.08em;
+  margin-top: 1.5rem;
+  padding: 10px 14px;
+  background: rgba(46, 204, 113, 0.06);
+  border: 1px solid rgba(46, 204, 113, 0.15);
+  border-radius: 8px;
+}
+
+/* ── V200: section label text override for dark sections ── */
+.digital-scars-section .section-title span,
+.digital-scars-section .section-title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+}
+
+/* ═══════════════════════════════════════════
+   APPLE-STYLE SPECULAR CARD SHEEN
+═══════════════════════════════════════════ */
+.specular-card {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Subtle inner ambient reflection */
+.specular-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    520px circle at var(--spec-x, -999px) var(--spec-y, -999px),
+    rgba(255, 255, 255, 0.06),
+    transparent 65%
+  );
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 1px Specular Border Glint via mask */
+.specular-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    380px circle at var(--spec-x, -999px) var(--spec-y, -999px),
+    rgba(255, 255, 255, 0.32),
+    transparent 55%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.specular-card:hover::before,
+.specular-card:hover::after {
+  opacity: 1;
+}
+
+/* Subtle styling when in light mode */
+body:not(.dark-mode) .specular-card::before {
+  background: radial-gradient(
+    520px circle at var(--spec-x, -999px) var(--spec-y, -999px),
+    rgba(0, 0, 0, 0.025),
+    transparent 65%
+  );
+}
+
+body:not(.dark-mode) .specular-card::after {
+  background: radial-gradient(
+    380px circle at var(--spec-x, -999px) var(--spec-y, -999px),
+    rgba(0, 0, 0, 0.14),
+    transparent 55%
+  );
+}
+

@@ -1,0 +1,304 @@
+/* ═══════════════════════════════
+   STATS BENTO GRID SECTION
+═══════════════════════════════ */
+.stats-bento-section {
+  padding: var(--section-padding);
+  position: relative;
+  z-index: 1;
+}
+
+.stats-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(200px, auto);
+  gap: var(--bento-gap, 24px);
+  width: 100%;
+}
+
+/* Individual Bento Cards - Claymorphism */
+.bento-card {
+  position: relative;
+  background: var(--bg-card);
+  border: none;
+  border-radius: 32px;
+  box-shadow: 
+    inset 4px 4px 10px rgba(255, 255, 255, 0.7),
+    inset -4px -4px 10px rgba(0, 0, 0, 0.05),
+    8px 8px 20px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+body.dark-mode .bento-card {
+  box-shadow: 
+    inset 4px 4px 10px rgba(255, 255, 255, 0.05),
+    inset -4px -4px 10px rgba(0, 0, 0, 0.2),
+    8px 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.bento-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 
+    inset 4px 4px 10px rgba(255, 255, 255, 0.8),
+    inset -4px -4px 10px rgba(0, 0, 0, 0.08),
+    12px 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Remove brutalist crosshatch */
+.bento-card::before {
+  display: none;
+}
+
+/* Grid Cell Placement */
+.bento-github {
+  grid-column: span 2;
+  grid-row: span 2;
+  justify-content: space-between;
+}
+
+.bento-counter {
+  grid-column: span 1;
+  grid-row: span 1;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Internal Layouts */
+.bento-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  z-index: 2;
+}
+
+.bento-icon {
+  font-size: 1.5rem;
+  color: var(--accent-primary);
+}
+
+.bento-status .bento-icon {
+  color: #000;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.bento-title {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.bento-number {
+  font-family: var(--font-mono);
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  z-index: 2;
+}
+
+.bento-number span {
+  font-size: 1.5rem;
+  color: var(--accent-primary);
+}
+
+.bento-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 2;
+}
+
+/* Status Indicator Pulse */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #2ecc71; /* Brutal Green */
+  border-radius: 50%;
+  position: relative;
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid #2ecc71;
+  animation: radar-pulse 2s infinite ease-out;
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.status-text {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* GitHub Heatmap Dummy Styling */
+.github-heatmap {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  z-index: 2;
+  margin-top: 1rem;
+}
+
+.heatmap-week {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heatmap-day {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background-color: rgba(150, 150, 150, 0.2);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.heatmap-day:hover {
+  transform: scale(1.2);
+  border: 1px solid var(--text-primary);
+}
+
+.heatmap-day.l1 { background-color: rgba(var(--accent-primary-rgb), 0.3); }
+.heatmap-day.l2 { background-color: rgba(var(--accent-primary-rgb), 0.6); }
+.heatmap-day.l3 { background-color: rgba(var(--accent-primary-rgb), 0.9); }
+.heatmap-day.l4 { background-color: var(--accent-primary); box-shadow: 0 0 5px var(--accent-primary); }
+
+.github-stats-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  z-index: 2;
+}
+
+.gh-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.gh-stat-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+}
+
+.gh-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* Card Spans */
+.bento-span-2 {
+  grid-column: span 2;
+}
+
+.bento-span-4 {
+  grid-column: span 4;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stats-bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bento-github,
+  .bento-status,
+  .bento-span-4 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-bento-section {
+    padding: 4rem 1rem 3rem;
+  }
+  .stats-bento-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+  .bento-card {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    padding: 1.3rem 1.1rem !important;
+    border-radius: 20px;
+  }
+  .bento-span-2,
+  .bento-span-4,
+  .bento-github,
+  .bento-status {
+    grid-column: 1 / -1 !important;
+  }
+  .bento-number {
+    font-size: 2.2rem;
+  }
+  .bento-title {
+    font-size: 1.1rem;
+  }
+  .status-text {
+    font-size: 0.92rem;
+  }
+  .bento-subtitle {
+    font-size: 0.82rem;
+  }
+  .github-stats-row {
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+  .github-heatmap-container {
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-bento-section {
+    padding: 3.5rem 0.75rem 2.5rem;
+  }
+  .bento-card {
+    padding: 1.1rem 0.9rem !important;
+  }
+  .bento-number {
+    font-size: 1.85rem;
+  }
+  .gh-stat-val {
+    font-size: 1.15rem;
+  }
+}

@@ -1,0 +1,338 @@
+/**
+ * ════════════════════════════════════════════════════════════════════
+ *  UNIFIED REQUEST LIFECYCLE & COGNITIVE TASK PIPELINE
+ * ════════════════════════════════════════════════════════════════════
+ * Coordinates:
+ * User Input → Intent Classification → Context Retrieval →
+ * Identity Compilation → Task Mode Selection → Reasoning →
+ * Optional Delegation → Permission Evaluation → Tool Execution →
+ * Verification → Response Synthesis → Optional Memory Update
+ * 
+ * CORE PRINCIPLE:
+ * Selective delegation. Level 1 simple queries are answered directly
+ * without invoking multiple specialist agents or redundant LLM calls.
+ */
+
+import { identityCompiler } from '../identity/IdentityCompiler';
+import { providerRegistry } from '../providers/ProviderRegistry';
+import { permissionRegistry } from '../agents/PermissionRegistry';
+import { memoryService } from '../memory/MemoryService';
+import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
+import { cognitiveLearningEngine } from '../learning/CognitiveLearningEngine';
+import { behaviouralController } from './BehaviouralController';
+import { INITIAL_USER_CONTEXT } from '../identity/CognitiveProfile';
+import { executionEngine } from '../executive/ExecutionEngine';
+
+export const TASK_COMPLEXITY = Object.freeze({
+  LEVEL_1_SIMPLE: 'LEVEL_1_SIMPLE',            // Direct conversation, standard query
+  LEVEL_2_TECHNICAL: 'LEVEL_2_TECHNICAL',        // Technical reasoning, single specialist/model
+  LEVEL_3_COMPLEX: 'LEVEL_3_COMPLEX',            // Multi-step planning, delegation, evaluation
+  LEVEL_4_CONSEQUENTIAL: 'LEVEL_4_CONSEQUENTIAL' // State mutation, permissions, requires approval
+});
+
+export class RequestLifecycle {
+  constructor() {
+    this.activeRequests = new Map();
+    this.recentTraces = [];
+    this.maxTraces = 50;
+  }
+
+  _recordLifecycleTrace(trace) {
+    this.recentTraces.unshift(trace);
+    if (this.recentTraces.length > this.maxTraces) {
+      this.recentTraces.pop();
+    }
+  }
+
+  getRecentTraces() {
+    return [...this.recentTraces];
+  }
+
+  getTrace(requestId) {
+    return this.recentTraces.find(t => t.requestId === requestId) || null;
+  }
+
+  /**
+   * Classify request complexity to prevent unnecessary computation
+   */
+  classifyComplexity(input = '', options = {}) {
+    if (options.forceComplexity) return options.forceComplexity;
+
+    const lower = input.toLowerCase().trim();
+
+    // Level 4: Consequential actions (deployments, credential access, data wipe)
+    if (
+      lower.includes('delete') || lower.includes('purge') || 
+      lower.includes('deploy to prod') || lower.includes('drop table') ||
+      lower.includes('override security') || lower.includes('modify secrets')
+    ) {
+      return TASK_COMPLEXITY.LEVEL_4_CONSEQUENTIAL;
+    }
+
+    // Level 3: Complex architectural, multi-agent, or deep audit tasks
+    if (
+      lower.includes('full audit') || lower.includes('systemic review') ||
+      lower.includes('multi-model consensus') || lower.includes('benchmark suite') ||
+      (options.summonedAgents && options.summonedAgents.length > 1)
+    ) {
+      return TASK_COMPLEXITY.LEVEL_3_COMPLEX;
+    }
+
+    // Level 2: Technical hardware, DSP, code, or specific agent questions
+    if (
+      lower.includes('kicad') || lower.includes('pcb') || lower.includes('stm32') ||
+      lower.includes('gnu radio') || lower.includes('dsp') || lower.includes('matlab') ||
+      lower.includes('simulink') || lower.includes('circuit') || lower.includes('code') ||
+      lower.includes('filter') || lower.includes('fir') || lower.includes('signal processing') ||
+      lower.includes('discrete-time') || lower.includes('algorithm') ||
+      lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday')
+    ) {
+      return TASK_COMPLEXITY.LEVEL_2_TECHNICAL;
+    }
+
+    // Level 1: Default conversational or navigational queries
+    return TASK_COMPLEXITY.LEVEL_1_SIMPLE;
+  }
+
+  /**
+   * Primary entry point for executing user requests through the cognitive pipeline
+   */
+  async processRequest(rawInput = '', options = {}) {
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    const startTime = Date.now();
+    const input = String(rawInput).trim();
+
+    // Autonomous Executive System Dispatch (Phase 5)
+    const isExecutiveGoal = Boolean(
+      options.isExecutiveGoal ||
+      input.toLowerCase().startsWith('goal:') ||
+      input.toLowerCase().startsWith('execute_goal:') ||
+      input.toLowerCase().startsWith('execute_plan:') ||
+      options.executeAsGoal
+    );
+
+    if (isExecutiveGoal) {
+      const cleanGoal = input.replace(/^(?:goal|execute_goal|execute_plan):\s*/i, '').trim();
+      const execResult = await executionEngine.executeGoal(cleanGoal, options.context || {}, options);
+      const durationMs = Date.now() - startTime;
+
+      return {
+        requestId,
+        complexity: TASK_COMPLEXITY.LEVEL_3_COMPLEX,
+        mode: 'EXECUTIVE',
+        isExecutiveGoal: true,
+        text: `[Autonomous Executive System]: Goal "${cleanGoal}" executed with status: ${execResult.status}. Subtasks completed: ${execResult.completedTasks?.length || 0}.`,
+        planId: execResult.planId,
+        status: execResult.status,
+        execResult,
+        durationMs
+      };
+    }
+
+    // Step 1: Complexity Classification
+    const complexity = this.classifyComplexity(input, options);
+
+    // Step 2: Intent & Behavioral Stance via Personal Understanding Engine
+    const stance = behaviouralController.evaluateStance(input, {
+      mode: options.mode,
+      memoryLimit: 4
+    });
+
+    const mode = options.mode || stance.mode.id;
+    const memoryContext = stance.relevantMemories || [];
+
+    // Step 3: Selective Specialist Identification
+    let specialistId = null;
+    if (options.summonedAgents && options.summonedAgents.length === 1) {
+      specialistId = options.summonedAgents[0];
+    } else if (complexity === TASK_COMPLEXITY.LEVEL_2_TECHNICAL) {
+      const lower = input.toLowerCase();
+      if (lower.includes('ultron') || lower.includes('critique') || lower.includes('architectural flaw')) {
+        specialistId = 'ULTRON';
+      } else if (lower.includes('friday') || lower.includes('security') || lower.includes('defense')) {
+        specialistId = 'FRIDAY';
+      } else if (lower.includes('jarvis') || lower.includes('plan') || lower.includes('operations')) {
+        specialistId = 'JARVIS';
+      } else if (lower.includes('research') || lower.includes('isro') || lower.includes('paper')) {
+        specialistId = 'EDITH';
+      } else if (lower.includes('hardware test') || lower.includes('prototype')) {
+        specialistId = 'DUM_E';
+      }
+    }
+
+    // Step 4: Identity & Context Compilation
+    const instructionPackage = identityCompiler.compileInstruction({
+      mode,
+      complexity,
+      userInput: input,
+      specialistAgentId: specialistId,
+      memoryContext,
+      allowTools: true,
+      behaviouralStance: stance
+    });
+
+    // Step 5: Consequential Action Gate (Level 4 Assessment)
+    if (complexity === TASK_COMPLEXITY.LEVEL_4_CONSEQUENTIAL) {
+      const permCheck = permissionRegistry.evaluate('MINI_ADHY', 'delete_persistent_state', { input, destroysProductionData: true });
+      if (!permCheck.allowed) {
+        return {
+          requestId,
+          complexity,
+          mode,
+          specialistId,
+          text: `[Permission Boundary Active]: This action requires explicit owner authorization. Approval request #${permCheck.approvalId || 'pending'} queued.`,
+          requiresApproval: true,
+          approvalId: permCheck.approvalId,
+          durationMs: Date.now() - startTime
+        };
+      }
+    }
+
+    // Step 6: Model Provider Execution with Bounded Fallback
+    const providerRequirements = {};
+    if (options.requiresVision) providerRequirements.requiresVision = true;
+    if (complexity === TASK_COMPLEXITY.LEVEL_1_SIMPLE) providerRequirements.fastReflex = true;
+
+    const requestPayload = {
+      prompt: input,
+      contents: options.history || [{ role: 'user', parts: [{ text: input }] }]
+    };
+
+    const generationResult = await providerRegistry.generateWithFallback(requestPayload, {
+      systemPrompt: instructionPackage.systemPrompt,
+      agentId: specialistId || 'MINI_ADHY',
+      requirements: providerRequirements,
+      timeoutMs: options.timeoutMs || 8000,
+      modelSnapshotVersion: instructionPackage.modelSnapshotVersion,
+      sessionId: options.sessionId,
+      isSensitive: options.isSensitive,
+      isVolatile: options.isVolatile,
+      requiresVision: options.requiresVision,
+      requiresAudio: options.requiresAudio
+    });
+
+    const durationMs = Date.now() - startTime;
+    const isOfflineFallback = !generationResult.text;
+    const responseType = isOfflineFallback
+      ? 'local_offline'
+      : (generationResult.responseType || (generationResult.cacheHit ? 'cache_hit' : 'live_model'));
+    const finalResponse = generationResult.text || this._resolveFallbackResponse(input, generationResult.error, specialistId);
+
+    // Step 7: Continuous Memory Extraction & Evidence-Based Cognitive Learning Pipeline
+    try {
+      const candidateMemories = memoryService.extractCandidateObservations(input);
+      candidateMemories.forEach(cand => {
+        if (typeof memoryService.evaluateAndProcessCandidate === 'function') {
+          memoryService.evaluateAndProcessCandidate(cand);
+        } else {
+          memoryService.storeRecord(cand);
+        }
+      });
+    } catch {}
+
+    let learningResults = [];
+    try {
+      learningResults = cognitiveLearningEngine.processInteraction({
+        userInput: input,
+        assistantResponse: finalResponse,
+        sessionId: options.sessionId,
+        taskCategory: instructionPackage.cognitiveContext?.taskCategory,
+        emotionalState: stance?.emotionalAssessment?.state,
+        metadata: { requestId, specialistId }
+      });
+    } catch {}
+
+    // Step 8: Verifiable Telemetry Logging in CognitiveEvolutionEngine
+    if (cognitiveEvolutionEngine?.recordTaskExecution) {
+      cognitiveEvolutionEngine.recordTaskExecution({
+        taskId: requestId,
+        agentId: specialistId || 'MINI_ADHY',
+        success: generationResult.success,
+        durationMs,
+        tokenCount: generationResult.tokenEstimate || 0,
+        modelsUsed: generationResult.attemptedProviders || [generationResult.provider || 'gemini']
+      });
+    }
+
+    const lifecycleTrace = {
+      requestId,
+      input: rawInput,
+      complexity,
+      taskCategory: instructionPackage.cognitiveContext?.taskCategory || 'GENERAL_CONVERSATION',
+      retrievedDimensions: instructionPackage.cognitiveContext?.retrievedDimensions || [],
+      selectedMemories: (instructionPackage.cognitiveContext?.authorizedMemories || []).map(m => m.id || m.content?.slice(0, 40)),
+      excludedContext: instructionPackage.cognitiveContext?.excludedContext || {},
+      modelSnapshotVersion: instructionPackage.modelSnapshotVersion,
+      provider: isOfflineFallback ? 'deterministic_local_knowledge' : generationResult.provider,
+      cacheHit: Boolean(generationResult.cacheHit),
+      fallbackUsed: isOfflineFallback || Boolean(generationResult.fallbackEngaged),
+      responseType,
+      learningObservationsCount: learningResults.length,
+      durationMs,
+      timestamp: new Date().toISOString()
+    };
+
+    this._recordLifecycleTrace(lifecycleTrace);
+
+    return {
+      requestId,
+      complexity,
+      mode,
+      specialistId,
+      text: finalResponse,
+      provider: isOfflineFallback ? 'deterministic_local_knowledge' : generationResult.provider,
+      responseType,
+      modelSnapshotVersion: instructionPackage.modelSnapshotVersion,
+      fallbackEngaged: isOfflineFallback || generationResult.fallbackEngaged || false,
+      durationMs,
+      lifecycleTrace
+    };
+  }
+
+  /**
+   * Deterministic local knowledge fallback when cloud providers are unreachable.
+   * Grounded dynamically in INITIAL_USER_CONTEXT and verified canonical identity.
+   */
+  _resolveFallbackResponse(input = '', errorMsg = '', specialistId = 'MINI_ADHY') {
+    const lower = input.toLowerCase().trim();
+    const ctx = INITIAL_USER_CONTEXT;
+
+    if (lower.includes('who are you') || lower.includes('what are you') || lower.includes('who is mini-adhy')) {
+      return `I'm Mini-Adhy, ${ctx.fullName}'s cognitive companion and digital twin. I represent his engineering, leadership, and creative workflows, bridging embedded systems, DSP, software architecture, and photography.`;
+    }
+
+    if (lower.includes('who is adhy') || lower.includes('about adhy') || lower.includes('tell me about yourself') || lower.includes('bio')) {
+      const currentList = (ctx.currentRoles || []).join(' and ');
+      return `${ctx.fullName} is an ${ctx.education} student in ${ctx.location}. He currently serves as ${currentList}. Formerly, he served as ${(ctx.historicalRoles || [])[0] || 'ISTE Chairperson'}. His technical core spans ${(ctx.technicalInterests || []).slice(0, 4).join(', ')}.`;
+    }
+
+    if (lower.includes('role') || lower.includes('senate') || lower.includes('iste') || lower.includes('frames') || lower.includes('leadership')) {
+      const current = (ctx.currentRoles || []).map(r => `• Current: ${r}`).join('\n');
+      const hist = (ctx.historicalRoles || []).map(r => `• Historical: ${r}`).join('\n');
+      return `Adhy's verified leadership roles include:\n${current}\n${hist}`;
+    }
+
+    if (lower.includes('project') || lower.includes('hardware') || lower.includes('stm32') || lower.includes('sdr') || lower.includes('dsp') || lower.includes('kicad')) {
+      const interests = (ctx.technicalInterests || []).map(i => `• ${i}`).join('\n');
+      return `Adhy's active engineering projects & focus areas include:\n${interests}`;
+    }
+
+    if (lower.includes('photo') || lower.includes('camera') || lower.includes('zoomout')) {
+      return "Adhy is the Lead Photographer at FRAMES MBCET and curates street, documentary, and architectural photography under @zoomout_frames, exploring high-contrast visual storytelling and analog-inspired aesthetics.";
+    }
+
+    if (lower.includes('contact') || lower.includes('email') || lower.includes('reach') || lower.includes('message') || lower.includes('hire')) {
+      return `You can get in touch with Adhy at ${ctx.email}, or connect via LinkedIn and GitHub directly from the links on this portfolio.`;
+    }
+
+    // Default polite offline fallback
+    if (errorMsg) {
+      return `I am currently operating in local offline mode as external cloud model providers are establishing connection (${errorMsg}). You can ask me anything about Adhy's engineering projects, leadership roles, photography, or skills!`;
+    }
+
+    return "I'm right here with you. What aspect of Adhy's work or projects shall we explore next?";
+  }
+}
+
+export const requestLifecycle = new RequestLifecycle();
+

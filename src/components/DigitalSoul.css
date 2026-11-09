@@ -1,0 +1,335 @@
+/* ════════════════════════════════════════════════════════
+   THE DIGITAL SOUL — Atmospheric Runtime Architecture
+════════════════════════════════════════════════════════ */
+
+.digital-soul {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  width: 2px;
+  height: 2px;
+  will-change: transform;
+}
+
+/* The solid inner core */
+.soul-core, .soul-core-echo, .soul-core-echo-2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--soul-core-override, #ffffff);
+  will-change: transform, opacity;
+}
+
+.soul-core {
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(135deg, #00ffff, #ff00ff);
+  box-shadow: 0 0 8px 2px rgba(255, 0, 255, 0.4);
+  animation: soul-pulse var(--bio-rhythm, 4s) ease-in-out infinite alternate;
+  transition: background 2s ease, box-shadow 2s ease;
+  z-index: 3;
+}
+
+.soul-core-echo {
+  width: 6px;
+  height: 6px;
+  background: rgba(163, 255, 220, 0.8);
+  animation: soul-orbit var(--soul-orbit-speed, 3s) linear infinite;
+  transform-origin: -8px -8px;
+  z-index: 2;
+}
+
+.soul-core-echo-2 {
+  width: 5px;
+  height: 5px;
+  background: rgba(108, 99, 255, 0.7);
+  animation: soul-orbit 4.5s linear infinite reverse;
+  transform-origin: 12px 10px;
+  z-index: 1;
+}
+
+/* The soft glowing aura */
+.soul-aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 25px;
+  height: 25px;
+  background: radial-gradient(circle, rgba(108, 99, 255, 0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(8px);
+  animation: soul-breathe var(--bio-rhythm, 8s) ease-in-out infinite alternate;
+  transition: width 2s ease, height 2s ease, background 2s ease, filter 2s ease;
+  will-change: transform, opacity;
+}
+
+.soul-aura-outer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, rgba(108, 99, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(12px);
+  animation: soul-breathe-outer calc(var(--bio-rhythm, 8s) * 1.5) ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .digital-soul {
+    mix-blend-mode: normal;
+  }
+  .soul-aura { width: 30px; height: 30px; filter: blur(4px); }
+  .soul-aura-outer { display: none; }
+  .soul-core-echo, .soul-core-echo-2 { display: none; }
+}
+
+/* ── Higher Intelligence States ── */
+
+.state-overclocked .soul-core {
+  background: #00ffff;
+  box-shadow: 0 0 10px 5px rgba(0, 255, 255, 0.8);
+  animation-duration: 0.5s;
+}
+.state-overclocked .soul-aura {
+  background: radial-gradient(circle, rgba(0, 255, 255, 1) 0%, rgba(0, 100, 255, 0.8) 40%, transparent 80%);
+  width: 80px; height: 80px;
+  filter: blur(15px) brightness(1.5);
+  animation: pulse-overclock 0.5s ease-in-out infinite alternate;
+}
+@keyframes pulse-overclock {
+  0% { transform: translate(-50%, -50%) scale(1); filter: blur(15px) brightness(1.5) hue-rotate(0deg); }
+  100% { transform: translate(-50%, -50%) scale(1.1); filter: blur(10px) brightness(2) hue-rotate(20deg); }
+}
+
+.state-glitching .soul-core {
+  background: #ff00ff;
+  animation: glitch-soul 0.2s steps(2, end) infinite;
+}
+.state-glitching .soul-aura {
+  background: radial-gradient(circle, rgba(255, 0, 255, 0.8) 0%, rgba(0, 255, 255, 0.6) 50%, transparent 80%);
+  width: 70px; height: 70px;
+  filter: blur(10px) contrast(1.5);
+  animation: glitch-soul 0.2s steps(2, end) infinite;
+}
+@keyframes glitch-soul {
+  0% { transform: translate(-50%, -50%) scale(1) skew(0deg); }
+  25% { transform: translate(calc(-50% - 4px), calc(-50% + 4px)) scale(1.1) skew(5deg); filter: blur(6px) hue-rotate(45deg); }
+  50% { transform: translate(calc(-50% + 4px), calc(-50% - 2px)) scale(0.9) skew(-10deg); filter: blur(12px) hue-rotate(-45deg); }
+  75% { transform: translate(calc(-50% - 2px), calc(-50% + 4px)) scale(1.05) skew(2deg); filter: blur(8px) hue-rotate(90deg); }
+  100% { transform: translate(calc(-50% + 2px), calc(-50% - 4px)) scale(0.95) skew(-5deg); filter: blur(6px) hue-rotate(0deg); }
+}
+
+.state-euphoric .soul-core {
+  background: #ffc832;
+  box-shadow: 0 0 15px 5px rgba(255, 200, 50, 0.9);
+}
+.state-euphoric .soul-aura {
+  background: radial-gradient(circle, rgba(255, 200, 50, 0.9) 0%, rgba(255, 50, 150, 0.6) 60%, transparent 80%);
+  width: 90px; height: 90px;
+  filter: blur(20px) saturate(2);
+  animation: breathe-euphoric 4s ease-in-out infinite alternate;
+}
+@keyframes breathe-euphoric {
+  0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.8; filter: blur(20px) saturate(2); }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; filter: blur(25px) saturate(2.5); }
+}
+
+.state-analyzing .soul-core {
+  background: #00ff64;
+  box-shadow: 0 0 10px 3px rgba(0, 255, 100, 0.8);
+}
+.state-analyzing .soul-aura {
+  background: radial-gradient(circle, rgba(0, 255, 100, 0.8) 0%, rgba(0, 150, 255, 0.5) 40%, transparent 70%);
+  width: 60px; height: 60px;
+  border-radius: 10px; /* blocky shape */
+  filter: blur(10px);
+  animation: scan-analyzing 1s cubic-bezier(0.8, 0, 0.2, 1) infinite;
+}
+@keyframes scan-analyzing {
+  0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); border-radius: 10px; filter: blur(10px); }
+  50% { transform: translate(-50%, -50%) scale(1.5, 0.5) rotate(90deg); border-radius: 30px; filter: blur(6px) brightness(1.5); }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(180deg); border-radius: 10px; filter: blur(10px); }
+}
+
+.state-melancholic .soul-core {
+  background: #1e0a3c;
+}
+.state-melancholic .soul-aura {
+  background: radial-gradient(circle, rgba(30, 10, 60, 0.9) 0%, rgba(10, 5, 30, 0.7) 50%, transparent 80%);
+  width: 70px; height: 70px;
+  filter: blur(15px);
+  animation: sink-melancholic 5s ease-in-out infinite alternate;
+}
+@keyframes sink-melancholic {
+  0% { transform: translate(-50%, -50%) scale(1) translateY(0); opacity: 0.6; filter: blur(15px); }
+  100% { transform: translate(-50%, -50%) scale(0.8) translateY(15px); opacity: 0.3; filter: blur(25px) grayscale(0.5); }
+}
+
+/* Subconscious whisper */
+.soul-whisper {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  text-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+.whisper-visible {
+  animation: whisper-fade 5s forwards;
+}
+
+@keyframes whisper-fade {
+  0% { opacity: 0; transform: translate(-50%, 5px); }
+  20% { opacity: 1; transform: translate(-50%, -5px); }
+  80% { opacity: 1; transform: translate(-50%, -8px); }
+  100% { opacity: 0; transform: translate(-50%, -15px); }
+}
+
+/* ── EMOTIONAL STATES ── */
+
+/* Dormant: Extremely quiet, deep blue */
+.state-dormant .soul-core {
+  background: #5c55d9;
+  box-shadow: 0 0 4px 1px rgba(92, 85, 217, 0.5);
+  animation-duration: 10s;
+}
+.state-dormant .soul-aura {
+  width: 25px;
+  height: 25px;
+  background: radial-gradient(circle, rgba(92, 85, 217, 0.1) 0%, transparent 70%);
+  animation-duration: 12s;
+  filter: blur(6px);
+}
+
+/* Exhausted: Dim, slow, reddish hue */
+.state-exhausted .soul-core {
+  background: #ff7b7b;
+  box-shadow: 0 0 4px 1px rgba(255, 123, 123, 0.4);
+  animation-duration: 6s;
+}
+.state-exhausted .soul-aura {
+  width: 35px;
+  height: 35px;
+  background: radial-gradient(circle, rgba(255, 123, 123, 0.15) 0%, transparent 70%);
+  filter: blur(8px);
+}
+
+/* Curious: Bright, active, white/blue */
+.state-curious .soul-core {
+  background: #ffffff;
+  box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.9);
+  animation-duration: 2s;
+}
+.state-curious .soul-aura {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(200, 230, 255, 0.25) 0%, transparent 70%);
+  animation-duration: 4s;
+  filter: blur(12px);
+}
+
+/* Distant: Dimmed out, observing from afar */
+.state-distant .soul-core {
+  opacity: 0.4;
+  box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.3);
+}
+.state-distant .soul-aura {
+  width: 20px;
+  height: 20px;
+  opacity: 0.3;
+  filter: blur(4px);
+}
+
+/* Thinking: Pulsating slow white/purple, medium aura */
+.state-thinking .soul-core {
+  background: #e0b0ff;
+  box-shadow: 0 0 6px 2px rgba(224, 176, 255, 0.6);
+  animation-duration: 4s;
+}
+.state-thinking .soul-aura {
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, rgba(224, 176, 255, 0.2) 0%, transparent 70%);
+  animation-duration: 6s;
+  filter: blur(10px);
+}
+
+/* Resonating: Bright flash on interaction */
+.state-resonating .soul-core {
+  background: #ffffff;
+  box-shadow: 0 0 15px 5px rgba(255, 255, 255, 1);
+  animation-duration: 0.5s;
+}
+.state-resonating .soul-aura {
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+  animation-duration: 0.5s;
+  filter: blur(15px);
+}
+
+/* Fractured: Instability */
+.state-fractured .soul-core {
+  animation: soul-glitch 0.2s steps(2) infinite;
+  background: #a3ffdc;
+}
+.state-fractured .soul-aura {
+  opacity: 0;
+}
+
+/* Environmental Modifiers */
+.env-silent .soul-core {
+  opacity: 0.3;
+  animation-duration: 12s;
+}
+.env-silent .soul-aura {
+  opacity: 0.1;
+  animation-duration: 15s;
+}
+.env-rain .soul-core {
+  background: #a3e4ff;
+  box-shadow: 0 0 6px 2px rgba(163, 228, 255, 0.6);
+}
+
+@keyframes soul-pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
+}
+
+@keyframes soul-breathe {
+  0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+}
+
+@keyframes soul-breathe-outer {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.3; }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+}
+
+@keyframes soul-orbit {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes soul-glitch {
+  0% { transform: translate(-50%, -50%) scale(1) skew(0deg); opacity: 1; }
+  50% { transform: translate(-54%, -46%) scale(0.8) skew(15deg); opacity: 0.3; }
+  100% { transform: translate(-48%, -52%) scale(1.2) skew(-10deg); opacity: 0.8; }
+}

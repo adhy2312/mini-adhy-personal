@@ -1,0 +1,209 @@
+/* ═══════════════════════════════════════════
+   AI COMPANION CURSOR (CustomCursor.css)
+═══════════════════════════════════════════ */
+
+.ai-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Origin centered for GSAP x/y translation */
+  margin-top: -12px;
+  margin-left: -12px;
+  transition: opacity 0.3s ease;
+}
+
+.cursor-hidden {
+  opacity: 0;
+}
+
+.cursor-visible {
+  opacity: 1;
+}
+
+.ai-cursor-shape {
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: width, height, border-radius, background, transform;
+}
+
+.ai-cursor-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity 0.3s ease 0.1s;
+  color: #000;
+  overflow: hidden;
+}
+
+/* ─── Standard States ─── */
+.state-hover .ai-cursor-shape {
+  transform: scale(1.5);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid white;
+}
+
+.state-text .ai-cursor-shape {
+  width: 2px;
+  height: 30px;
+  border-radius: 2px;
+}
+
+.state-magnetic .ai-cursor-shape {
+  transform: scale(0.2);
+  opacity: 0;
+}
+
+.state-grab .ai-cursor-shape {
+  transform: scale(1.5);
+  background: transparent;
+  border: 2px dashed white;
+  animation: cursor-spin 4s linear infinite;
+}
+
+.state-chat .ai-cursor-shape {
+  transform: scale(1.2);
+  background: var(--accent-primary);
+  border-radius: 4px;
+}
+
+/* ─── AI Companion States (Experimental Mode) ─── */
+.is-experimental {
+  mix-blend-mode: normal; /* AI cursor has its own colors */
+}
+
+.is-experimental .ai-cursor-shape {
+  background: rgba(255, 255, 255, 0.15);
+  /* backdrop-filter REMOVED for strict 60fps performance */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* box-shadow removed to prevent layout thrashing */
+}
+
+.is-experimental.state-ai-idle .ai-cursor-shape {
+  transform: scale(0.8);
+  border-color: var(--accent-primary);
+  /* Reduced glow for performance */
+  box-shadow: 0 0 10px rgba(108, 99, 255, 0.2);
+}
+
+.is-experimental.state-ai-idle .ai-cursor-content {
+  opacity: 1;
+}
+
+.ai-idle-thought {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 8px;
+  color: var(--accent-primary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: -35px; /* Floats above the orb */
+  white-space: nowrap;
+  animation: float-thought 2s ease-in-out infinite alternate;
+}
+
+@keyframes float-thought {
+  from { transform: translateY(0); opacity: 0.5; }
+  to { transform: translateY(-3px); opacity: 1; }
+}
+
+/* ─── AI Project Hover State ─── */
+.is-experimental.state-ai-project .ai-cursor-shape {
+  width: 280px;
+  height: 140px;
+  border-radius: 12px;
+  background: rgba(10, 15, 30, 0.95); /* More opaque since blur is gone */
+  border: 1px solid var(--accent-primary);
+  /* Kept minimal shadow for design, but simpler */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transform: translate(20px, 20px); /* Offset from exact pointer */
+}
+
+.is-experimental.state-ai-project .ai-cursor-content {
+  opacity: 1;
+  transform: translate(-50%, -50%) translate(20px, 20px);
+}
+
+.ai-project-card {
+  padding: 16px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  color: white;
+}
+
+.ai-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 8px;
+  color: var(--accent-primary);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ai-label::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  animation: pulse-dot 1s infinite alternate;
+}
+
+.ai-project-card h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-project-card p {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── Click Feedback ─── */
+.cursor-click .ai-cursor-shape {
+  transform: scale(0.8) !important;
+  background: white !important;
+}
+
+@keyframes pulse-dot {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes cursor-spin {
+  100% { transform: scale(1.5) rotate(360deg); }
+}

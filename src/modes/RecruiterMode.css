@@ -1,0 +1,137 @@
+/* ══════════════════════════════════════════════════════════════════
+   RECRUITER MODE — The Executive Silicon & Engineering Showcase
+   Pristine, Polished, High-Signal SaaS Architecture (Apple / Linear)
+   ══════════════════════════════════════════════════════════════════ */
+
+body.mode-recruiter {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent-primary: #2563eb;
+  --border-brutal: 1px solid rgba(15, 23, 42, 0.08);
+  --shadow-brutal: 0 4px 20px rgba(15, 23, 42, 0.06);
+  --shadow-brutal-deep: 0 12px 35px rgba(15, 23, 42, 0.09);
+  --border-radius-bento: 20px;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+body.mode-recruiter.dark-mode {
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-card: #141c2e;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent-primary: #3b82f6;
+  --border-brutal: 1px solid rgba(255, 255, 255, 0.1);
+  --shadow-brutal: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --shadow-brutal-deep: 0 16px 45px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Executive Header / Navbar Polish ─── */
+body.mode-recruiter .navbar {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.mode-recruiter.dark-mode .navbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.mode-recruiter .nav-resume-btn,
+body.mode-recruiter .mobile-nav-resume-btn {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+  font-weight: 600 !important;
+  padding: 8px 18px !important;
+  transition: all 0.2s ease !important;
+}
+
+body.mode-recruiter .nav-resume-btn:hover {
+  background: #1d4ed8 !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ─── Bento Cards & Grid Polish ─── */
+body.mode-recruiter .bento-card,
+body.mode-recruiter .bento-cell,
+body.mode-recruiter .glass-card,
+body.mode-recruiter .work-card,
+body.mode-recruiter .skill-card,
+body.mode-recruiter .marquee-card {
+  border-radius: 20px !important;
+  border: var(--border-brutal) !important;
+  box-shadow: var(--shadow-brutal) !important;
+  background: var(--bg-card) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+body.mode-recruiter .bento-card:hover,
+body.mode-recruiter .work-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: var(--shadow-brutal-deep) !important;
+}
+
+/* Suppress harsh brutalist crosshatch and block shadows */
+body.mode-recruiter .bento-card::before,
+body.mode-recruiter .bento-card::after {
+  display: none !important;
+}
+
+/* ─── Typography & Signal Clarity ─── */
+body.mode-recruiter h1,
+body.mode-recruiter h2,
+body.mode-recruiter h3,
+body.mode-recruiter .section-title,
+body.mode-recruiter .hero-name-giant {
+  text-shadow: none !important;
+  letter-spacing: -0.02em !important;
+  color: var(--text-primary) !important;
+}
+
+body.mode-recruiter .section-subtitle,
+body.mode-recruiter .hero-tagline-premium {
+  color: var(--text-secondary) !important;
+  font-weight: 400 !important;
+}
+
+/* ─── Executive Engineering Role Tags ─── */
+body.mode-recruiter .tag,
+body.mode-recruiter .work-tag,
+body.mode-recruiter .skill-tag,
+body.mode-recruiter .bento-badge {
+  background: rgba(37, 99, 235, 0.08) !important;
+  color: var(--accent-primary) !important;
+  border: 1px solid rgba(37, 99, 235, 0.2) !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 0.72rem !important;
+  box-shadow: none !important;
+}
+
+/* ─── Clean Up Overlays ─── */
+body.mode-recruiter .noise-overlay {
+  opacity: 0.01 !important;
+}
+
+body.mode-recruiter .custom-cursor-ring.viewfinder {
+  border-radius: 50% !important;
+  border: 1.5px solid rgba(37, 99, 235, 0.6) !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+body.mode-recruiter .custom-cursor-ring.viewfinder::before,
+body.mode-recruiter .custom-cursor-ring.viewfinder::after {
+  display: none !important;
+}

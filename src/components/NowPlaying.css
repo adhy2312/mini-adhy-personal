@@ -1,0 +1,774 @@
+/* ═════════════════════════════════════════════════════════════════
+   NEO-BRUTALIST SPOTIFY NOW PLAYING WIDGET
+   • Neo-Brutalist tactile geometry: stark borders & hard drop-shadows
+   • High-fidelity spinning music vinyl disc with real grooves & tonearm
+   • Crisp monospace & Space Grotesk typography
+   • ZERO changes to existing ambient light config
+   ═════════════════════════════════════════════════════════════════ */
+
+/* ── Outer Wrapper ── */
+.np-wrapper {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 999;
+  animation: np-neo-slidein 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes np-neo-slidein {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Neo-Brutalist Widget Container (Tightly Packed Pill) ── */
+.np-widget--brutalist {
+  position: relative;
+  z-index: 1;
+  width: 220px;
+  max-width: calc(100vw - 24px);
+  padding: 7px 8px;
+  border-radius: 8px;
+
+  background: #0d0e14;
+  border: 1.5px solid #000000;
+  outline: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 3px 3px 0px #000000, 0 8px 25px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.22));
+
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.np-widget--brutalist:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000000, 0 10px 28px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.30));
+}
+
+/* ── 1. Header Row (Tightly Packed) ── */
+.np-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.np-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #000000;
+  background: #a1a1aa;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid #000000;
+  box-shadow: 1.5px 1.5px 0px #000000;
+}
+
+.np-status-tag--live {
+  background: var(--spotify-ambient-accent, #1ed760);
+  color: #000000;
+}
+
+.np-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #000000;
+  opacity: 0.6;
+}
+
+.np-status-dot--live {
+  opacity: 1;
+  background: #000000;
+  animation: np-neo-blink 1.2s steps(2, start) infinite;
+}
+
+@keyframes np-neo-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.85); }
+}
+
+.np-status-text {
+  line-height: 1;
+}
+
+.np-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.np-spotify-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  background: var(--spotify-ambient-accent, #1ed760);
+  color: #000000;
+  border: 1px solid #000000;
+  box-shadow: 1.5px 1.5px 0px #000000;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.np-spotify-link:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.np-spotify-link:active {
+  transform: translate(1px, 1px);
+  box-shadow: 0.5px 0.5px 0px #000000;
+}
+
+.np-btn-minimize {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  box-shadow: 1.5px 1.5px 0px #000000;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.np-btn-minimize:hover {
+  background: #fbbf24;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.np-btn-minimize:active {
+  transform: translate(1px, 1px);
+  box-shadow: 0.5px 0.5px 0px #000000;
+}
+
+/* ── 2. Body: Spinning Vinyl Record + Details (Tightly Packed) ── */
+.np-body {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* ── Spinning Music Vinyl Disc Stage ── */
+.np-disc-stage {
+  position: relative;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.np-disc-stage:hover {
+  transform: scale(1.04);
+}
+
+.np-vinyl-disc {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a0a0e 0%, #171720 30%, #0d0d12 50%, #1e1e28 72%, #08080c 100%);
+  border: 1.5px solid #000000;
+  box-shadow: 2px 2px 0px #000000, 0 0 8px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  transition: filter 0.3s;
+}
+
+/* Concentric Vinyl Grooves */
+.np-vinyl-grooves {
+  position: absolute;
+  inset: 1.5px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0px,
+    transparent 2px,
+    rgba(255, 255, 255, 0.06) 3px,
+    transparent 4px
+  );
+  pointer-events: none;
+}
+
+/* Reflective Vinyl Sheen Overlay */
+.np-vinyl-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.12) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Center Album Label Sticker */
+.np-vinyl-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid #000000;
+  overflow: hidden;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+}
+
+.np-vinyl-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.np-vinyl-art-fallback {
+  color: var(--spotify-ambient-accent, #1ed760);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Center Spindle Hole */
+.np-vinyl-spindle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e4e4e7;
+  border: 1.5px solid #000000;
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+/* Continuous Rotation Animation */
+@keyframes np-spin-disc {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.np-vinyl-disc--spinning {
+  animation: np-spin-disc 3.6s linear infinite;
+}
+
+.np-vinyl-disc--paused {
+  animation: np-spin-disc 3.6s linear infinite;
+  animation-play-state: paused;
+  opacity: 0.85;
+}
+
+/* Tonearm Needle Stylus Indicator */
+.np-tonearm {
+  position: absolute;
+  top: 0px;
+  right: -2px;
+  width: 10px;
+  height: 22px;
+  border-right: 1.5px solid #e4e4e7;
+  border-top: 1.5px solid #e4e4e7;
+  border-top-right-radius: 3px;
+  transform-origin: top right;
+  transform: rotate(-15deg);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  filter: drop-shadow(1px 1px 0px #000);
+}
+
+.np-tonearm--playing {
+  transform: rotate(18deg);
+}
+
+.np-tonearm-head {
+  position: absolute;
+  bottom: -2px;
+  right: -3px;
+  width: 4px;
+  height: 4px;
+  background: var(--spotify-ambient-accent, #1ed760);
+  border: 1px solid #000;
+}
+
+/* ── Track Details ── */
+.np-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+}
+
+.np-meta-badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 1px;
+}
+
+.np-badge-brutal {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.52rem;
+  font-weight: 800;
+  background: #181924;
+  color: #94a3b8;
+  padding: 0.5px 4px;
+  border-radius: 2.5px;
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.np-title {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  transition: color 0.15s ease;
+}
+
+.np-title:hover {
+  color: var(--spotify-ambient-accent, #1ed760);
+}
+
+.np-artist {
+  margin: 0;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.60rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.np-preview-btn {
+  margin-top: 3px;
+  align-self: flex-start;
+  padding: 1.5px 6px;
+  font-size: 0.52rem;
+  font-family: 'Fira Code', monospace;
+  font-weight: 800;
+  border-radius: 3px;
+  background: #181924;
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0px #000000;
+  color: var(--spotify-ambient-accent, #1ed760);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.np-preview-btn:hover {
+  background: var(--spotify-ambient-accent, #1ed760);
+  color: #000000;
+  transform: translate(-1px, -1px);
+  box-shadow: 1.5px 1.5px 0px #000000;
+}
+
+.np-preview-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+/* ── 3. Footer: Chunky Neo-Brutalist Progress Track ── */
+.np-progress-section {
+  margin-top: 6px;
+}
+
+.np-progress-track {
+  height: 4px;
+  background: #1c1d27;
+  border-radius: 2px;
+  border: 1px solid #000000;
+  overflow: hidden;
+  box-shadow: inset 1px 1px 0px rgba(0, 0, 0, 0.4);
+}
+
+.np-progress-fill {
+  height: 100%;
+  background: var(--spotify-ambient-accent, #1ed760);
+  border-radius: 0;
+  border-right: 1px solid #000000;
+  transition: width 0.3s linear;
+}
+
+.np-time-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.52rem;
+  font-weight: 700;
+  color: #71717a;
+}
+
+.np-live-tag {
+  color: var(--spotify-ambient-accent, #1ed760);
+  font-size: 0.50rem;
+  letter-spacing: 0.05em;
+}
+
+/* ── Waveform Animation ── */
+.np-waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 12px;
+}
+
+.np-waveform span {
+  display: block;
+  width: 3px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.25);
+  height: 3px;
+}
+
+.np-waveform--playing span {
+  background: var(--spotify-ambient-accent, #1ed760);
+}
+
+.np-waveform--playing span:nth-child(1) { animation: np-bar 0.9s ease-in-out infinite; }
+.np-waveform--playing span:nth-child(2) { animation: np-bar 0.7s ease-in-out infinite 0.15s; }
+.np-waveform--playing span:nth-child(3) { animation: np-bar 1.1s ease-in-out infinite 0.05s; }
+.np-waveform--playing span:nth-child(4) { animation: np-bar 0.8s ease-in-out infinite 0.25s; }
+
+@keyframes np-bar {
+  0%, 100% { height: 3px; }
+  50%       { height: 12px; }
+}
+
+/* ── Neo-Brutalist Docked Tab (When Minimized) ── */
+.np-dock--brutalist {
+  position: fixed;
+  left: 0;
+  bottom: 120px;
+  z-index: 999;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 4px 6px 4px 3px;
+  border: 1.5px solid #000000;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+
+  background: #0d0e14;
+  outline: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 2px 2px 0px #000000, 0 4px 15px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.20));
+
+  color: #ffffff;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  width: auto;
+  max-width: 26px; /* Subtle when idle */
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* When Song is Playing: Dock expands slightly & glows with ambient lighting */
+.np-dock--brutalist.np-dock--playing {
+  max-width: 38px; /* Slightly only little big */
+  padding: 5px 7px 5px 4px;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 2.5px 2.5px 0px #000000, 0 4px 20px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.35));
+}
+
+.np-dock--brutalist:hover {
+  max-width: 96px;
+  padding-right: 9px;
+  background: #141520;
+  transform: translateX(1px);
+}
+
+/* ── Realistic Miniature Vinyl Record in Dock ── */
+.np-dock-disc {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #08080c 0%, #171722 35%, #0e0e16 60%, #1e1e2c 78%, #050508 100%);
+  border: 1.5px solid #000000;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 1.5px 1.5px 0px #000000, 0 0 6px rgba(0, 0, 0, 0.7);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Slightly bigger vinyl disc when music is playing */
+.np-dock--playing .np-dock-disc {
+  width: 28px;
+  height: 28px;
+}
+
+/* Concentric Vinyl Grooves */
+.np-dock-grooves {
+  position: absolute;
+  inset: 1px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0px,
+    transparent 1.5px,
+    rgba(255, 255, 255, 0.08) 2px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+/* Reflective Vinyl Sheen Reflection */
+.np-dock-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.26) 0%,
+    transparent 42%,
+    rgba(255, 255, 255, 0.16) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Center Album Label / Spindle Sticker */
+.np-dock-label-sticker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid #000000;
+  overflow: hidden;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+  transition: width 0.25s ease, height 0.25s ease;
+}
+
+.np-dock--playing .np-dock-label-sticker {
+  width: 13px;
+  height: 13px;
+}
+
+.np-dock-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.np-dock-art-fallback {
+  width: 100%;
+  height: 100%;
+  background: var(--spotify-ambient-accent, #1ed760);
+}
+
+.np-dock-center-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 0.5px solid #000000;
+  pointer-events: none;
+}
+
+/* Continuous Vinyl Rotation Animation */
+.np-dock-disc--spinning {
+  animation: np-spin-disc 3.2s linear infinite;
+}
+
+.np-dock-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 0.58rem;
+  letter-spacing: 0.05em;
+  color: var(--spotify-ambient-accent, #1ed760);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.np-dock--brutalist:hover .np-dock-label {
+  opacity: 1;
+}
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .np-wrapper {
+    bottom: 10px;
+    left: 8px;
+    max-width: calc(100vw - 16px);
+  }
+  .np-widget--brutalist {
+    width: 196px;
+    max-width: calc(100vw - 16px);
+    padding: 5px 6px;
+    border-radius: 6px;
+  }
+  .np-header {
+    margin-bottom: 4px;
+    padding-bottom: 3px;
+  }
+  .np-disc-stage {
+    width: 32px;
+    height: 32px;
+  }
+  .np-vinyl-disc {
+    width: 32px;
+    height: 32px;
+  }
+  .np-vinyl-label {
+    width: 14px;
+    height: 14px;
+  }
+  .np-title {
+    font-size: 0.68rem;
+  }
+  .np-artist {
+    font-size: 0.54rem;
+  }
+  .np-badge-brutal {
+    font-size: 0.46rem;
+    padding: 0.5px 3px;
+  }
+  /* Ultra-compact docked tab on mobile */
+  .np-dock--brutalist {
+    bottom: 65px;
+    padding: 3px 4px 3px 3px !important;
+    gap: 0 !important;
+    border-radius: 0 6px 6px 0 !important;
+    max-width: 24px !important;
+    width: auto !important;
+    box-shadow: 1.5px 1.5px 0px #000000 !important;
+  }
+  .np-dock--brutalist.np-dock--playing {
+    max-width: 32px !important; /* Slightly only little big on mobile */
+    padding: 4px 5px 4px 3px !important;
+    border-radius: 0 8px 8px 0 !important;
+  }
+  .np-dock--brutalist:hover {
+    max-width: 32px !important;
+    width: auto !important;
+    padding-right: 5px !important;
+    transform: none !important;
+  }
+  .np-dock--brutalist .np-dock-label {
+    display: none !important;
+  }
+  .np-dock-disc {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .np-dock--playing .np-dock-disc {
+    width: 23px !important;
+    height: 23px !important;
+  }
+  .np-dock--playing .np-dock-label-sticker {
+    width: 10px !important;
+    height: 10px !important;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   SUBTLE INTEGRATED AMBIENCE (ONLY WHEN MUSIC IS PLAYING)
+   • Gentle backshadows and typography depth
+   • No giant blobs, no navbar lines, no artificial tints
+   ═════════════════════════════════════════════════════════════════ */
+
+/* Subtle Card Backshadows */
+body.spotify-ambient-active.spotify-playing .bento-card,
+body.spotify-ambient-active.spotify-playing .project-card,
+body.spotify-ambient-active.spotify-playing .about-bento-card,
+body.spotify-ambient-active.spotify-playing .experience-card,
+body.spotify-ambient-active.spotify-playing .testimonial-card,
+body.spotify-ambient-active.spotify-playing .contact-tile,
+body.spotify-ambient-active.spotify-playing .achievement-card {
+  box-shadow:
+    5px 5px 0px #111111,
+    0 14px 40px var(--spotify-ambient-glow-card, rgba(0, 0, 0, 0.12)),
+    0 0 50px var(--spotify-ambient-glow, transparent) !important;
+  transition: box-shadow 0.6s ease;
+}
+
+body.dark-mode.spotify-ambient-active.spotify-playing .bento-card,
+body.dark-mode.spotify-ambient-active.spotify-playing .project-card,
+body.dark-mode.spotify-ambient-active.spotify-playing .about-bento-card,
+body.dark-mode.spotify-ambient-active.spotify-playing .experience-card,
+body.dark-mode.spotify-ambient-active.spotify-playing .testimonial-card,
+body.dark-mode.spotify-ambient-active.spotify-playing .contact-tile,
+body.dark-mode.spotify-ambient-active.spotify-playing .achievement-card {
+  box-shadow:
+    5px 5px 0px #000000,
+    0 14px 40px var(--spotify-ambient-glow-card, rgba(0, 0, 0, 0.12)),
+    0 0 50px var(--spotify-ambient-glow, transparent) !important;
+}
+
+/* Subtle Text Shadows on Primary Headings */
+body.spotify-ambient-active.spotify-playing h1,
+body.spotify-ambient-active.spotify-playing h2,
+body.spotify-ambient-active.spotify-playing .section-title,
+body.spotify-ambient-active.spotify-playing .hero-title {
+  text-shadow: 0 0 20px var(--spotify-ambient-text-glow, rgba(0, 0, 0, 0.1));
+  transition: text-shadow 0.8s ease;
+}
+
+/* Subtle Corner Accent on interactive badges */
+body.spotify-ambient-active.spotify-playing .tag,
+body.spotify-ambient-active.spotify-playing .tech-tag,
+body.spotify-ambient-active.spotify-playing .skill-pill,
+body.spotify-ambient-active.spotify-playing .badge {
+  box-shadow: 0 0 10px var(--spotify-ambient-corner-glow, transparent);
+  transition: box-shadow 0.6s ease;
+}

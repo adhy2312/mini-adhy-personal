@@ -1,0 +1,136 @@
+/* ════════════════════════════════════════════════════
+   PAGE LOADER — AUTHENTIC MULTILINGUAL BOOT SCREEN
+   Brutalist Typography, Indic Transliterations & Zero-Jank
+   ════════════════════════════════════════════════════ */
+
+.page-loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary, #0c0d14);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  will-change: transform;
+}
+
+.loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  position: relative;
+  z-index: 2;
+  padding: 20px;
+}
+
+.loader-logo {
+  display: flex;
+  justify-content: center;
+}
+
+.loader-name-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.loader-name-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(3.2rem, 11vw, 6.8rem);
+  font-weight: 800;
+  color: var(--text-primary, #ffffff);
+  letter-spacing: 6px;
+  line-height: 1;
+  text-shadow: 4px 4px 0px var(--accent-brutal-yellow, #f4d03f);
+  display: inline-block;
+  will-change: contents;
+}
+
+.loader-dot {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(3.2rem, 11vw, 6.8rem);
+  font-weight: 800;
+  color: var(--accent-primary, #6C63FF);
+  line-height: 1;
+  text-shadow: 4px 4px 0px #000;
+  display: inline-block;
+  margin-left: 2px;
+}
+
+/* Language label badge beneath the transliterated name */
+.loader-lang-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 3px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #000;
+  background: var(--accent-brutal-yellow, #f4d03f);
+  padding: 4px 14px;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0px #000;
+  min-height: 1.4em;
+  border-radius: 2px;
+}
+
+/* Brutalist loading bar wrapper */
+.loader-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.loader-bar-track {
+  width: clamp(200px, 45vw, 280px);
+  height: 12px;
+  background: #ffffff;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 4px 4px 0px #000;
+  border: 3px solid #000;
+}
+
+.loader-bar-fill {
+  height: 100%;
+  background: var(--accent-primary, #6C63FF);
+  border-right: 3px solid #000;
+  box-shadow: none;
+  position: relative;
+  will-change: width;
+}
+
+.loader-percent {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-primary, #ffffff);
+  letter-spacing: 1px;
+  min-width: 38px;
+}
+
+/* Cultural phrase ticker */
+.loader-phrase {
+  font-family: 'Fira Code', monospace;
+  font-size: clamp(0.72rem, 1.8vw, 0.82rem);
+  font-weight: 700;
+  color: var(--text-primary, #ffffff);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .loader-content {
+    gap: 20px;
+  }
+  .loader-name-text {
+    letter-spacing: 4px;
+  }
+}

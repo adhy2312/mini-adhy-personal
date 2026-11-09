@@ -1,0 +1,832 @@
+/* ═══════════════════════════════════════════
+   NAVBAR — Desktop glass pill
+═══════════════════════════════════════════ */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  padding: 0.25rem 0 !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar-scrolled {
+  padding: 0.15rem 0 !important;
+}
+
+/* Removed .navbar-scrolled .navbar-inner to keep floating pill design */
+
+.navbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0;
+  max-width: 1240px;
+  margin: 0 1.5rem;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  box-sizing: border-box !important;
+  padding: 0 1.25rem !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 100;
+  transition: all var(--transition-bounce);
+}
+
+@media (min-width: 1280px) {
+  .navbar-inner {
+    margin: 0 auto;
+    max-width: 1200px;
+  }
+}
+
+/* Left cluster: logo + weather + xray */
+.navbar-left-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* ─── Finance Club Co-Founder Chip ─── */
+.nav-chairperson-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #fff;
+  background: linear-gradient(135deg, #1a7f5a 0%, #0f4c35 100%);
+  border: 1px solid #0a3828;
+  padding: 3px 8px;
+  border-radius: 20px;
+  box-shadow: 2px 2px 0px #0a3828;
+  cursor: default;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.dark-mode .nav-chairperson-chip {
+  color: #e0ffe8;
+  box-shadow: 2px 2px 0px rgba(26, 127, 90, 0.5);
+}
+
+.nav-chairperson-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0px #000;
+}
+
+.chip-crown {
+  font-size: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .nav-chairperson-chip .chip-text {
+    display: none;
+  }
+  .nav-chairperson-chip {
+    padding: 3px 6px;
+  }
+}
+
+/* All direct children of navbar-inner sit above the rain canvas (z-index: 2) */
+.navbar-inner > *:not(canvas) {
+  position: relative;
+  z-index: 3;
+}
+
+/* ─── Logo ─── */
+.nav-logo {
+  text-decoration: none;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  transition: all 0.2s ease;
+  user-select: none;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Removed nav-logo::after PORTFOLIO text */
+
+.nav-logo-glow .logo-text {
+  text-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.9), 0 0 32px rgba(var(--accent-primary-rgb), 0.5);
+  animation: logo-pulse 0.3s ease;
+}
+
+@keyframes logo-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.logo-text {
+  color: #000;
+  background: linear-gradient(180deg, #000 0%, #444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.logo-dot { display: none; }
+
+/* ─── Desktop nav links ─── */
+.desktop-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.nav-link {
+  color: rgba(0, 0, 0, 0.6);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  position: relative;
+  white-space: nowrap;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background: var(--accent-primary);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateX(-50%);
+}
+
+.nav-link:hover { color: #000; }
+.nav-link:hover::after { width: 50%; }
+
+.nav-resume-btn {
+  padding: 4px 12px;
+  background: var(--accent-primary);
+  color: var(--button-text, #fff);
+  font-weight: 900;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  border-radius: 4px;
+  border: var(--border-brutal);
+  text-decoration: none;
+  font-size: 0.74rem;
+  line-height: 1.2;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-brutal);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.nav-resume-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000;
+  background: var(--accent-brutal-pink);
+}
+
+/* ═══════════════════════════════════════════
+   HAMBURGER BUTTON
+═══════════════════════════════════════════ */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1100;
+  padding: 4px;
+}
+
+.hamburger span {
+  width: 26px;
+  height: 2px;
+  background: #000;
+  transition: 0.3s ease;
+  border-radius: 2px;
+  display: block;
+}
+
+.hamburger-open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.hamburger-open span:nth-child(2) { opacity: 0; }
+.hamburger-open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+/* ═══════════════════════════════════════════
+   BACKDROP — rendered at root level
+═══════════════════════════════════════════ */
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1049;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.mobile-menu-backdrop.backdrop-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE SLIDE-IN PANEL — full viewport height
+   Rendered at root level (outside nav) so
+   backdrop-filter on navbar-inner cannot clip it
+═══════════════════════════════════════════ */
+.mobile-menu-panel {
+  display: none; /* hidden on desktop */
+}
+
+@media (max-width: 991px) {
+  .hamburger { display: flex; }
+  .desktop-nav-links { display: none; }
+
+  /* ── Full-height slide panel ── */
+  .mobile-menu-panel {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 310px;
+    max-width: 85vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 1060;
+    background: #0a0d14;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-left: 2px solid #000;
+    box-shadow: -8px 0px 0px #000, -24px 0 60px rgba(0, 0, 0, 0.7);
+
+    /* Slide off-screen by default */
+    transform: translateX(100%);
+    pointer-events: none;
+    visibility: hidden;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.4s;
+
+    /* Corner accents via pseudo-elements */
+    overflow: hidden;
+  }
+
+  .mobile-menu-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 140px; height: 140px;
+    background: radial-gradient(
+      circle at top left,
+      rgba(108, 99, 255, 0.10) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .mobile-menu-panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(
+      circle at bottom right,
+      rgba(108, 99, 255, 0.06) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .mobile-menu-open {
+    transform: translateX(0);
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  /* ── Nav list inside panel ── */
+  .mobile-nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 100px 36px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  /* ── NAVIGATION label ── */
+  .mobile-menu-label {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.25);
+    margin-bottom: 24px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+  }
+
+  .mobile-menu-label::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #6C63FF;
+    box-shadow: 0 0 6px #6C63FF;
+    flex-shrink: 0;
+    animation: ledPulse 2s ease-in-out infinite;
+  }
+
+  /* ── Nav link items ── */
+  .mobile-nav-link {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.65);
+    padding: 14px 4px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease, opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  /* Separator line */
+  .mobile-nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
+  }
+
+  .mobile-nav-link:hover { color: #fff; }
+
+  /* Index numbers e.g. 01, 02 */
+  .mobile-nav-link-index {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.2);
+    min-width: 22px;
+  }
+
+  /* ── Resume button ── */
+  .mobile-nav-resume-btn {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 12px 28px;
+    background: #22c55e;
+    color: #000;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    border: 2px solid #000;
+    text-decoration: none;
+    letter-spacing: 1px;
+    box-shadow: 4px 4px 0px #000;
+    transition: all 0.2s ease, opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  .mobile-nav-resume-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 0px #000;
+    background: #4ade80;
+  }
+
+  /* ── Divider ── */
+  .mobile-menu-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.08) 0%,
+      rgba(108,99,255,0.18) 50%,
+      rgba(255,255,255,0.02) 100%
+    );
+    margin: 28px 0;
+    opacity: 0;
+    transition: opacity 0.4s ease 0.45s;
+  }
+
+  /* ── Social section ── */
+  .mobile-menu-socials {
+    width: 100%;
+    margin-top: auto;
+    padding-top: 8px;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.4s ease 0.5s, transform 0.4s ease 0.5s;
+  }
+
+  .mobile-socials-label {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    margin-bottom: 14px;
+  }
+
+  .mobile-socials-row {
+    display: flex;
+    gap: 12px;
+  }
+
+  .mobile-social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .mobile-social-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.22);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  .mobile-social-link svg { width: 20px; height: 20px; }
+
+  /* ── Staggered entrance when panel opens ── */
+  .mobile-menu-open .mobile-menu-label {
+    opacity: 1; transform: translateX(0);
+  }
+
+  .mobile-menu-open .mobile-nav-links li:nth-child(2) .mobile-nav-link { opacity: 1; transform: translateX(0); transition-delay: 0.18s; }
+  .mobile-menu-open .mobile-nav-links li:nth-child(3) .mobile-nav-link { opacity: 1; transform: translateX(0); transition-delay: 0.23s; }
+  .mobile-menu-open .mobile-nav-links li:nth-child(4) .mobile-nav-link { opacity: 1; transform: translateX(0); transition-delay: 0.28s; }
+  .mobile-menu-open .mobile-nav-links li:nth-child(5) .mobile-nav-link { opacity: 1; transform: translateX(0); transition-delay: 0.33s; }
+  .mobile-menu-open .mobile-nav-links li:nth-child(6) .mobile-nav-link { opacity: 1; transform: translateX(0); transition-delay: 0.38s; }
+  .mobile-menu-open .mobile-nav-links li:nth-child(7) .mobile-nav-resume-btn { opacity: 1; transform: translateX(0); transition-delay: 0.43s; }
+  .mobile-menu-open .mobile-menu-divider { opacity: 1; }
+  .mobile-menu-open .mobile-menu-socials { opacity: 1; transform: translateX(0); }
+}
+
+/* =========================================================
+   AMBIENT WEATHER LIGHTING (Dynamic Navbar Effects)
+========================================================= */
+
+.navbar {
+  transition: background 1s ease, box-shadow 1s ease, border-color 1s ease;
+}
+
+/* Base Ambient Wrapper around Navbar */
+.ambient-clear-day .navbar-inner {
+  box-shadow: 0 8px 32px rgba(255, 191, 0, 0.15) !important;
+  border: 1px solid rgba(255, 200, 0, 0.4) !important;
+  background: rgba(255, 252, 230, 0.3) !important;
+}
+
+/* Sunlight corona above the navbar */
+.ambient-clear-day .navbar-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 100px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 220, 50, 0.12) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Golden shimmer sweep on logo for sunny */
+.ambient-clear-day .logo-text {
+  background: linear-gradient(
+    90deg,
+    #c8860a 0%,
+    #f9d71c 25%,
+    #ffe066 45%,
+    #fff7aa 55%,
+    #f9d71c 70%,
+    #c8860a 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: sunny-shimmer 3s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(255, 191, 0, 0.8)) drop-shadow(0 0 14px rgba(255, 165, 0, 0.5));
+}
+
+@keyframes sunny-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ─── CLEAR NIGHT & CLOUDS NIGHT (CELESTIAL MOONLIGHT) ─── */
+.ambient-clear-night .navbar-inner,
+.ambient-clouds-night .navbar-inner {
+  box-shadow: 
+    0 8px 32px rgba(99, 102, 241, 0.22),
+    0 0 20px rgba(139, 92, 246, 0.16),
+    inset 0 1px 0 rgba(192, 132, 252, 0.25) !important;
+  border: 1px solid rgba(139, 92, 246, 0.38) !important;
+  background: rgba(10, 12, 28, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
+  position: relative;
+}
+
+/* Moonlight nocturnal corona above navbar */
+.ambient-clear-night .navbar-inner::before,
+.ambient-clouds-night .navbar-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 100px;
+  background: linear-gradient(
+    180deg,
+    rgba(168, 85, 247, 0.14) 0%,
+    rgba(99, 102, 241, 0.04) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Celestial Moonlit Shimmer sweep on logo for nighttime */
+.ambient-clear-night .logo-text,
+.ambient-clouds-night .logo-text {
+  background: linear-gradient(
+    90deg,
+    #818cf8 0%,
+    #c084fc 25%,
+    #f1f5f9 50%,
+    #c084fc 75%,
+    #818cf8 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: moon-shimmer 3.5s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 14px rgba(99, 102, 241, 0.5));
+}
+
+@keyframes moon-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.ambient-clear-night .weather-indicator,
+.ambient-clouds-night .weather-indicator {
+  color: #c7d2fe;
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(139, 92, 246, 0.35);
+  box-shadow: 0 0 10px rgba(116, 125, 255, 0.25);
+}
+
+/* ─── CLOUDS (DAYTIME) ─── */
+.ambient-clouds .navbar-inner {
+  box-shadow: 0 8px 32px rgba(180, 205, 230, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(180, 205, 230, 0.45) !important;
+  background: rgba(220, 230, 242, 0.28) !important;
+}
+
+.ambient-clouds .logo-text {
+  background: linear-gradient(
+    90deg,
+    #94a3b8 0%,
+    #cbd5e1 30%,
+    #ffffff 50%,
+    #cbd5e1 70%,
+    #94a3b8 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: cloud-shimmer 4s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 8px rgba(180, 205, 230, 0.6));
+}
+
+@keyframes cloud-shimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 100% center; }
+}
+
+/* ─── RAIN AMBIENT ─────────────────────────────────────────── */
+.ambient-rain .navbar-inner {
+  background: rgba(8, 22, 38, 0.35) !important;
+  box-shadow: 0 8px 32px rgba(0, 120, 220, 0.2) !important;
+  border: 1px solid rgba(80, 190, 255, 0.4) !important;
+  position: relative;
+  /* Removed overflow: hidden so button shadows don't clip */
+}
+
+/* Removed under-glow beneath navbar to eliminate unwanted bottom lines */
+.ambient-rain .navbar-inner::before {
+  display: none !important;
+}
+
+/* Remove any ::after interference */
+.ambient-rain .navbar-inner::after { display: none; }
+
+/* ── Liquid-blue ADHY logo ── */
+.ambient-rain .logo-text {
+  background: linear-gradient(160deg, #c8eeff 0%, #4dc8ff 40%, #0090e0 80%, #005aab 100%);
+  background-size: 100% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: liquid-flow 3s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 6px rgba(0, 170, 255, 0.7)) drop-shadow(0 0 14px rgba(0, 110, 220, 0.4));
+}
+
+@keyframes liquid-flow {
+  0%   { background-position: 50% 0%; }
+  100% { background-position: 50% 100%; }
+}
+
+/* ── Rain mode: ensure all inner text is legible on dark glass ── */
+.ambient-rain .nav-link {
+  color: rgba(200, 230, 255, 0.85);
+}
+.ambient-rain .nav-link:hover {
+  color: #fff;
+}
+.ambient-rain .nav-link::after {
+  background: rgba(120, 200, 255, 0.9);
+}
+.ambient-rain .weather-indicator {
+  color: rgba(160, 215, 255, 0.9);
+  border-color: rgba(100, 190, 255, 0.2);
+  background: rgba(255,255,255,0.04);
+}
+.ambient-rain .hamburger span {
+  background: rgba(180, 230, 255, 0.9);
+}
+.ambient-rain .xray-toggle-btn {
+  color: rgba(160, 215, 255, 0.85);
+}
+
+.ambient-snow .navbar-inner {
+  box-shadow: 0 8px 32px rgba(230, 245, 255, 0.2) !important;
+  border: 1px solid rgba(230, 245, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+}
+.ambient-snow .logo-text { color: #ffffff; text-shadow: 2px 2px 0px #000; }
+
+.ambient-thunderstorm .navbar-inner {
+  box-shadow: 0 8px 32px rgba(150, 0, 255, 0.15) !important;
+  border: 1px solid rgba(150, 0, 255, 0.4) !important;
+  background: rgba(150, 0, 255, 0.05) !important;
+  animation: lightning-flash 5s infinite;
+}
+.ambient-thunderstorm .logo-text { color: #d9a0ff; text-shadow: 0 0 10px rgba(150,0,255,0.6); }
+
+@keyframes lightning-flash {
+  0%, 95%, 100% { box-shadow: 0 10px 50px -5px rgba(150, 0, 255, 0.5), 0 8px 32px rgba(0,0,0,0.1); }
+  96% { box-shadow: 0 10px 60px 0px rgba(255, 255, 255, 0.8), 0 8px 32px rgba(0,0,0,0.1); }
+  98% { box-shadow: 0 10px 50px -5px rgba(150, 0, 255, 0.5), 0 8px 32px rgba(0,0,0,0.1); }
+  99% { box-shadow: 0 10px 70px 5px rgba(255, 255, 255, 0.9), 0 8px 32px rgba(0,0,0,0.1); }
+}
+
+/* ─── XRay Toggle ─── */
+.xray-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: var(--border-brutal);
+  border-radius: 4px;
+  color: #000;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 2px 2px 0px #000;
+  flex-shrink: 0;
+}
+
+.xray-toggle-btn:hover {
+  background: #000;
+  color: #fff;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000;
+}
+
+/* Weather Indicator */
+.weather-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--button-text, #fff);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--accent-primary);
+  border: var(--border-brutal);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-brutal);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.weather-icon {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    /* Respect notch / safe area on iOS */
+    padding-top: max(0.2rem, env(safe-area-inset-top, 0.2rem)) !important;
+    padding-bottom: 0.2rem !important;
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
+  .navbar-inner {
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding: 0 0.85rem !important;
+    margin: 0 1rem;
+    gap: 8px;
+    /* Prevent inner pill from overflowing screen */
+    width: calc(100% - 2rem);
+    box-sizing: border-box;
+    border-radius: 40px;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  }
+  .nav-logo {
+    letter-spacing: 2px;
+    font-size: 1rem;
+  }
+  .navbar-left-cluster {
+    gap: 0.4rem;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .weather-indicator {
+    padding: 2px 6px;
+    font-size: 0.72rem;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    gap: 3px;
+  }
+  .xray-toggle-btn {
+    width: 28px !important;
+    height: 28px !important;
+    box-shadow: 1px 1px 0px #000;
+  }
+  .hamburger {
+    margin-left: auto;
+  }
+}
+
+/* ── Magnetic Pill ── */
+.nav-pill-bg {
+  position: absolute;
+  inset: -6px -12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  z-index: 0;
+  pointer-events: none;
+}

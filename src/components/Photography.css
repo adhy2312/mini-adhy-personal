@@ -1,0 +1,1362 @@
+/* ═══════════════════════════════════════════════════════════════
+   PHOTOGRAPHY & DESIGN: LEICA/HASSELBLAD VIEWFINDER HUD (V300)
+   Ultra-Low Load: Single active DOM node, zero infinite loops.
+═══════════════════════════════════════════════════════════════ */
+
+.photography-section {
+  padding: 6rem 0 5rem;
+  background: var(--bg-primary, #0c0d12);
+  position: relative;
+  overflow: hidden;
+  overflow-x: clip;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  color: var(--text-primary, #e2e8f0);
+}
+
+/* Subtle background optical darkroom vignette */
+.photography-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1000px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, rgba(99, 102, 241, 0.03) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header layout */
+.photo-viewfinder-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.photo-viewfinder-header .section-divider {
+  margin: 1.25rem auto;
+}
+
+.photo-viewfinder-header .section-desc {
+  max-width: 580px;
+  margin: 0 auto 2rem;
+  color: var(--text-muted, #94a3b8);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* ── Mode Switcher Pills (Photography vs Design) ── */
+.viewfinder-mode-pills {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(18, 20, 29, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  padding: 5px;
+  border-radius: 999px;
+  gap: 6px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 1.4rem;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mode-pill .pill-icon {
+  font-size: 1.05rem;
+  transition: transform 0.25s ease;
+}
+
+.mode-pill .pill-count {
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--text-muted, #94a3b8);
+}
+
+.mode-pill.active {
+  background: var(--accent-primary, #6366f1);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+}
+
+.mode-pill.active .pill-icon {
+  transform: scale(1.1);
+}
+
+.mode-pill.active .pill-count {
+  background: rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   THE CAMERA BODY / RANGEFINDER CONSOLE
+═══════════════════════════════════════════════════════════════ */
+.rangefinder-console {
+  --lens-tilt-x: 0deg;
+  --lens-tilt-y: 0deg;
+  --glare-x: 35%;
+  --glare-y: 25%;
+  perspective: 1200px;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  background: #11131a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: 
+    0 25px 60px -15px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.rangefinder-console.console-fullscreen {
+  max-width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ── Top Camera Status Strip ── */
+.camera-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.4rem;
+  background: #0d0f14;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  font-family: 'Space Mono', monospace, ui-monospace, sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  gap: 1rem;
+}
+
+.camera-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leica-red-dot {
+  color: #ef4444;
+  font-size: 1.15rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
+}
+
+.brand-text {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #f1f5f9;
+}
+
+.shutter-mode-tag {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+/* Middle Quick Tools */
+.camera-quick-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.film-sim-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tool-label {
+  font-size: 0.65rem;
+  color: #64748b;
+  padding-left: 4px;
+}
+
+.film-sim-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-family: inherit;
+  font-size: 0.68rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.film-sim-btn:hover {
+  color: #ffffff;
+}
+
+.film-sim-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.tool-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.tool-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tool-btn.active {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #818cf8;
+}
+
+.design-quick-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.design-badge {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+}
+
+/* Frame Counter */
+.camera-counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.counter-icon {
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 0.68rem;
+}
+
+.counter-digits {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OPTICAL VIEWFINDER GLASS FRAME (SINGLE RENDERED ACTIVE IMAGE)
+═══════════════════════════════════════════════════════════════ */
+.viewfinder-optical-stage {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  background: #08090c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+}
+
+.console-fullscreen .viewfinder-optical-stage {
+  flex: 1;
+  height: auto;
+}
+
+/* Shutter Blade Curtain Animation */
+.shutter-blade-overlay {
+  position: absolute;
+  inset: 0;
+  background: #050608;
+  z-index: 25;
+  opacity: 0;
+  pointer-events: none;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.05s linear, opacity 0.05s linear;
+}
+
+.shutter-blade-overlay.blade-fire {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* Corner Framelines */
+.frameline {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-style: solid;
+  pointer-events: none;
+  z-index: 10;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+
+.frameline.top-left {
+  top: 24px;
+  left: 24px;
+  border-width: 2px 0 0 2px;
+}
+
+.frameline.top-right {
+  top: 24px;
+  right: 24px;
+  border-width: 2px 2px 0 0;
+}
+
+.frameline.bottom-left {
+  bottom: 24px;
+  left: 24px;
+  border-width: 0 0 2px 2px;
+}
+
+.frameline.bottom-right {
+  bottom: 24px;
+  right: 24px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Center Split-Prism Focus Reticle */
+.rangefinder-center-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.65;
+}
+
+.reticle-circle {
+  width: 100%;
+  height: 100%;
+  border: 1px dashed rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.reticle-cross {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+}
+
+.reticle-cross::before,
+.reticle-cross::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.reticle-cross::before {
+  top: 5px;
+  left: 0;
+  width: 12px;
+  height: 2px;
+}
+
+.reticle-cross::after {
+  top: 0;
+  left: 5px;
+  width: 2px;
+  height: 12px;
+}
+
+/* 3x3 Rule-Of-Thirds Grid Overlay */
+.rule-of-thirds-grid {
+  position: absolute;
+  inset: 24px;
+  pointer-events: none;
+  z-index: 8;
+  opacity: 0.25;
+}
+
+.rule-of-thirds-grid .grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.rule-of-thirds-grid .grid-line.horizontal {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.rule-of-thirds-grid .grid-line.horizontal.h1 { top: 33.33%; }
+.rule-of-thirds-grid .grid-line.horizontal.h2 { top: 66.66%; }
+
+.rule-of-thirds-grid .grid-line.vertical {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.rule-of-thirds-grid .grid-line.vertical.v1 { left: 33.33%; }
+.rule-of-thirds-grid .grid-line.vertical.v2 { left: 66.66%; }
+
+/* The Active Image Layer with 3D Tilt */
+.active-frame-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  inset: 0;
+  transform: perspective(1000px) rotateX(var(--lens-tilt-x, 0deg)) rotateY(var(--lens-tilt-y, 0deg));
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.active-viewfinder-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7);
+  transition: filter 0.3s ease;
+}
+
+/* Multi-coated Optical Lens Glare & Vignette Overlay */
+.optical-lens-coating {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 12;
+  box-shadow: 
+    inset 0 0 90px rgba(0, 0, 0, 0.75),
+    inset 0 0 160px rgba(8, 10, 16, 0.45),
+    inset 0 0 2px rgba(255, 255, 255, 0.18);
+  background: radial-gradient(
+    ellipse at var(--glare-x, 35%) var(--glare-y, 25%),
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(56, 189, 248, 0.035) 26%,
+    rgba(168, 85, 247, 0.018) 50%,
+    transparent 72%
+  );
+  mix-blend-mode: screen;
+  transition: background 0.08s ease-out;
+}
+
+/* Floating Glass Label */
+.optical-frame-label {
+  position: absolute;
+  bottom: 24px;
+  left: 36px;
+  background: rgba(10, 12, 18, 0.78);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.optical-frame-label .label-category {
+  font-size: 0.68rem;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  color: var(--accent-primary, #818cf8);
+  letter-spacing: 0.08em;
+}
+
+.optical-frame-label .label-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Tactical Viewfinder Arrows */
+.viewfinder-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(15, 18, 25, 0.65);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.viewfinder-nav-arrow:hover {
+  background: rgba(99, 102, 241, 0.85);
+  border-color: #a5b4fc;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.viewfinder-nav-arrow.arrow-prev { left: 20px; }
+.viewfinder-nav-arrow.arrow-next { right: 20px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   BOTTOM RANGEFINDER INSTRUMENT READOUT CLUSTER
+═══════════════════════════════════════════════════════════════ */
+.camera-instrument-cluster {
+  background: #0d0f14;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 1rem 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Space Mono', monospace, ui-monospace, sans-serif;
+  gap: 1.5rem;
+}
+
+/* Exposure Compensation Scale */
+.exposure-meter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meter-label {
+  font-size: 0.65rem;
+  color: #64748b;
+  letter-spacing: 0.08em;
+}
+
+.exposure-scale {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.exposure-scale .center-zero {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.exposure-scale .dot {
+  font-size: 0.5rem;
+  opacity: 0.4;
+}
+
+.meter-needle-pip {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+  transition: left 0.25s ease;
+}
+
+/* Tactical HUD Optical Readouts */
+.optical-readouts {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.readout-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.readout-key {
+  font-size: 0.62rem;
+  color: #64748b;
+  letter-spacing: 0.08em;
+}
+
+.readout-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+/* Design Studio Inspector Readouts */
+.design-inspector-cluster {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+}
+
+.inspector-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inspector-swatches {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.swatch-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch-chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.swatch-chip:hover {
+  transform: scale(1.2);
+}
+
+.swatch-check {
+  color: #ffffff;
+  font-size: 0.75rem;
+  filter: drop-shadow(0 0 2px #000);
+}
+
+.copied-toast {
+  font-size: 0.7rem;
+  color: #10b981;
+}
+
+/* Physical Mechanical Shutter Release Button */
+.shutter-trigger-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mechanical-shutter-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e2e8f0 0%, #64748b 60%, #1e293b 100%);
+  border: 2px solid #0f172a;
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.7),
+    inset 0 2px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.mechanical-shutter-btn:active {
+  transform: scale(0.92);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.8),
+    inset 0 3px 5px rgba(0, 0, 0, 0.9);
+}
+
+.shutter-inner-crown {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.shutter-legend {
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  color: #64748b;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   35MM FILM CONTACT STRIP (MINIMAL THUMBNAILS)
+═══════════════════════════════════════════════════════════════ */
+.film-contact-strip {
+  background: #08090d;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sprocket-holes-bar {
+  height: 6px;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.2) 2px, transparent 2.5px);
+  background-size: 14px 6px;
+  background-repeat: repeat-x;
+  opacity: 0.4;
+}
+
+.sprocket-holes-bar.top { margin-bottom: 6px; }
+.sprocket-holes-bar.bottom { margin-top: 6px; }
+
+.film-strip-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.film-strip-track::-webkit-scrollbar {
+  height: 4px;
+}
+
+.film-strip-track::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.film-frame-thumb {
+  flex-shrink: 0;
+  width: 76px;
+  height: 54px;
+  border-radius: 6px;
+  background: #141721;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  opacity: 0.55;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.film-frame-thumb:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.film-frame-thumb.active-frame {
+  opacity: 1;
+  border-color: var(--accent-primary, #6366f1);
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.frame-num {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 0.55rem;
+  font-family: 'Space Mono', monospace;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 1px 3px;
+  border-radius: 3px;
+  color: #ffffff;
+  z-index: 2;
+  line-height: 1;
+}
+
+.thumb-cursor-bracket {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--accent-primary, #6366f1);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+/* Instagram Footer CTA */
+.photo-footer-cta {
+  text-align: center;
+  margin-top: 2.5rem;
+}
+
+.instagram-direct-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1.8rem;
+  border-radius: 999px;
+  background: rgba(18, 20, 28, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.instagram-direct-btn:hover {
+  background: linear-gradient(135deg, rgba(225, 48, 108, 0.2) 0%, rgba(131, 58, 180, 0.2) 100%);
+  border-color: rgba(225, 48, 108, 0.5);
+  color: #ffffff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(225, 48, 108, 0.25);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVENESS / MOBILE ADAPTATION
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .photography-section {
+    padding: 4rem 1rem 3.5rem;
+  }
+
+  .rangefinder-console {
+    border-radius: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .photo-viewfinder-header .section-desc {
+    padding: 0 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .viewfinder-mode-pills {
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .mode-pill {
+    padding: 0.5rem 1rem;
+    font-size: 0.82rem;
+    gap: 6px;
+  }
+
+  .camera-top-bar {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.72rem;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: space-between;
+  }
+
+  .camera-brand {
+    gap: 6px;
+    font-size: 0.72rem;
+  }
+
+  .film-sim-selector {
+    display: none; /* Collapse LUT switcher on mobile to avoid overcrowding */
+  }
+
+  .camera-quick-tools {
+    gap: 6px;
+  }
+
+  .tool-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+
+  .design-quick-meta {
+    gap: 4px;
+  }
+
+  .design-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .camera-counter {
+    font-size: 0.72rem;
+  }
+
+  .viewfinder-optical-stage {
+    /* Responsive height that scales beautifully on portrait and landscape screens */
+    height: clamp(320px, 54vh, 460px);
+  }
+
+  .frameline.top-left { top: 12px; left: 12px; width: 20px; height: 20px; }
+  .frameline.top-right { top: 12px; right: 12px; width: 20px; height: 20px; }
+  .frameline.bottom-left { bottom: 12px; left: 12px; width: 20px; height: 20px; }
+  .frameline.bottom-right { bottom: 12px; right: 12px; width: 20px; height: 20px; }
+
+  .viewfinder-nav-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+
+  .viewfinder-nav-arrow.arrow-prev { left: 8px; }
+  .viewfinder-nav-arrow.arrow-next { right: 8px; }
+
+  .camera-instrument-cluster {
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding: 0.75rem 0.9rem;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .optical-readouts {
+    gap: 1rem;
+    flex: 1;
+    justify-content: space-around;
+  }
+
+  .readout-item {
+    gap: 1px;
+  }
+
+  .readout-key {
+    font-size: 0.58rem;
+  }
+
+  .readout-val {
+    font-size: 0.8rem;
+  }
+
+  .design-inspector-cluster {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .inspector-column .readout-val {
+    font-size: 0.78rem;
+    word-break: break-word;
+  }
+
+  .inspector-swatches {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .swatch-chip {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mechanical-shutter-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .shutter-inner-crown {
+    width: 12px;
+    height: 12px;
+  }
+
+  .film-contact-strip {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .film-strip-track {
+    gap: 8px;
+    padding: 3px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .film-frame-thumb {
+    width: 68px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .photography-section {
+    padding: 3.5rem 0.5rem 2.5rem;
+  }
+
+  .rangefinder-console {
+    border-radius: 14px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .camera-top-bar {
+    padding: 0.6rem 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .brand-text {
+    display: none; /* Keep the red dot and mode tag visible for sleek Leica look */
+  }
+
+  .shutter-mode-tag {
+    font-size: 0.65rem;
+    padding: 1px 5px;
+  }
+
+  .design-badge:nth-child(2) {
+    display: none; /* Keep primary tool badge, hide lengthy artboard string on small screens */
+  }
+
+  .exposure-meter-group {
+    display: none;
+  }
+
+  .viewfinder-optical-stage {
+    height: clamp(300px, 50vh, 420px);
+  }
+
+  .optical-readouts {
+    gap: 0.6rem;
+  }
+
+  .design-inspector-cluster {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .inspector-column {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .inspector-column .readout-val {
+    font-size: 0.74rem;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .film-frame-thumb {
+    width: 58px;
+    height: 42px;
+  }
+
+  .instagram-direct-btn {
+    padding: 0.65rem 1rem;
+    font-size: 0.8rem;
+    gap: 6px;
+    width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN STUDIO EMPTY STATE & CURATION CANVAS
+   High-Taste Blueprint Canvas when awaiting Sanity 'design' uploads
+═══════════════════════════════════════════════════════════════ */
+.design-empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  z-index: 10;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, rgba(99, 102, 241, 0.08) 0%, rgba(10, 12, 18, 0.95) 75%);
+}
+
+.empty-blueprint-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.empty-state-content {
+  position: relative;
+  z-index: 2;
+  max-width: 620px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-beacon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+}
+
+.beacon-dot-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: pulse-beacon 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-beacon {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.75); }
+}
+
+.beacon-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #fbbf24;
+}
+
+.empty-icon-cluster {
+  margin-bottom: 1rem;
+}
+
+.empty-icon-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
+  border: 1px solid rgba(165, 180, 252, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a5b4fc;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+}
+
+.main-empty-icon {
+  font-size: 1.7rem;
+}
+
+.empty-title {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.empty-desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  max-width: 520px;
+  margin-bottom: 1.4rem;
+}
+
+.design-pillars {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.6rem;
+}
+
+.pillar-chip {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.pillar-chip:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #ffffff;
+}
+
+.empty-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.empty-action-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 1.3rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.empty-action-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  color: #ffffff;
+}
+
+.empty-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 1.3rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.empty-action-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Label Figma Link (when design artboard has a link) */
+.label-figma-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(165, 180, 252, 0.3);
+  color: #a5b4fc;
+  font-size: 0.7rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.label-figma-link:hover {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+/* Empty Film Strip Track */
+.film-strip-empty {
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-strip-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  color: #64748b;
+  letter-spacing: 0.05em;
+}
+
+.empty-strip-hint code {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.text-accent {
+  color: #38bdf8 !important;
+}
+
+.text-amber {
+  color: #fbbf24 !important;
+}
+

@@ -1,0 +1,602 @@
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { ScrollTrigger } from './hooks/useGSAPAnimations';
+import './index.css';
+import './modes/RecruiterMode.css';
+import './modes/ExperimentalMode.css';
+import './modes/PhotographerMode.css';
+import { client } from './sanity';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import PageLoader from './components/PageLoader';
+import DreamStateLoader from './components/DreamStateLoader';
+import EasterEggOverlay from './components/EasterEggOverlay';
+import { StoryProvider } from './contexts/StoryContext';
+import { ConsciousnessProvider, useConsciousness } from './contexts/ConsciousnessContext';
+import { SiteModeProvider, useSiteMode } from './contexts/SiteModeContext';
+// LiquidFilterDef removed — SVG displacement map was causing global hover distortion & GPU drain
+import { useSolarLighting } from './hooks/useSolarLighting';
+import SiteModeSwitcher from './components/SiteModeSwitcher';
+import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
+import DeveloperModeOS from './components/DeveloperModeOS';
+import ErrorBoundary from './components/ErrorBoundary';
+import AgentPortal from './components/AgentPortal';
+import pipeline from './core/WorkerPipeline';
+import { useHybridMotion } from './hooks/useHybridMotion';
+import { initSpecularSheen } from './utils/specularSheen';
+// Initialize core pipelining & smooth scrolling
+pipeline.init();
+
+// Lazy load heavy components
+const NowPlaying = lazy(() => import('./components/NowPlaying'));
+const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
+const StatsBento = lazy(() => import('./components/StatsBento'));
+const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
+const ExperimentalLabSuite = lazy(() => import('./components/experimental/ExperimentalLabSuite'));
+
+// const CreativeLab = lazy(() => import('./components/CreativeLab'));
+
+// Export dictionary of imports for ML Prefetching
+const dynamicImports = {
+  About: () => import('./components/About'),
+  Skills: () => import('./components/Skills'),
+  Experience: () => import('./components/Experience'),
+  NeuralMap: () => import('./components/NeuralMap'),
+  Timeline: () => import('./components/Timeline'),
+  DigitalScars: () => import('./components/DigitalScars'),
+  Photography: () => import('./components/Photography'),
+  MyWorks: () => import('./components/MyWorks'),
+  Achievements: () => import('./components/Achievements'),
+  Testimonials: () => import('./components/Testimonials'),
+  TrustedBy: () => import('./components/TrustedBy'),
+  Contact: () => import('./components/Contact'),
+  Footer: () => import('./components/Footer'),
+  CallToAction: () => import('./components/CallToAction'),
+  ScrollProgress: () => import('./components/ScrollProgress'),
+  ZipGame: () => import('./components/ZipGame'),
+  TicTacToe: () => import('./components/TicTacToe'),
+  SnakeGame: () => import('./components/SnakeGame'),
+  GamesHub: () => import('./components/GamesHub'),
+  StackVisualizer: () => import('./components/StackVisualizer'),
+  StatsBento: () => import('./components/StatsBento'),
+
+  KineticMarquee: () => import('./components/motion/KineticMarquee'),
+  CustomCursor: () => import('./components/motion/CustomCursor'),
+  ZAxisTunnel: () => import('./components/motion/ZAxisTunnel'),
+  ScrollCanvasSequence: () => import('./components/ScrollCanvasSequence')
+};
+
+// Wrap dictionary into React.lazy
+const About = lazy(dynamicImports.About);
+const Skills = lazy(dynamicImports.Skills);
+const Experience = lazy(dynamicImports.Experience);
+const NeuralMap = lazy(dynamicImports.NeuralMap);
+const Timeline = lazy(dynamicImports.Timeline);
+const DigitalScars = lazy(dynamicImports.DigitalScars);
+const Photography = lazy(dynamicImports.Photography);
+const MyWorks = lazy(dynamicImports.MyWorks);
+const Achievements = lazy(dynamicImports.Achievements);
+const TrustedBy = lazy(dynamicImports.TrustedBy);
+const Testimonials = lazy(dynamicImports.Testimonials);
+const Contact = lazy(dynamicImports.Contact);
+const Footer = lazy(dynamicImports.Footer);
+const CallToAction = lazy(dynamicImports.CallToAction);
+const ZipGame = lazy(dynamicImports.ZipGame);
+const TicTacToe = lazy(dynamicImports.TicTacToe);
+const SnakeGame = lazy(dynamicImports.SnakeGame);
+const GamesHub = lazy(dynamicImports.GamesHub);
+const StackVisualizer = lazy(dynamicImports.StackVisualizer);
+const KineticMarquee = lazy(dynamicImports.KineticMarquee);
+// const ScrollCanvasSequence = lazy(dynamicImports.ScrollCanvasSequence);
+
+// ML Prefetch Listener (Predictive Pre-Computation)
+if (typeof window !== 'undefined') {
+  window.addEventListener('ml-prefetch', (e) => {
+    const target = e.detail?.target;
+    if (target && dynamicImports[target]) {
+      // Proactively call the import() promise to load the bundle 
+      // into browser cache before React Suspense hits it.
+      dynamicImports[target]();
+    }
+  });
+}
+
+function LazySection({ name, className = "section-container", visualOptions = {}, children }) {
+  const ref = React.useRef();
+  const { setActiveSection } = useConsciousness();
+  const { isSectionVisible } = useSiteMode();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setActiveSection(name);
+        }
+      },
+      { rootMargin: '-10% 0px -50% 0px' }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [name, setActiveSection]);
+
+  // Mode-aware: hide sections not relevant to current mode
+  if (!isSectionVisible(name) || visualOptions?.isHidden) return null;
+
+  const dynamicStyle = {};
+  if (visualOptions?.paddingTop && visualOptions.paddingTop !== 'auto') dynamicStyle.paddingTop = visualOptions.paddingTop;
+  if (visualOptions?.paddingBottom && visualOptions.paddingBottom !== 'auto') dynamicStyle.paddingBottom = visualOptions.paddingBottom;
+  if (visualOptions?.backgroundColor) dynamicStyle.backgroundColor = visualOptions.backgroundColor;
+  if (visualOptions?.contentAlignment) dynamicStyle.textAlign = visualOptions.contentAlignment;
+
+  return (
+    <div ref={ref} className={className} data-xray="[SYSTEM: RENDERED]" style={dynamicStyle}>
+      <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '200px', height: 'auto' }} />}>
+        {children}
+      </Suspense>
+    </div>
+  );
+}
+
+function AppContent() {
+  const { mode } = useSiteMode();
+  useSolarLighting();
+  const [activeGame, setActiveGame] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [pageData, setPageData] = useState(null);
+
+  useEffect(() => {
+    // Fetch Page Builder content
+    const fetchPage = async () => {
+      try {
+        const query = `*[_type == "page" && slug.current == "home"][0]{
+          sections[] {
+            ...,
+            _type == "reference" => @->,
+            _type != "reference" => @
+          }
+        }`;
+        const data = await client.fetch(query);
+        if (data && data.sections) {
+          setPageData(data);
+        }
+      } catch (err) {
+        console.error("Error fetching page builder data", err);
+      }
+    };
+    fetchPage();
+  }, []);
+  const [dreamState, setDreamState] = useState(() => {
+    try {
+      const memory = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
+      const last = memory.lastInteraction || Date.now();
+      return (Date.now() - last > 3600000); // 1 hour offline
+    } catch { return false; }
+  });
+  const [activeEgg, setActiveEgg] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [loadWidgets, setLoadWidgets] = useState(false);
+  const [devConsoleOpen, setDevConsoleOpen] = useState(false);
+
+  // Initialize unified physics engine
+  useHybridMotion();
+
+  // Late Night Loneliness Mode
+  const hour = new Date().getHours();
+  const isLateNight = hour < 5 || hour >= 23;
+
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
+    // Initialize Apple-style specular card sheen engine
+    initSpecularSheen();
+
+    // applyGlobalEluteEffect removed — was causing layout thrash and SVG filter GPU drain
+    const eluteEffectKiller = null;
+
+    // Spotlight Engine: Removed for performance. 
+    // Global document.body.style.setProperty triggers massive layout thrashing.
+
+    let roTimeout;
+    const ro = new ResizeObserver(() => {
+      clearTimeout(roTimeout);
+      roTimeout = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 200);
+    });
+    ro.observe(document.body);
+
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+
+    // launch-ttt event (from logo 3-click easter egg)
+    const handleLaunch = () => setActiveGame('gameshub');
+    window.addEventListener('launch-ttt', handleLaunch);
+
+    // V20 Quantum Prefetching Listener
+    const handlePrefetch = (e) => {
+      const { target } = e.detail || {};
+      if (!target) return;
+      
+      const injectPrefetch = (componentName) => {
+        if (!document.querySelector(`link[data-prefetch="${componentName}"]`)) {
+          const link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.as = 'script';
+          link.href = `/${componentName.toLowerCase()}.chunk.js`; // Simulated chunk name for V20 
+          link.setAttribute('data-prefetch', componentName);
+          document.head.appendChild(link);
+        }
+      };
+
+      // Prefetch specific top-level components
+      injectPrefetch(target);
+      
+      if (target === 'Photography' || target === 'GamesHub') {
+        import('./components/GamesHub');
+        import('./components/SnakeGame');
+      } else if (target === 'Contact' || target === 'Hero') {
+        import('./components/GravityWell');
+      }
+    };
+    window.addEventListener('ml-prefetch', handlePrefetch);
+
+    // ML Persona-driven Behavioral Adaptation
+    const handlePersona = (e) => {
+      const { persona, confidence } = e.detail || {};
+      if (persona === 'Developer') {
+        import('./components/StackVisualizer');
+        import('./components/DeveloperModeOS');
+        // Snappy, fast transitions for developers
+        document.documentElement.style.setProperty('--transition-bounce', '0.2s cubic-bezier(0.2, 0, 0, 1)');
+      } else if (persona === 'Creator') {
+        import('./components/Photography');
+        // Cinematic, slow transitions for creators
+        document.documentElement.style.setProperty('--transition-bounce', '0.6s cubic-bezier(0.4, 0, 0.2, 1)');
+      }
+      document.documentElement.setAttribute('data-persona', persona);
+      console.log(`[ML_ENGINE] Persona identified: ${persona} (Confidence: ${confidence})`);
+    };
+    window.addEventListener('persona-shift', handlePersona);
+
+    // AI "Ghost in the Machine" Command Execution
+    const handleAiCommand = (e) => {
+      const { type, value } = e.detail || {};
+      console.log(`[Ghost In The Machine] Executing Command: ${type}:${value}`);
+      
+      if (type === 'MODE') {
+        const modes = ['default', 'recruiter', 'expert', 'photographer', 'experimental'];
+        if (modes.includes(value)) {
+          window.dispatchEvent(new CustomEvent('switch-mode-direct', { detail: value }));
+        }
+      } else if (type === 'SEED') {
+        window.dispatchEvent(new CustomEvent('force-seed-growth'));
+      } else if (type === 'THEME') {
+        if (value === 'dark') document.body.classList.add('dark-theme-override');
+        if (value === 'light') document.body.classList.remove('dark-theme-override');
+      } else if (type === 'SCROLL' || type === 'FOCUS') {
+        const targetKey = (value || '').toLowerCase();
+        const selectorMap = {
+          hero: '#hero, .hero-section',
+          about: '#about, .about-section',
+          skills: '#skills, .skills-section',
+          works: '#works, .projects-section, .my-works-section',
+          projects: '#projects, .projects-section, .my-works-section',
+          timeline: '#timeline, .timeline-section',
+          achievements: '#achievements, .stats-bento, .achievements-section',
+          photography: '#photography, .photography-section',
+          contact: '#contact, .contact-section'
+        };
+        const selector = selectorMap[targetKey] || `#${targetKey}`;
+        const targetEl = document.querySelector(selector);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else if (type === 'EGG') {
+        triggerEgg(value, 2000);
+      }
+    };
+    window.addEventListener('ai-command', handleAiCommand);
+
+    // Konami code → barrel roll
+    const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let ki = 0;
+    const keydownHandler = (e) => {
+      if (e.key === konami[ki]) {
+        ki++;
+        if (ki === konami.length) {
+          triggerEgg('barrelroll', 1800);
+          ki = 0;
+        }
+      } else { ki = 0; }
+    };
+    window.addEventListener('keydown', keydownHandler);
+
+    // Secret 'adhy' trigger for Developer Mode OS
+    let adhyKeyIndex = 0;
+    const adhySequence = ['a', 'd', 'h', 'y'];
+    const adhyHandler = (e) => {
+      if (e.key.toLowerCase() === adhySequence[adhyKeyIndex]) {
+        adhyKeyIndex++;
+        if (adhyKeyIndex === adhySequence.length) {
+          setDevConsoleOpen(true);
+          adhyKeyIndex = 0;
+        }
+      } else {
+        adhyKeyIndex = 0;
+      }
+    };
+    window.addEventListener('keydown', adhyHandler);
+
+
+    // Generic egg trigger — detail is { name, duration }
+    const eggHandler = (e) => {
+      const name = e.detail?.name ?? e.detail;
+      const duration = e.detail?.duration ?? (name === 'matrix' ? 8000 : name === 'party' ? 6000 : name === 'barrelroll' ? 1800 : name === 'thanos' ? 15000 : 4000);
+      triggerEgg(name, duration);
+    };
+    window.addEventListener('trigger-egg', eggHandler);
+
+    // Dev Console Listener
+    const devConsoleHandler = () => {
+      setDevConsoleOpen(prev => !prev);
+    };
+    window.addEventListener('trigger-dev-console', devConsoleHandler);
+
+
+    // 2. Hacker Decode Reveal (Removed: setInterval causing layout thrashing)
+
+    // 3. Console Easter Egg
+    console.log(`
+    █████╗ ██████╗ ██╗  ██╗██╗
+   ██╔══██╗██╔══██╗██║  ██║╚██╗
+   ███████║██║  ██║███████║ ╚██╗
+   ██╔══██║██║  ██║██╔══██║ ██╔╝
+   ██║  ██║██████╔╝██║  ██║██╔╝
+   ╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝
+   "Building digital architecture." 
+   
+   Secret Code for Mini-Adhy: sudo namakk-sett-aakam
+    `);
+
+    // Load widgets shortly after initial render
+    const widgetTimer = setTimeout(() => {
+      setLoadWidgets(true);
+    }, 500);
+
+    return () => {
+      ro.disconnect();
+      clearTimeout(widgetTimer);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('launch-ttt', handleLaunch);
+      window.removeEventListener('keydown', keydownHandler);
+      window.removeEventListener('keydown', adhyHandler);
+      window.removeEventListener('trigger-egg', eggHandler);
+      window.removeEventListener('trigger-dev-console', devConsoleHandler);
+      eluteEffectKiller && eluteEffectKiller();
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      window.scrollTo(0, 0);
+      window.dispatchEvent(new CustomEvent('system-boot'));
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+      });
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        ScrollTrigger.refresh();
+      }, 100);
+    }
+  }, [loading]);
+
+  const triggerEgg = (name, duration = 5000) => {
+    setActiveEgg(name);
+    setTimeout(() => setActiveEgg(null), duration);
+  };
+
+  return (
+    <>
+      {dreamState && <DreamStateLoader onAwake={() => setDreamState(false)} />}
+
+      <SiteModeSwitcher />
+      {loading && <PageLoader onDone={() => setLoading(false)} />}
+
+      <Navbar />
+
+      <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''}`}>
+        <Hero />
+
+        {/* Experimental Lab Suite — Exclusively active in Experimental Mode */}
+        {mode === 'experimental' && (
+          <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '300px' }} />}>
+            <ExperimentalLabSuite />
+          </Suspense>
+        )}
+
+        {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
+        {pageData && pageData.sections && pageData.sections.length > 0 ? (
+          pageData.sections.map((section, index) => {
+            const COMPONENT_MAP = {
+              hero: Hero,
+              about: About,
+              skillCategory: Skills,
+              statsBento: StatsBento,
+              neuralMap: NeuralMap,
+              experience: Experience,
+              projectListSection: MyWorks,
+              timelineSection: Timeline,
+              photographySection: Photography,
+              achievementsSection: Achievements,
+              trustedBySection: TrustedBy,
+              testimonialsSection: Testimonials,
+              digitalScarsSection: DigitalScars,
+              callToActionSection: CallToAction,
+              contact: Contact,
+              contactSection: Contact,
+              stackVisualizerSection: StackVisualizer,
+              kineticMarqueeSection: KineticMarquee,
+              footerSection: Footer
+            };
+            const Component = COMPONENT_MAP[section._type];
+            if (!Component) return null;
+            return (
+              <LazySection 
+                key={section._id || index} 
+                name={section._type} 
+                className={section._type === 'kineticMarqueeSection' || section._type === 'footerSection' ? 'lazy-section-auto' : 'section-container'}
+                visualOptions={section.visualOptions}
+              >
+                <Component data={section} />
+              </LazySection>
+            );
+          })
+        ) : (
+          <>
+            <LazySection name="About"><About /></LazySection>
+            <LazySection name="Skills"><Skills /></LazySection>
+            <LazySection name="StatsBento"><StatsBento /></LazySection>
+            <LazySection name="Experience"><Experience /></LazySection>
+            <LazySection name="MyWorks"><MyWorks /></LazySection>
+            <LazySection name="Timeline"><Timeline /></LazySection>
+            <LazySection name="Photography"><Photography /></LazySection>
+            <LazySection name="Achievements"><Achievements /></LazySection>
+            <LazySection name="TrustedBy"><TrustedBy /></LazySection>
+            <LazySection name="Testimonials"><Testimonials /></LazySection>
+            <LazySection name="DigitalScars"><DigitalScars /></LazySection>
+            <LazySection name="CallToAction"><CallToAction /></LazySection>
+            <LazySection name="Contact"><Contact /></LazySection>
+            <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
+            <LazySection name="KineticMarquee" className="lazy-section-auto"><KineticMarquee /></LazySection>
+            <LazySection name="Footer" className="lazy-section-auto"><Footer /></LazySection>
+          </>
+        )}
+
+      </div>
+
+      {mode === 'photographer' && (
+        <Suspense fallback={null}>
+          <CameraViewfinder />
+        </Suspense>
+      )}
+
+      {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
+      <EasterEggOverlay egg={activeEgg} />
+
+      {/* Spotify & Chatbot — Deferred rendering to guarantee Lighthouse 100 on initial load */}
+      {loadWidgets && (
+        <Suspense fallback={null}>
+          <NowPlaying />
+          <MiniAdhy />
+        </Suspense>
+      )}
+
+      {devConsoleOpen && (
+        <Suspense fallback={null}>
+          <DeveloperModeOS onClose={() => setDevConsoleOpen(false)} onLaunchGame={(game) => {
+            if (game === 'tictactoe' && isMobile) return;
+            if (game === 'zip' && !isMobile) return;
+            setActiveGame(game);
+          }} />
+        </Suspense>
+      )}
+
+
+      {/* Easter egg games — outside Suspense */}
+      {activeGame === 'gameshub' && <GamesHub onClose={() => setActiveGame(null)} />}
+      {activeGame === 'tictactoe' && !isMobile && <TicTacToe onClose={() => setActiveGame(null)} />}
+      {activeGame === 'zip' && isMobile && <ZipGame onClose={() => setActiveGame(null)} />}
+      {activeGame === 'snake' && <SnakeGame onClose={() => setActiveGame(null)} />}
+
+    </>
+  );
+}
+
+function App() {
+  const checkIsAgentP = () => {
+    if (typeof window === 'undefined') return false;
+    const p = (window.location.pathname || '').toLowerCase();
+    const h = (window.location.hash || '').toLowerCase();
+    const s = (window.location.search || '').toLowerCase();
+    return (
+      p === '/agentp' ||
+      p === '/agentp/' ||
+      p.startsWith('/agentp') ||
+      h === '#agentp' ||
+      h === '#/agentp' ||
+      s.includes('agentp')
+    );
+  };
+
+  const [isAgentP, setIsAgentP] = useState(checkIsAgentP);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setIsAgentP(checkIsAgentP());
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    window.addEventListener('adhy:open_agentp', handleLocationChange);
+
+    window.openAgentPortal = () => {
+      try {
+        window.history.pushState({}, '', '/agentp');
+      } catch {
+        window.location.hash = '#agentp';
+      }
+      setIsAgentP(true);
+    };
+
+    window.closeAgentPortal = () => {
+      try {
+        window.history.pushState({}, '', '/');
+      } catch {
+        window.location.hash = '';
+      }
+      setIsAgentP(false);
+    };
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+      window.removeEventListener('adhy:open_agentp', handleLocationChange);
+    };
+  }, []);
+
+  if (isAgentP) {
+    return (
+      <ErrorBoundary>
+        <div style={{ minHeight: '100vh', width: '100vw', background: '#09090b', color: '#fff', position: 'relative' }}>
+          <AgentPortal onExit={() => {
+            try {
+              window.history.pushState({}, '', '/');
+            } catch {
+              window.location.hash = '';
+            }
+            setIsAgentP(false);
+          }} />
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
+  return (
+    <ErrorBoundary>
+      <SystemOrchestratorProvider>
+        <SiteModeProvider>
+          <ConsciousnessProvider>
+            <StoryProvider>
+              <AppContent />
+            </StoryProvider>
+          </ConsciousnessProvider>
+        </SiteModeProvider>
+      </SystemOrchestratorProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;

@@ -1,0 +1,471 @@
+/* ═══════════════════════════════
+   CONTACT V200 — BRUTAL BENTO
+═══════════════════════════════ */
+.contact {
+  padding: var(--section-padding);
+  background: var(--bg-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.contact-header { margin-bottom: 3.5rem; }
+
+/* ── V200: Local time strip ── */
+.contact-time-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.08em;
+}
+
+.contact-time-strip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3498db;
+  flex-shrink: 0;
+}
+
+.contact-time-strip-label {
+  opacity: 0.55;
+}
+
+.contact-time-strip-value {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Response time badge ── */
+.contact-response-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: #1a7a3a;
+  background: rgba(46, 204, 113, 0.08);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  border-radius: 8px;
+  padding: 7px 14px;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.08em;
+}
+
+.contact-response-badge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2ecc71;
+  display: inline-block;
+  animation: avail-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+  flex-shrink: 0;
+}
+
+@keyframes avail-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(46,204,113,0); }
+  100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+}
+
+
+/* ── Grid Layout ── */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ── Brutalist Info Panel ── */
+.contact-info-card {
+  padding: 2rem;
+  height: 100%;
+  background: var(--bg-card) !important;
+  border: var(--border-brutal) !important;
+  box-shadow: var(--shadow-brutal) !important;
+  border-radius: 0 !important;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.contact-info-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-brutal-deep) !important;
+}
+
+.contact-info-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #000;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+
+.contact-info-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.contact-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.contact-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 0;
+  background-color: var(--accent-brutal-blue);
+  border: var(--border-brutal);
+  box-shadow: 2px 2px 0px #000;
+  color: #000;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.contact-info-label {
+  display: block;
+  font-size: 0.72rem;
+  color: #000;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 3px;
+  font-weight: 700;
+}
+
+.contact-info-value {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+.contact-info-value.link {
+  text-decoration: none;
+  color: #000;
+  border-bottom: 2px solid #000;
+  transition: all 0.2s ease;
+}
+
+.contact-info-value.link:hover {
+  background: var(--accent-brutal-yellow);
+}
+
+/* ── Click-to-copy Email Button ── */
+.copy-email-btn {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.copy-email-text {
+  display: block;
+  font-size: 0.88rem;
+  color: #000;
+  border-bottom: 2px solid #000;
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.copy-email-btn:hover .copy-email-text {
+  background: var(--accent-brutal-yellow);
+}
+
+.copy-email-btn--copied .copy-email-text {
+  background: var(--accent-brutal-green);
+  color: #000;
+}
+
+.copy-email-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.copy-email-btn:hover .copy-email-hint,
+.copy-email-btn--copied .copy-email-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.copy-email-btn--copied .copy-email-hint {
+  color: var(--accent-brutal-green);
+}
+
+/* ── Brutalist Form ── */
+.contact-form {
+  padding: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  background: var(--bg-card) !important;
+  border: var(--border-heavy) !important;
+  box-shadow: var(--shadow-brutal-deep) !important;
+  border-radius: 0 !important;
+  position: relative;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #000;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Brutalist input fields */
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #fff;
+  border: var(--border-brutal);
+  border-radius: 0;
+  color: #000;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.1) inset;
+}
+
+.form-input::placeholder {
+  color: #999;
+  font-weight: 500;
+}
+
+.form-input:focus {
+  border-color: #000;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1) inset, 0 0 0 2px var(--accent-brutal-yellow);
+  background: #ffffe0;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Brutalist Button */
+.form-submit {
+  width: 100%;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 16px;
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 0;
+  background: var(--accent-brutal-pink);
+  color: #000;
+  border: var(--border-heavy);
+  box-shadow: var(--shadow-brutal);
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.form-submit:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-brutal-deep);
+  background: var(--accent-brutal-yellow);
+}
+
+.form-submit:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 #000;
+}
+
+.submitting {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 #000;
+}
+
+/* ── Spinner ── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(0,0,0,0.15);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Availability dot ── */
+.avail-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #2ecc71;
+  display: inline-block;
+  animation: avail-pulse 2.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .contact {
+    padding: 4rem 1rem 3.5rem;
+    overflow-x: clip;
+  }
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    width: 100%;
+  }
+  .contact-info-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact {
+    padding: 3.5rem 1rem 3rem;
+    overflow-x: clip;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .contact-header {
+    margin-bottom: 2rem;
+  }
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .contact-info,
+  .contact-form-wrap {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .contact-info-card {
+    padding: 1.4rem 1.2rem;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0px #000 !important;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+  .contact-form {
+    padding: 1.4rem 1.2rem;
+    box-shadow: 4px 4px 0px #000 !important;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .contact-info-item {
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 100%;
+  }
+  .contact-info-value,
+  .contact-info-value.link,
+  .copy-email-text {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    font-size: 0.84rem;
+  }
+  .contact-time-strip {
+    font-size: 0.65rem;
+    padding: 6px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .contact-response-badge {
+    font-size: 0.65rem;
+    padding: 6px 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact {
+    padding: 3rem 0.75rem 2rem;
+  }
+  .contact-info-card,
+  .contact-form {
+    padding: 1.2rem 0.9rem;
+    box-shadow: 3px 3px 0px #000 !important;
+  }
+  .form-input {
+    padding: 12px 12px;
+    font-size: 0.82rem;
+  }
+  .form-submit {
+    padding: 14px;
+    font-size: 0.88rem;
+  }
+}

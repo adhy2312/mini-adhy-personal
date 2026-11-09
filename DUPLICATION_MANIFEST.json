@@ -1,0 +1,69 @@
+{
+  "projectName": "mini-adhy-personal",
+  "projectRole": "Sovereign Personal AI Companion & Executive Intelligence",
+  "version": "1.0.0-personal",
+  "provenance": {
+    "sourceRepository": "https://github.com/adhy2312/portfolio",
+    "sourceCommitHash": "7e174be12f8fd688fd23315087a327c5ed054f41",
+    "duplicationDate": "2026-11-09T16:51:30+05:30",
+    "strategy": "FULL_INDEPENDENT_DUPLICATION",
+    "owner": "Adhithya Mohan S (Adhy)"
+  },
+  "networkAndIsolation": {
+    "defaultPort": 3001,
+    "storageNamespace": "mini_adhy_personal_",
+    "cookieName": "mini_adhy_personal_session",
+    "environmentConfig": ".env.example",
+    "gitRepository": "Independent local git repository with pristine initial commit"
+  },
+  "modulesCopied": [
+    "src/core/ai (AdhyModel foundation)",
+    "src/core/identity (IdentityCompiler, PersonalIdentityConfig)",
+    "src/core/cognition (CognitiveContextCompiler)",
+    "src/core/learning (CognitiveLearningEngine)",
+    "src/core/metacognition (MetacognitionEngine, ProductionSafetyGuard, FailureAnalyzer, ImprovementProposalEngine)",
+    "src/core/memory (MemoryService, MemoryStore, IndexedDbStorageEngine, Episodic & Semantic)",
+    "src/core/emotion (EmotionalContextInterpreter)",
+    "src/core/understanding (PersonalUnderstandingEngine, RelationshipContinuityEngine)",
+    "src/core/executive (AutonomousExecutiveSystem, ExecutionEngine, ExecutiveTypes)",
+    "src/core/agents (PermissionRegistry, UltronOverlord, AgentOrchestrator, AgentRegistry, SelfExtensionArchitect, Specialists)",
+    "src/core/adapters (HermesAgentAdapter)",
+    "src/core/distribution (CognitiveSyncEngine, HybridExecutionManager, AgentMessageBus, PortableIdentityManager)",
+    "src/core/providers (ProviderRegistry, Gemini, Groq, OmniRoute, Local, HuggingFace, OpenRouter)",
+    "src/core/live (LiveVoiceAndVisualSession, SpeechToSpeechService, AudioStreamPipeline)",
+    "src/core/vision (VisualStreamPipeline)",
+    "src/core/devices (NeuroContextAdapter, Physiological DSP)",
+    "src/core/defense (SecurityGuardrails, PromptInjectionShield)",
+    "src/core/diagnostics (Telemetry, SystemHealth)",
+    "src/core/runtime (RequestLifecycle)",
+    "src/core/personal (PersonalExecutiveAgent, IntegrationRegistry, Connectors: Gmail, GitHub, Calendar, Drive, Browser, Desktop, LocalExecutionAgent, HardwareGateways: Physical, MQTT, Serial, ESP32, RaspberryPi, ProactiveScheduler, Dashboard, SecurityAudit)",
+    "src/components (Complete React frontend UI, Chat, Live Voice, Terminal, Visualizers)",
+    "api (Perimeter auth, secure serverless proxies, agent ecosystem endpoint)",
+    "studio (Sanity Studio CMS schemas and build)",
+    "AI_AGENT_MEMORY & ai history (Historical cognitive memory logs)",
+    "MINI_ADHY_AI_ARCHITECTURE_MASTERCLASS.txt & documentation files"
+  ],
+  "excludedArtefacts": [
+    "node_modules/ (Reinstalled independently via npm install)",
+    "studio/node_modules/ (Reinstalled independently via studio npm install)",
+    "build/ (Rebuilt independently via npm run build)",
+    "dist/ (Rebuilt independently)",
+    ".git/ from source repository",
+    ".next/",
+    ".vercel/",
+    ".sanity/",
+    "src.zip",
+    "Private credentials, production tokens, and real API keys from .env"
+  ],
+  "testVerification": {
+    "totalTestSuites": 18,
+    "totalTestsPassed": 352,
+    "totalTestsFailed": 0,
+    "parityWithSource": "100% parity verified on baseline tests + 19 new personal architecture tests passing"
+  },
+  "buildVerification": {
+    "reactAppCompiled": true,
+    "sanityStudioCompiled": true,
+    "buildExitCode": 0
+  }
+}

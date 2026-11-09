@@ -1,0 +1,69 @@
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
+import ns from '../core/NervousSystem';
+
+gsap.registerPlugin(ScrollTrigger);
+
+/**
+ * useHybridMotion.js — The Unified Physics & Animation Loop Engine
+ * 
+ * Synchronizes Lenis (smooth scrolling), Custom Physics (RAF), and GSAP
+ * onto a single, perfectly coordinated gsap.ticker loop.
+ * This completely eliminates layout thrashing and stutter.
+ */
+export function useHybridMotion() {
+  const lenisRef = useRef(null);
+  
+  // Expose scroll velocity and current scroll for our custom physics components
+  const scrollData = useRef({ current: 0, target: 0, velocity: 0 });
+
+  useEffect(() => {
+    // 1. Initialize High-Performance Lenis
+    const lenis = new Lenis({
+      lerp: 0.12,             // Increased from 0.08 — settles faster, fewer physics frames fired
+      wheelMultiplier: 1.0,   // Standard speed to avoid trackpad hypersensitivity
+      smoothWheel: true,      // Smooths out chunky mouse wheels
+      syncTouch: false,       // MUST BE FALSE for native mobile touch scrolling
+      smoothTouch: false,     // MUST BE FALSE for native mobile touch physics
+      normalizeWheel: false,  // MUST BE FALSE so trackpad 2-finger gestures work properly
+    });
+    lenisRef.current = lenis;
+
+    // Force initial scroll position to the very top (never restore stale scroll position)
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    if (typeof ScrollTrigger.clearScrollMemory === 'function') {
+      ScrollTrigger.clearScrollMemory('manual');
+    }
+    lenis.scrollTo(0, { immediate: true });
+    window.scrollTo(0, 0);
+
+    // 2. Sync GSAP ScrollTrigger purely to Lenis
+    lenis.on('scroll', ScrollTrigger.update);
+
+    // 3. THE UNIFIED LOOP (The "Brain" of the hybrid system)
+    const updateEngine = (time, deltaTime) => {
+      // Tick Lenis forward
+      lenis.raf(time);
+      
+      // Cache physics data so child components (like VelocityText) 
+      // can read it without interrogating the DOM
+      scrollData.current.velocity = lenis.velocity;
+      scrollData.current.current = lenis.scroll;
+    };
+
+    // Add our unified engine to the central NervousSystem brain.
+    // Setting priority to CRITICAL ensures scroll physics never drop even if system is fatigued.
+    ns.register('hybridMotion', updateEngine, { priority: 'CRITICAL' });
+
+    return () => {
+      ns.unregister('hybridMotion');
+      lenis.destroy();
+    };
+  }, []);
+
+  return { lenisRef, scrollData };
+}

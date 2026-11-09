@@ -1,0 +1,790 @@
+/* ═══════════════════════════════════════════
+   TIMELINE V200 — TEMPORAL MEMORY CORRIDOR
+   Horizontal scroll, glowing active line,
+   alternating card placement, drag-to-scroll
+═══════════════════════════════════════════ */
+
+.timeline-section {
+  padding: var(--section-padding);
+  position: relative;
+  background-color: var(--bg-primary);
+  overflow: hidden;
+}
+
+/* ── Subtle scanline overlay ── */
+.timeline-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.012) 3px,
+    rgba(0,0,0,0.012) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Header ── */
+.timeline-header {
+  text-align: center;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-section .section-label {
+  margin-bottom: 0;
+}
+
+.timeline-section .section-title {
+  color: var(--text-primary) !important;
+}
+
+.timeline-section .section-desc {
+  color: var(--text-secondary) !important;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  opacity: 0.75;
+  letter-spacing: 0.03em;
+}
+
+/* ── Scroll Hint ── */
+.timeline-scroll-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.6;
+  margin-top: 4px;
+  position: relative;
+  z-index: 2;
+  animation: hint-pulse 3s ease-in-out infinite;
+}
+
+.hint-arrow {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.hint-arrow span {
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  animation: arrow-flow 1.2s ease-in-out infinite;
+}
+
+.hint-arrow span:nth-child(2) { animation-delay: 0.2s; opacity: 0.7; }
+.hint-arrow span:nth-child(3) { animation-delay: 0.4s; opacity: 0.4; }
+
+@keyframes arrow-flow {
+  0%, 100% { opacity: 1; transform: rotate(-45deg) translateX(0); }
+  50% { opacity: 0.3; transform: rotate(-45deg) translateX(4px); }
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Scroll Track ── */
+.timeline-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 80px 0 100px 0;
+  cursor: grab;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-scroll-wrapper:active {
+  cursor: grabbing;
+}
+
+.timeline-scroll-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Progress Bar ── */
+.timeline-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-brutal-yellow), var(--accent-brutal-pink));
+  width: 0%;
+  transition: width 0.05s linear;
+  z-index: 10;
+  border-radius: 2px;
+}
+
+/* ── Track Container ── */
+.timeline-track-container {
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+  padding: 0 12vw;
+  height: 420px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Central Line ── */
+.timeline-line-bg {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.12);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.timeline-line-active {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-brutal-yellow) 0%,
+    var(--accent-brutal-pink) 40%,
+    var(--accent-brutal-blue) 80%,
+    var(--accent-brutal-green) 100%
+  );
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  z-index: 1;
+  box-shadow: 0 0 8px rgba(244, 208, 63, 0.4), 0 0 24px rgba(244, 208, 63, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+/* ── Nodes Container ── */
+.timeline-nodes {
+  position: relative;
+  display: flex;
+  gap: 140px;
+  z-index: 2;
+  align-items: center;
+}
+
+.timeline-node-wrapper {
+  position: relative;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Timeline Point ── */
+.timeline-point {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 0 0 0 0 rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.timeline-point-inner {
+  width: 8px;
+  height: 8px;
+  background: #000;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.heartbeat-pulse {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-node-wrapper:hover .heartbeat-pulse {
+  opacity: 1;
+  animation: heartbeat 1.4s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(0,0,0,0.4); }
+  14%  { transform: scale(1.2); }
+  28%  { transform: scale(1);   }
+  42%  { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0,0,0,0); }
+  70%  { transform: scale(1);   box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+}
+
+.timeline-node-wrapper:hover .timeline-point {
+  background: var(--accent-brutal-yellow);
+  border-color: #000;
+  box-shadow: 0 0 0 4px rgba(244, 208, 63, 0.25), 4px 4px 0 #000;
+}
+
+.timeline-node-wrapper:hover .timeline-point-inner {
+  opacity: 1;
+}
+
+/* ── Node Position ── */
+.node-top {
+  justify-content: flex-end;
+  padding-bottom: 65px;
+}
+.node-top .timeline-point {
+  bottom: -10px;
+}
+
+.node-bottom {
+  justify-content: flex-start;
+  padding-top: 65px;
+}
+.node-bottom .timeline-point {
+  top: -10px;
+}
+
+/* ── Connector Lines ── */
+.node-top .timeline-content::after {
+  content: '';
+  position: absolute;
+  bottom: -65px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 65px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%);
+}
+
+.node-bottom .timeline-content::after {
+  content: '';
+  position: absolute;
+  top: -65px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 65px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%);
+}
+
+/* ── Card Content ── */
+.timeline-content {
+  padding: 22px 24px 18px;
+  text-align: left;
+  position: relative;
+  cursor: default;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 14px;
+  box-shadow: 5px 5px 0px #000;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.3s ease;
+  overflow: hidden;
+}
+
+.timeline-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-brutal-yellow), var(--accent-brutal-pink));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 2px 2px 0 0;
+}
+
+.timeline-node-wrapper:hover .timeline-content {
+  transform: translate(-4px, -4px);
+  box-shadow: 9px 9px 0px #000;
+}
+
+.timeline-node-wrapper:hover .timeline-content::before {
+  opacity: 1;
+}
+
+/* ── Year Badge ── */
+.timeline-year {
+  display: inline-block;
+  font-family: 'Fira Code', monospace;
+  color: #000;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding: 3px 12px;
+  background: var(--accent-brutal-yellow);
+  border-radius: 4px;
+  border: 1.5px solid #000;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.timeline-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: #000;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.timeline-desc {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+/* ── Memory Fragment ── */
+.timeline-memory {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.03);
+  border-left: 2px solid var(--accent-brutal-yellow);
+  border-radius: 0 6px 6px 0;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #666;
+  font-style: italic;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+}
+
+.timeline-node-wrapper:hover .timeline-memory {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Audio Resonance ── */
+.audio-resonance {
+  position: absolute;
+  top: 20px;
+  right: 18px;
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  height: 14px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.timeline-node-wrapper:hover .audio-resonance {
+  opacity: 1;
+}
+
+.audio-resonance span {
+  display: block;
+  width: 3px;
+  background: #000;
+  border-radius: 1px;
+  animation: visual-resonance 0.9s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: bottom;
+}
+
+.audio-resonance span:nth-child(1) { height: 5px;  animation-delay: 0s; }
+.audio-resonance span:nth-child(2) { height: 11px; animation-delay: 0.18s; }
+.audio-resonance span:nth-child(3) { height: 7px;  animation-delay: 0.36s; }
+
+@keyframes visual-resonance {
+  0%   { transform: scaleY(0.3); opacity: 0.25; }
+  100% { transform: scaleY(1);   opacity: 0.8;  }
+}
+
+/* ── Temporal Whisper ── */
+.temporal-whisper {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, 10px) scale(0.95);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: rgba(0, 0, 0, 0.3);
+  letter-spacing: 2.5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out, transform 2s ease-out;
+  z-index: 10;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.temporal-whisper.whisper-active {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+/* ── Unresolved Future Node ── */
+.unresolved-future-node .fractured-memory {
+  background: rgba(0, 0, 0, 0.02);
+  border: 2px dashed rgba(0,0,0,0.3);
+  box-shadow: none;
+  opacity: 0.55;
+  animation: memory-flicker 5s ease-in-out infinite;
+}
+
+.unresolved-future-node .corrupted-text {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+
+.unresolved-future-node .glitch-point {
+  background: transparent;
+  border-style: dashed;
+  border-color: rgba(0,0,0,0.3);
+  animation: glitch-spin 10s linear infinite;
+}
+
+.glitch-resonance span {
+  background: rgba(0, 0, 0, 0.35) !important;
+  animation-duration: 0.15s !important;
+}
+
+@keyframes memory-flicker {
+  0%, 92%  { opacity: 0.55; transform: skew(0deg);   }
+  94%      { opacity: 0.2;  transform: skew(1.5deg); }
+  96%      { opacity: 0.5;  transform: skew(-1deg);  }
+  100%     { opacity: 0.6;  transform: skew(0deg);   }
+}
+
+@keyframes glitch-spin {
+  100% { transform: translateX(-50%) rotate(360deg); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .timeline-scroll-wrapper {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding: 0 6vw;
+    scroll-behavior: smooth;
+  }
+
+  .timeline-track-container {
+    padding: 0 6vw;
+    height: 380px;
+  }
+
+  .timeline-nodes {
+    gap: 80px;
+  }
+
+  .timeline-node-wrapper {
+    width: 240px;
+    scroll-snap-align: center;
+  }
+
+  .timeline-content {
+    padding: 16px 18px 14px;
+    box-shadow: 4px 4px 0px #000;
+  }
+
+  .node-top  { padding-bottom: 55px; }
+  .node-top .timeline-point { bottom: -10px; }
+  .node-bottom { padding-top: 55px; }
+  .node-bottom .timeline-point { top: -10px; }
+
+  .node-top .timeline-content::after,
+  .node-bottom .timeline-content::after {
+    height: 55px;
+  }
+  .node-top .timeline-content::after  { bottom: -55px; }
+  .node-bottom .timeline-content::after { top: -55px; }
+
+  .timeline-memory { display: none; }
+  .timeline-scroll-hint { display: none; }
+}
+
+/* ═══════════════════════════════════════════
+   ♛  CHAIRPERSON MILESTONE — PREMIUM ANIMATION
+   Golden orbital rings, crown badge, shimmer
+   sweep, persistent glow on the node dot.
+═══════════════════════════════════════════ */
+
+/* ── Wider card to accommodate the badge ── */
+.milestone-chairperson {
+  width: 320px;
+}
+
+/* ── Card base override — gold border theme ── */
+.chairperson-card {
+  border-color: #f4d03f !important;
+  border-width: 2.5px !important;
+  box-shadow: 0 0 0 3px #f4d03f, 8px 8px 0px #000, 0 0 40px rgba(244, 208, 63, 0.25) !important;
+  background: linear-gradient(145deg, #fffbe8 0%, #fff 60%) !important;
+  overflow: visible !important;
+}
+
+/* Shimmer sweep on load */
+.chairperson-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(244, 208, 63, 0.25) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: chairperson-shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 14px;
+}
+
+@keyframes chairperson-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Ensure card content sits above the shimmer */
+.chairperson-card > *:not(.chairperson-crown-ring) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Top accent bar override — gold gradient */
+.milestone-chairperson .timeline-content::before {
+  background: linear-gradient(90deg, #f4d03f, #e67e22, #f4d03f) !important;
+  opacity: 1 !important;
+  height: 4px !important;
+  animation: chairperson-bar-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes chairperson-bar-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(244, 208, 63, 0.5); }
+  50%       { box-shadow: 0 0 18px rgba(244, 208, 63, 0.9); }
+}
+
+/* ── Crown badge + orbital rings container ── */
+.chairperson-crown-ring {
+  position: absolute;
+  top: -38px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Orbital rings */
+.crown-orbit {
+  position: absolute;
+  border-radius: 50%;
+  border-style: solid;
+  border-color: rgba(244, 208, 63, 0.55);
+  /* start hidden — GSAP animates them in */
+  opacity: 0;
+}
+
+.orbit-1 {
+  width: 56px;
+  height: 56px;
+  border-width: 1.5px;
+  animation: orbit-spin-1 6s linear infinite;
+  border-color: rgba(244, 208, 63, 0.6) transparent rgba(244, 208, 63, 0.3) transparent;
+}
+
+.orbit-2 {
+  width: 44px;
+  height: 44px;
+  border-width: 1px;
+  animation: orbit-spin-2 4s linear infinite reverse;
+  border-color: transparent rgba(230, 126, 34, 0.5) transparent rgba(230, 126, 34, 0.25);
+}
+
+@keyframes orbit-spin-1 {
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-spin-2 {
+  to { transform: rotate(360deg); }
+}
+
+/* Crown badge ♛ */
+.crown-badge {
+  position: relative;
+  z-index: 3;
+  font-size: 1.45rem;
+  line-height: 1;
+  /* start hidden — GSAP animates it in */
+  opacity: 0;
+  filter: drop-shadow(0 2px 6px rgba(244, 208, 63, 0.8));
+  animation: crown-breathe 3s ease-in-out infinite;
+}
+
+@keyframes crown-breathe {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 2px 6px rgba(244,208,63,0.7)); }
+  50%       { transform: translateY(-3px) scale(1.08); filter: drop-shadow(0 4px 14px rgba(244,208,63,1)); }
+}
+
+/* ── Milestone timeline dot — permanently gold ── */
+.milestone-chairperson .timeline-point {
+  background: #f4d03f;
+  border-color: #000;
+  box-shadow: 0 0 0 6px rgba(244, 208, 63, 0.3), 4px 4px 0 #000;
+  transform: translateX(-50%) scale(1.35);
+  animation: milestone-dot-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes milestone-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(244, 208, 63, 0.25), 4px 4px 0 #000; }
+  50%       { box-shadow: 0 0 0 10px rgba(244, 208, 63, 0.08), 4px 4px 0 #000; }
+}
+
+.milestone-chairperson .timeline-point-inner {
+  background: #000;
+  opacity: 1;
+}
+
+/* ── Year badge override — accent orange ── */
+.milestone-chairperson .timeline-year {
+  background: linear-gradient(90deg, #f4d03f, #e67e22);
+  color: #000;
+  font-weight: 900;
+  letter-spacing: 2px;
+  border-color: #000;
+}
+
+/* ── Title override — slightly larger + bolder ── */
+.milestone-chairperson .timeline-title {
+  font-size: 1.05rem;
+  color: #1a1a1a;
+  background: linear-gradient(90deg, #b7950b, #e67e22, #b7950b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: gold-text-flow 4s linear infinite;
+}
+
+@keyframes gold-text-flow {
+  to { background-position: 200% center; }
+}
+
+/* ── Memory fragment — gold left border ── */
+.milestone-chairperson .timeline-memory {
+  border-left-color: #e67e22;
+  background: rgba(244, 208, 63, 0.06);
+  color: #7d6608;
+}
+
+/* ── Audio resonance bars — gold ── */
+.milestone-chairperson .audio-resonance span {
+  background: #e67e22;
+}
+
+/* ═══════════════════════════════════════════
+   MEDIA SECRETARY (MBCET SENATE) — TEAL/CYAN PREMIUM STYLING
+   Echoes chairperson treatment with a distinct palette
+═══════════════════════════════════════════ */
+
+.secretary-card {
+  border: 2px solid var(--accent-cyan, #00d8ff) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 216, 255, 0.04) 0%,
+    rgba(0, 184, 212, 0.08) 100%
+  ) !important;
+  box-shadow: 5px 5px 0px #000, 0 0 20px rgba(0, 216, 255, 0.15) !important;
+  position: relative;
+}
+
+.milestone-secretary .timeline-year {
+  color: var(--accent-cyan, #00d8ff) !important;
+  font-weight: 800;
+}
+
+.milestone-secretary .timeline-title {
+  color: var(--accent-cyan, #00d8ff) !important;
+}
+
+/* ── Memory fragment — cyan left border ── */
+.milestone-secretary .timeline-memory {
+  border-left-color: #00d8ff;
+  background: rgba(0, 216, 255, 0.06);
+  color: #006272;
+}
+
+/* ── Audio resonance bars — cyan ── */
+.milestone-secretary .audio-resonance span {
+  background: #00d8ff;
+}
+
+/* ── Mobile Responsive Adaptation ── */
+@media (max-width: 768px) {
+  .timeline-section {
+    padding: 4rem 0 3rem;
+  }
+  .timeline-scroll-wrapper {
+    padding: 30px 0 45px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .timeline-track-container {
+    height: 380px;
+    padding: 0 8vw;
+  }
+  .timeline-nodes {
+    gap: 70px;
+  }
+  .timeline-node-wrapper {
+    width: 260px;
+  }
+  .timeline-card {
+    padding: 1.25rem 1.1rem;
+    box-shadow: 4px 4px 0px #000;
+  }
+  .timeline-title {
+    font-size: 1.15rem;
+  }
+  .timeline-desc {
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-nodes {
+    gap: 45px;
+  }
+  .timeline-node-wrapper {
+    width: 240px;
+  }
+  .timeline-card {
+    padding: 1rem 0.9rem;
+  }
+}
+
+
+

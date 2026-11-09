@@ -1,0 +1,43 @@
+.kinetic-marquee-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 2rem 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+}
+
+.kinetic-marquee-track {
+  display: flex;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU layer */
+}
+
+.kinetic-marquee-content {
+  display: flex;
+  align-items: center;
+  padding-right: 2rem;
+}
+
+.kinetic-marquee-content h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(3rem, 8vw, 8rem);
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  margin: 0;
+  padding-right: 2rem;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--text-muted);
+  transition: color 0.3s ease, -webkit-text-stroke 0.3s ease;
+  cursor: default;
+}
+
+.kinetic-marquee-content h1:hover {
+  color: var(--accent-primary);
+  -webkit-text-stroke: 1px transparent;
+}

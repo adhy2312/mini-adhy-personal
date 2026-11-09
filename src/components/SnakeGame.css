@@ -1,0 +1,228 @@
+.snake-overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Fira Code', monospace;
+}
+
+.snake-device {
+  background: rgba(0, 20, 30, 0.9);
+  border: 1px solid #0ff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.2), inset 0 0 20px rgba(0, 255, 255, 0.1);
+  position: relative;
+}
+
+.snake-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  padding-bottom: 0.5rem;
+}
+
+.snake-brand {
+  color: #0ff;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px #0ff;
+}
+
+.snake-close-btn {
+  background: none;
+  border: none;
+  color: #ff3131;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  text-shadow: 0 0 10px #ff3131;
+  transition: all 0.2s ease;
+}
+.snake-close-btn:hover {
+  transform: scale(1.2);
+  color: #ffaa00;
+}
+
+/* Authentic Nokia Screen Styling */
+.snake-screen-bezel {
+  background: #111;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 255, 255, 0.2);
+  box-shadow: inset 0 0 15px #000;
+}
+
+.snake-screen {
+  background-color: #879a73; /* Classic Nokia Olive Green */
+  width: 300px;
+  height: 330px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #3c4b31; /* Dark green border */
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+  image-rendering: pixelated;
+}
+
+/* Canvas */
+.snake-canvas {
+  width: 100%;
+  height: 300px;
+  display: block;
+  image-rendering: pixelated; /* Crisp rendering */
+}
+
+/* Overlays inside the screen */
+.snake-message-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(135, 154, 115, 0.85); /* Semi-transparent olive */
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.blink-text {
+  color: #1a2214;
+  font-weight: bold;
+  font-size: 1.2rem;
+  animation: blink-text 1s step-end infinite;
+}
+
+@keyframes blink-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.sub-text {
+  color: #1a2214;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* Authentic Nokia Score & Progress HUD */
+.snake-hud-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+  box-sizing: border-box;
+  pointer-events: none;
+  border-top: 2px solid #1a2214;
+  background: #879a73;
+}
+
+.snake-score-classic {
+  color: #1a2214;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.snake-progress-bar {
+  width: 60%;
+  height: 8px;
+  border: 1px solid #1a2214;
+  background: transparent;
+  padding: 1px;
+  margin-bottom: 2px;
+}
+
+.snake-progress-fill {
+  height: 100%;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="2" height="4" fill="%231a2214"/></svg>') repeat-x;
+  background-size: 4px 100%;
+  transition: width 0.3s ease;
+}
+
+/* Mobile D-Pad (Classic Retro Style) */
+.snake-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+  touch-action: none; /* Prevent scroll on touch */
+}
+
+.dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: #2a2a2a;
+  padding: 16px;
+  border-radius: 50%;
+  box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5), inset 2px 2px 5px rgba(255,255,255,0.1), 0 5px 15px rgba(0,0,0,0.8);
+}
+
+.dpad-middle {
+  display: flex;
+  gap: 4rem; /* Space in the middle for center button */
+  align-items: center;
+  position: relative;
+}
+
+.dpad-btn {
+  background: #111;
+  border: none;
+  color: #666;
+  width: 65px;
+  height: 65px;
+  border-radius: 12px;
+  font-size: 1.6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.1s;
+  box-shadow: inset 1px 1px 2px rgba(255,255,255,0.1), inset -2px -2px 4px rgba(0,0,0,0.8);
+  touch-action: manipulation; /* Prevent double-tap zoom */
+}
+
+.dpad-btn:active {
+  background: #000;
+  transform: scale(0.95);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.9);
+  color: #0ff;
+}
+
+.dpad-btn.center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #800000;
+  color: #ff3131;
+  font-size: 1.2rem;
+  font-weight: bold;
+  box-shadow: inset 2px 2px 4px rgba(255,255,255,0.2), inset -2px -2px 4px rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.dpad-btn.center:active {
+  background: #400000;
+  box-shadow: inset 3px 3px 6px rgba(0,0,0,0.9);
+  transform: translateX(-50%) scale(0.95);
+}
+
+/* Hide DPAD on desktop */
+@media (min-width: 769px) {
+  .snake-controls {
+    display: none;
+  }
+}
