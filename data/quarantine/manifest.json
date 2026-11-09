@@ -1,0 +1,13 @@
+[
+  {
+    "id": "quarantine_1794232704671_p5b1",
+    "originalPath": "d:\\portfolio\\mini-adhy-personal\\data\\threat_test\\suspicious_revshell.ps1",
+    "originalFilename": "suspicious_revshell.ps1",
+    "quarantinePath": "D:\\portfolio\\mini-adhy-personal\\data\\quarantine\\suspicious_revshell.ps1.quarantine_1794232704671_p5b1.quarantined",
+    "quarantineFilename": "suspicious_revshell.ps1.quarantine_1794232704671_p5b1.quarantined",
+    "sizeBytes": 78,
+    "sha256": "8bf12a86ecf1933da67c7084cea37790a93b8dee25eec2b6a6eae27ff13f7b4e",
+    "reason": "Detected heuristic malware signature",
+    "quarantinedAt": 1794232704676
+  }
+]

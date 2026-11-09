@@ -16,6 +16,9 @@ export * from './connectors/GoogleDriveConnector';
 export * from './connectors/BrowserAutomationConnector';
 export * from './connectors/DesktopControlConnector';
 export * from './local/LocalExecutionAgent';
+export * from './local/LocalFileOpsAgent';
+export * from './memory/PersonalMemoryStore';
+export * from './server/StarkServer';
 export * from './hardware/HardwareDeviceGateway';
 export * from './hardware/MqttGateway';
 export * from './hardware/SerialGateway';
@@ -24,5 +27,6 @@ export * from './hardware/RaspberryPiGateway';
 export * from './automation/ProactiveScheduler';
 export * from './dashboard/PersonalDashboardService';
 export * from './security/PersonalSecurityAudit';
+export * from './security/StarkMalwareDefenseSentinel';
 export * from './executive/PersonalExecutiveAgent';
 

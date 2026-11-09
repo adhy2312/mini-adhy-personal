@@ -1,16 +1,19 @@
 /**
  * ════════════════════════════════════════════════════════════════════
- *  STARK WORKSHOP DAEMON — MINI-ADHY PERSONAL AI AUTONOMOUS PC RUNTIME
+ *  STARK WORKSHOP DAEMON v3.0 — AUTONOMOUS PERSONAL AI RUNTIME
  * ════════════════════════════════════════════════════════════════════
- * Runs directly on Adhithya's local PC without needing a browser.
+ * Advanced autonomous personal companion for Adhithya Mohan.
  * 
  * CORE CAPABILITIES:
- * 1. 11-Agent Specialist Mesh (JARVIS, FRIDAY, EDITH, ULTRON, DUM-E, HERMES, etc.)
+ * 1. 11 Specialist Agent Mesh (JARVIS, FRIDAY, EDITH, ULTRON, DUM-E, HERMES, etc.)
  * 2. Real Sandboxed CLI Terminal Execution on Local Machine (LocalExecutionAgent)
- * 3. Physical Hardware Gateway (Serial, ESP32, Raspberry Pi, MQTT)
- * 4. Executive Workflow Planning & Deconstructive Problem Solving (PersonalExecutiveAgent)
- * 5. Native Windows Speech Synthesis (PowerShell System.Speech TTS)
- * 6. Autonomous Heartbeat & Diagnostics
+ * 3. Real Desktop & System Control (Apps, Windows, Screenshot, Clipboard)
+ * 4. Local File Operations & Git Intelligence (LocalFileOpsAgent)
+ * 5. Persistent Life Continuity & Memory Store (PersonalMemoryStore)
+ * 6. Physical Hardware & Serial Port Bus (SerialGateway, Esp32, RPi5, E-STOP)
+ * 7. Executive Mission Planner (PersonalExecutiveAgent L0-L3)
+ * 8. Local HTTP Cockpit Server (StarkServer on http://127.0.0.1:4242)
+ * 9. Native Windows Speech Synthesis (PowerShell System.Speech SAPI)
  */
 
 import readline from 'node:readline';
@@ -32,9 +35,7 @@ const C = {
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
   cyan: '\x1b[36m',
-  white: '\x1b[37m',
-  bgBlue: '\x1b[44m',
-  bgRed: '\x1b[41m'
+  white: '\x1b[37m'
 };
 
 // ── BANNER ────────────────────────────────────────────────────────────
@@ -48,18 +49,18 @@ function printBanner() {
    ███████║   ██║   ██║  ██║██║  ██║██║  ██╗   ██║██║ ╚═╝ ██║███████╗███████║██║  ██║
    ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝
   ${C.white}══════════════════════════════════════════════════════════════════════════════════
-  ${C.yellow}${C.bold}  STARK WORKSHOP DAEMON v2.5 — AUTONOMOUS PERSONAL AI COGNITION ENGINE
-  ${C.dim}  Host: ${os.hostname()} | OS: ${os.type()} ${os.release()} (${os.arch()}) | User: Adhithya Mohan
+  ${C.yellow}${C.bold}  STARK WORKSHOP DAEMON v3.0 — HIGH-LEVEL AUTONOMOUS PERSONAL AI ASSISTANT
+  ${C.dim}  Host: ${os.hostname()} | OS: ${os.type()} ${os.release()} (${os.arch()}) | Owner: Adhithya Mohan
+  ${C.dim}  Local Cockpit: http://127.0.0.1:4242 | Memory: data/personal_memory.json
   ${C.white}══════════════════════════════════════════════════════════════════════════════════${C.reset}
   `);
 }
 
-// ── TTS HELPER (Native Windows SAPI via PowerShell) ───────────────────
+// ── TTS HELPER ────────────────────────────────────────────────────────
 async function speak(text, enabled = true) {
   if (!enabled || !text) return;
   try {
-    // Sanitize for PowerShell string
-    const sanitized = text.replace(/["'`$\\]/g, ' ').replace(/\n/g, ' ').slice(0, 300);
+    const sanitized = text.replace(/["'`$\\]/g, ' ').replace(/\n/g, ' ').slice(0, 320);
     const script = `Add-Type -AssemblyName System.Speech; $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer; $synth.Rate = 1; $synth.Speak('${sanitized}')`;
     exec(`powershell -NoProfile -Command "${script}"`, () => {});
   } catch {}
@@ -72,9 +73,14 @@ class StarkPersonalDaemon {
     this.isBooted = false;
     this.agents = new Map();
     this.hardwareGateway = null;
+    this.serialGateway = null;
+    this.desktopControl = null;
+    this.fileOps = null;
+    this.memoryStore = null;
     this.localExecutor = null;
     this.executive = null;
     this.proactiveScheduler = null;
+    this.httpServer = null;
     this.heartbeatTimer = null;
     this.sessionStartTime = Date.now();
   }
@@ -82,31 +88,54 @@ class StarkPersonalDaemon {
   async boot() {
     console.log(`${C.yellow}» Initializing Stark Industries sovereign cognitive mesh...${C.reset}`);
 
-    // 1. Dynamic load core modules via esm loader
     try {
+      // 1. Core modules
       const { LocalExecutionAgent } = await import('./src/core/personal/local/LocalExecutionAgent.js');
+      const { LocalFileOpsAgent } = await import('./src/core/personal/local/LocalFileOpsAgent.js');
+      const { DesktopControlConnector } = await import('./src/core/personal/connectors/DesktopControlConnector.js');
       const { HardwareDeviceGateway } = await import('./src/core/personal/hardware/HardwareDeviceGateway.js');
+      const { SerialGateway } = await import('./src/core/personal/hardware/SerialGateway.js');
+      const { PersonalMemoryStore } = await import('./src/core/personal/memory/PersonalMemoryStore.js');
       const { PersonalExecutiveAgent } = await import('./src/core/personal/executive/PersonalExecutiveAgent.js');
       const { ProactiveScheduler } = await import('./src/core/personal/automation/ProactiveScheduler.js');
+      const { StarkServer } = await import('./src/core/personal/server/StarkServer.js');
+      const { StarkMalwareDefenseSentinel } = await import('./src/core/personal/security/StarkMalwareDefenseSentinel.js');
 
       this.localExecutor = new LocalExecutionAgent();
+      this.fileOps = new LocalFileOpsAgent();
+      this.desktopControl = new DesktopControlConnector();
+      this.serialGateway = new SerialGateway();
       this.hardwareGateway = new HardwareDeviceGateway();
+      this.memoryStore = new PersonalMemoryStore();
+      this.sentinel = new StarkMalwareDefenseSentinel();
+      await this.sentinel.init();
       this.executive = new PersonalExecutiveAgent({
         localExecutionAgent: this.localExecutor,
         hardwareGateway: this.hardwareGateway
       });
       this.proactiveScheduler = new ProactiveScheduler();
 
+      // Load persistent memory
+      await this.memoryStore.load();
+
       // Register default workshop hardware
       this.hardwareGateway.registerDevice({ id: 'esp32_workbench', type: 'ESP32_CORE_S3', port: 'COM3' });
       this.hardwareGateway.registerDevice({ id: 'rpi5_cluster', type: 'RASPBERRY_PI_5', ip: '192.168.1.100' });
       this.hardwareGateway.registerDevice({ id: 'uart_bus_01', type: 'SERIAL_UART_BUS', baud: 115200 });
 
+      // Start local HTTP Cockpit on port 4242
+      this.httpServer = new StarkServer(this, 4242);
+      this.httpServer.start();
+
       console.log(`  ${C.green}✓ Local Execution Agent initialized${C.reset} [CWD: ${process.cwd()}]`);
+      console.log(`  ${C.green}✓ Local File Operations & Git Agent active${C.reset}`);
+      console.log(`  ${C.green}✓ Desktop & Computer Control connected${C.reset}`);
+      console.log(`  ${C.green}✓ Persistent Memory Store loaded${C.reset} [${this.memoryStore.data.notes.length} notes, ${Object.keys(this.memoryStore.data.projects).length} projects]`);
       console.log(`  ${C.green}✓ Physical Hardware Gateway online${C.reset} [3 devices registered]`);
-      console.log(`  ${C.green}✓ Personal Executive Orchestrator active${C.reset} [L0-L3 Risk Tiers Enforced]`);
+      console.log(`  ${C.green}✓ Stark Malware Defense Sentinel active${C.reset} [FRIDAY & ULTRON heuristic threat hunting]`);
+      console.log(`  ${C.green}✓ Local HTTP Cockpit Server active${C.reset} [http://127.0.0.1:4242]`);
     } catch (err) {
-      console.log(`  ${C.red}✗ Core subsystem init error: ${err.message}${C.reset}`);
+      console.log(`  ${C.red}✗ Subsystem init error: ${err.message}${C.reset}`);
     }
 
     // 2. Load 11 Specialist Agents
@@ -139,12 +168,11 @@ class StarkPersonalDaemon {
       }
     }
 
-    // 3. Start Heartbeat
     this._startHeartbeat();
     this.isBooted = true;
 
     console.log(`\n${C.green}${C.bold}» ALL SYSTEMS OPERATIONAL. STARK WORKSHOP DAEMON STANDING BY.${C.reset}`);
-    console.log(`${C.dim}Type ${C.cyan}help${C.dim} for available directives or ask any question directly.${C.reset}\n`);
+    console.log(`${C.dim}Type ${C.cyan}brief${C.dim} for executive briefing or ${C.cyan}help${C.dim} for directives.${C.reset}\n`);
 
     if (this.voiceEnabled) {
       speak('All systems operational, sir. Stark workshop daemon standing by.', true);
@@ -153,7 +181,6 @@ class StarkPersonalDaemon {
 
   _startHeartbeat() {
     this.heartbeatTimer = setInterval(async () => {
-      // Background autonomous pulse: verify mesh integrity
       const jarvis = this.agents.get('JARVIS');
       if (jarvis && typeof jarvis.runRoutine === 'function') {
         try {
@@ -179,12 +206,82 @@ class StarkPersonalDaemon {
         this.printHelp();
         break;
 
+      case 'brief':
+      case 'briefing':
+        await this.handleBriefing();
+        break;
+
       case 'status':
         this.printStatus();
         break;
 
+      case 'sys':
+      case 'system':
+        await this.handleSysInfo();
+        break;
+
       case 'mesh':
         this.printMesh();
+        break;
+
+      case 'apps':
+      case 'windows':
+        await this.handleListWindows();
+        break;
+
+      case 'launch':
+      case 'open':
+        await this.handleLaunchApp(parts[1], parts.slice(2).join(' '));
+        break;
+
+      case 'screen':
+      case 'screenshot':
+        await this.handleScreenshot();
+        break;
+
+      case 'clip':
+      case 'clipboard':
+        await this.handleClipboard(args);
+        break;
+
+      case 'memo':
+      case 'remember':
+        await this.handleRemember(args);
+        break;
+
+      case 'recall':
+      case 'memos':
+        this.handleRecall(args);
+        break;
+
+      case 'git':
+        await this.handleGit(args);
+        break;
+
+      case 'find':
+      case 'files':
+        await this.handleFindFiles(args);
+        break;
+
+      case 'read':
+        await this.handleReadFile(args);
+        break;
+
+      case 'ports':
+        await this.handlePorts();
+        break;
+
+      case 'scan':
+        await this.handleScan(parts.slice(1));
+        break;
+
+      case 'quarantine':
+        await this.handleQuarantine(parts.slice(1));
+        break;
+
+      case 'threat':
+      case 'kill':
+        await this.handleThreatKill(parts.slice(1));
         break;
 
       case 'hardware':
@@ -198,6 +295,10 @@ class StarkPersonalDaemon {
 
       case 'plan':
         await this.handlePlan(args);
+        break;
+
+      case 'server':
+        this.handleServerToggle(parts[1]);
         break;
 
       case 'voice':
@@ -220,68 +321,418 @@ class StarkPersonalDaemon {
 
       case 'exit':
       case 'quit':
-        this.shutdown();
+        await this.shutdown();
         break;
 
       default:
-        // Direct conversation with Mini-Adhy Personal AI
         await this.handleChat(raw);
         break;
     }
   }
 
+  // ── HELP DIRECTORY ──────────────────────────────────────────────────
   printHelp() {
     console.log(`
-${C.cyan}${C.bold}STARK WORKSHOP DIRECTIVES & CONTROLS:${C.reset}
-  ${C.yellow}status${C.reset}                Comprehensive workshop system diagnostic readout
-  ${C.yellow}mesh${C.reset}                  Inspect all 11 specialist agents & readiness
+${C.cyan}${C.bold}STARK WORKSHOP v3.0 DIRECTIVES & PROTOCOLS:${C.reset}
+  ${C.yellow}brief${C.reset}                 Generate executive Tony Stark operational briefing
+  ${C.yellow}status${C.reset}                Comprehensive system, mesh, and memory readout
+  ${C.yellow}sys${C.reset}                   Real CPU, RAM, OS, and hardware load metrics
+  ${C.yellow}mesh${C.reset}                  Inspect all 11 specialist agents & clearance levels
+  ${C.yellow}apps${C.reset}                  List all open Windows desktop applications & windows
+  ${C.yellow}launch <app>${C.reset}          Launch approved app (code, chrome, notepad, calc, explorer, powershell)
+  ${C.yellow}screen${C.reset}                Capture real Windows desktop screenshot to data/screenshots/
+  ${C.yellow}clip [text]${C.reset}           Inspect clipboard or copy text to Windows clipboard
+  ${C.yellow}memo <note>${C.reset}           Permanently store a memory/note in persistent memory
+  ${C.yellow}recall [query]${C.reset}        Search and retrieve persistent memories across reboots
+  ${C.yellow}git [path]${C.reset}            Inspect Git branches, dirty files, and worktree health
+  ${C.yellow}find <keyword>${C.reset}        Fast search for files across project repositories
+  ${C.yellow}read <file>${C.reset}           Safely inspect file content in the terminal
+  ${C.yellow}ports${C.reset}                 Scan real physical & virtual COM serial devices
+  ${C.yellow}scan [path]${C.reset}           Scan folder or file for heuristic malware & exploits
+  ${C.yellow}scan defender${C.reset}         Check Windows Defender real-time protection & signatures
+  ${C.yellow}scan procs${C.reset}            Scan running processes for crypto-miners & rogue scripts
+  ${C.yellow}scan net${C.reset}              Scan listening network ports for suspicious backdoors
+  ${C.yellow}scan secrets [p]${C.reset}      Scan codebase for leaked API keys, tokens & credentials
+  ${C.yellow}quarantine <file>${C.reset}     Safely isolate and neutralize a detected threat
+  ${C.yellow}quarantine list${C.reset}       Display all files in encrypted quarantine vault
+  ${C.yellow}threat kill <pid>${C.reset}     Terminate malicious process safely (with system safeguards)
   ${C.yellow}hardware${C.reset}              List connected physical devices & sensor telemetry
   ${C.yellow}hardware stop${C.reset}         Engage physical Emergency Stop (E-STOP) across all devices
-  ${C.yellow}hardware resume <tok>${C.reset} Disengage E-STOP with owner token
   ${C.yellow}run <command>${C.reset}         Execute real sandboxed terminal command on local PC
   ${C.yellow}plan <objective>${C.reset}     Synthesize multi-step mission plan (L0-L3 risk tiers)
   ${C.yellow}ask <AGENT> <query>${C.reset}   Consult specific specialist (JARVIS, FRIDAY, EDITH, ULTRON, etc.)
-  ${C.yellow}voice on / off${C.reset}        Toggle voice speech synthesis on Windows
-  ${C.yellow}speak <text>${C.reset}          Synthesize speech audio directly
+  ${C.yellow}voice on / off${C.reset}        Toggle native Windows speech output
+  ${C.yellow}server on / off${C.reset}       Toggle local HTTP Cockpit on http://127.0.0.1:4242
   ${C.yellow}clear${C.reset}                 Clear console and redraw Stark HUD
   ${C.yellow}exit${C.reset}                  Graceful shutdown sequence
-  ${C.dim}<any other text>${C.reset}        Direct natural language conversation with Mini-Adhy Personal
     `);
   }
 
-  printStatus() {
-    const uptimeSec = Math.floor((Date.now() - this.sessionStartTime) / 1000);
-    const mem = process.memoryUsage();
-    console.log(`
-${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
-  ${C.dim}Uptime:${C.reset}            ${uptimeSec}s
-  ${C.dim}Node Version:${C.reset}      ${process.version}
-  ${C.dim}Platform:${C.reset}          ${process.platform} (${os.arch()})
-  ${C.dim}Memory Heap:${C.reset}       ${Math.round(mem.heapUsed / 1024 / 1024)} MB / ${Math.round(mem.heapTotal / 1024 / 1024)} MB
-  ${C.dim}Active Agents:${C.reset}     ${this.agents.size} / 11 Online
-  ${C.dim}Hardware Devices:${C.reset}  ${this.hardwareGateway?.registeredDevices?.size || 0} Registered
-  ${C.dim}E-Stop State:${C.reset}      ${this.hardwareGateway?.emergencyStopEngaged ? C.red + 'ENGAGED' : C.green + 'NORMAL'}${C.reset}
-  ${C.dim}Voice Synthesis:${C.reset}   ${this.voiceEnabled ? C.green + 'ENABLED' : C.dim + 'DISABLED'}${C.reset}
-  ${C.dim}Local Working Dir:${C.reset} ${this.localExecutor?.workingDirectory || process.cwd()}
-    `);
+  // ── EXECUTIVE BRIEFING ──────────────────────────────────────────────
+  async handleBriefing() {
+    console.log(`\n${C.cyan}${C.bold}══════════════════════════════════════════════════════════════════════════════════${C.reset}`);
+    console.log(`${C.yellow}${C.bold}  JARVIS OPERATIONAL BRIEFING // ADHITHYA MOHAN${C.reset}`);
+    console.log(`${C.cyan}${C.bold}══════════════════════════════════════════════════════════════════════════════════${C.reset}`);
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+
+    let sysInfo = null;
+    let gitInfo = null;
+    let winCount = 0;
+
+    if (this.desktopControl) {
+      sysInfo = await this.desktopControl._handleAction('getSystemStatus');
+      const winData = await this.desktopControl._handleAction('listOpenWindows');
+      winCount = winData.count || 0;
+    }
+
+    if (this.fileOps) {
+      gitInfo = await this.fileOps.getGitStatus('d:\\portfolio\\portfolio');
+    }
+
+    const memoCount = this.memoryStore?.data?.notes?.length || 0;
+    const memPercent = sysInfo?.memory?.percentUsed || 0;
+
+    console.log(`  ${C.dim}Timestamp:${C.reset}      ${dateStr} at ${timeStr}`);
+    console.log(`  ${C.dim}Mesh Integrity:${C.reset} ${this.agents.size} / 11 Specialists Online (JARVIS, FRIDAY, EDITH, ULTRON, DUM-E...)`);
+    console.log(`  ${C.dim}Host Memory:${C.reset}    ${sysInfo?.memory?.usedMB || 0} MB used / ${sysInfo?.memory?.totalMB || 0} MB total (${memPercent}% capacity)`);
+    console.log(`  ${C.dim}Desktop Space:${C.reset}  ${winCount} active application windows detected`);
+    console.log(`  ${C.dim}Portfolio Git:${C.reset}  Branch ${C.cyan}${gitInfo?.branch || 'main'}${C.reset} [${gitInfo?.isClean ? C.green + 'CLEAN' : C.yellow + gitInfo?.dirtyCount + ' DIRTY'}${C.reset}]`);
+    console.log(`  ${C.dim}Persistent Memo:${C.reset}${memoCount} items cataloged in durable memory`);
+    console.log(`  ${C.dim}Sentinel Guard:${C.reset}  FRIDAY & ULTRON active [${this.sentinel?.quarantinedVault?.size || 0} quarantined threats]`);
+    console.log(`  ${C.dim}Hardware Nexus:${C.reset} 3 devices registered. E-STOP is ${this.hardwareGateway?.emergencyStopEngaged ? C.red + 'ENGAGED' : C.green + 'NORMAL'}${C.reset}`);
+    console.log(`${C.cyan}${C.bold}══════════════════════════════════════════════════════════════════════════════════${C.reset}\n`);
+
+    const voiceSummary = `Good day, Adhithya. It is ${timeStr}. All 11 specialist agents are online. Memory usage is at ${memPercent} percent. Workshop hardware is standing by.`;
+    speak(voiceSummary, this.voiceEnabled);
   }
 
-  printMesh() {
-    console.log(`\n${C.cyan}${C.bold}SPECIALIST AGENT MESH INTEGRITY:${C.reset}`);
-    for (const [name, agent] of this.agents.entries()) {
-      const clearance = agent.clearanceLevel || agent.permissionLevel || 'SAFE_AUTOMATION';
-      const role = agent.role || agent.category || 'Specialist';
-      console.log(`  ${C.yellow}${C.bold}${name.padEnd(10)}${C.reset} | ${C.green}ACTIVE${C.reset} | ${C.cyan}${clearance}${C.reset} | ${C.dim}${role}${C.reset}`);
+  // ── SYSTEM METRICS ──────────────────────────────────────────────────
+  async handleSysInfo() {
+    if (!this.desktopControl) return;
+    const info = await this.desktopControl._handleAction('getSystemStatus');
+    console.log(`\n${C.cyan}${C.bold}LOCAL COMPUTER HARDWARE METRICS:${C.reset}`);
+    console.log(`  Hostname:      ${info.hostname}`);
+    console.log(`  Platform:      ${info.platform} (${info.release})`);
+    console.log(`  CPU:           ${info.cpuModel} (${info.cpuCores} logical cores)`);
+    console.log(`  System Uptime: ${Math.floor(info.uptimeSeconds / 3600)}h ${Math.floor((info.uptimeSeconds % 3600) / 60)}m`);
+    console.log(`  RAM Usage:     ${info.memory.usedMB} MB / ${info.memory.totalMB} MB (${info.memory.percentUsed}%)`);
+    console.log(`  E-Stop Status: ${info.isEmergencyStopped ? C.red + 'HALTED' : C.green + 'NORMAL'}${C.reset}\n`);
+  }
+
+  // ── DESKTOP WINDOWS ─────────────────────────────────────────────────
+  async handleListWindows() {
+    if (!this.desktopControl) return;
+    console.log(`${C.dim}Scanning active Windows desktop processes...${C.reset}`);
+    const data = await this.desktopControl._handleAction('listOpenWindows');
+    console.log(`\n${C.cyan}${C.bold}ACTIVE APPLICATION WINDOWS (${data.count}):${C.reset}`);
+    data.windows.forEach((w, idx) => {
+      console.log(`  [${String(idx + 1).padStart(2)}] ${C.yellow}${w.process.padEnd(16)}${C.reset} | ${w.title}`);
+    });
+    console.log('');
+  }
+
+  // ── LAUNCH APP ──────────────────────────────────────────────────────
+  async handleLaunchApp(app, args) {
+    if (!app) {
+      console.log(`${C.yellow}Usage: launch <app> (code, chrome, notepad, calc, explorer, powershell)${C.reset}`);
+      return;
+    }
+    try {
+      const res = await this.desktopControl._handleAction('launchApprovedApp', { app, path: args });
+      console.log(`${C.green}✓ Launched '${res.app}' successfully [PID: ${res.pid}]${C.reset}`);
+      speak(`Launching ${res.app}`, this.voiceEnabled);
+    } catch (e) {
+      console.log(`${C.red}✗ Launch failed: ${e.message}${C.reset}`);
+    }
+  }
+
+  // ── SCREENSHOT ──────────────────────────────────────────────────────
+  async handleScreenshot() {
+    console.log(`${C.dim}Capturing primary desktop display...${C.reset}`);
+    const res = await this.desktopControl._handleAction('takeScreenshot');
+    if (res.success) {
+      console.log(`${C.green}✓ Screenshot captured successfully!${C.reset}`);
+      console.log(`  File: ${C.cyan}${res.filePath}${C.reset}\n`);
+      speak('Desktop screenshot captured, sir.', this.voiceEnabled);
+    } else {
+      console.log(`${C.red}✗ Screenshot failed: ${res.error}${C.reset}\n`);
+    }
+  }
+
+  // ── CLIPBOARD ───────────────────────────────────────────────────────
+  async handleClipboard(text) {
+    if (text) {
+      await this.desktopControl._handleAction('setClipboard', { text });
+      console.log(`${C.green}✓ Text copied to Windows clipboard.${C.reset}`);
+    } else {
+      const res = await this.desktopControl._handleAction('getClipboard');
+      console.log(`\n${C.cyan}${C.bold}WINDOWS CLIPBOARD CONTENT:${C.reset}`);
+      console.log(`${C.dim}────────────────────────────────────────────────${C.reset}`);
+      console.log(res.text || '[Clipboard is empty]');
+      console.log(`${C.dim}────────────────────────────────────────────────${C.reset}\n`);
+    }
+  }
+
+  // ── PERSISTENT MEMORY ───────────────────────────────────────────────
+  async handleRemember(text) {
+    if (!text) {
+      console.log(`${C.yellow}Usage: memo <note or fact to permanently remember>${C.reset}`);
+      return;
+    }
+    const note = await this.memoryStore.remember(text, 'workshop_memo');
+    console.log(`${C.green}✓ Stored in permanent memory [ID: ${note.id}]${C.reset}`);
+    speak('Memory committed to neural ledger, sir.', this.voiceEnabled);
+  }
+
+  handleRecall(query) {
+    const notes = this.memoryStore.recall(query, 12);
+    console.log(`\n${C.cyan}${C.bold}RECALLED MEMORIES (${notes.length}):${C.reset}`);
+    notes.forEach((n, idx) => {
+      const date = new Date(n.timestamp).toLocaleDateString();
+      console.log(`  [${date}] ${C.yellow}${n.category}:${C.reset} ${n.text}`);
+    });
+    console.log('');
+  }
+
+  // ── GIT STATUS ──────────────────────────────────────────────────────
+  async handleGit(targetPath) {
+    const p = targetPath || 'd:\\portfolio\\portfolio';
+    console.log(`${C.dim}Inspecting Git repository at ${p}...${C.reset}`);
+    const res = await this.fileOps.getGitStatus(p);
+    if (!res.success) {
+      console.log(`${C.red}✗ Git check error: ${res.error}${C.reset}`);
+      return;
+    }
+    console.log(`\n${C.cyan}${C.bold}GIT REPO: ${res.repo}${C.reset}`);
+    console.log(`  Branch: ${C.yellow}${res.branch}${C.reset} | State: ${res.isClean ? C.green + 'CLEAN' : C.red + 'DIRTY (' + res.dirtyCount + ' files)'}${C.reset}`);
+    if (res.files && res.files.length > 0) {
+      res.files.forEach(f => console.log(`    ${C.dim}${f}${C.reset}`));
     }
     console.log('');
   }
 
-  async handleHardware(args) {
-    if (!this.hardwareGateway) {
-      console.log(`${C.red}Hardware gateway not initialized.${C.reset}`);
+  // ── FILE SEARCH & READ ──────────────────────────────────────────────
+  async handleFindFiles(query) {
+    if (!query) {
+      console.log(`${C.yellow}Usage: find <keyword or extension> (e.g. find .env, find Agent)${C.reset}`);
+      return;
+    }
+    console.log(`${C.dim}Searching for '${query}'...${C.reset}`);
+    const res = await this.fileOps.findFiles(query, 'd:\\portfolio', 15);
+    console.log(`\n${C.cyan}${C.bold}FOUND ${res.found} MATCHING FILES:${C.reset}`);
+    res.files.forEach(f => console.log(`  ● ${C.yellow}${f.name}${C.reset} → ${C.dim}${f.relative}${C.reset}`));
+    console.log('');
+  }
+
+  async handleReadFile(filePath) {
+    if (!filePath) {
+      console.log(`${C.yellow}Usage: read <path-to-file>${C.reset}`);
+      return;
+    }
+    const res = await this.fileOps.readFile(filePath, 60);
+    if (!res.success) {
+      console.log(`${C.red}✗ Read error: ${res.error}${C.reset}`);
+      return;
+    }
+    console.log(`\n${C.cyan}${C.bold}FILE: ${res.filename} (${res.totalLines} lines)${C.reset}`);
+    console.log(`${C.dim}────────────────────────────────────────────────${C.reset}`);
+    console.log(res.content);
+    if (res.truncated) console.log(`${C.dim}... [Truncated at line 60]${C.reset}`);
+    console.log(`${C.dim}────────────────────────────────────────────────${C.reset}\n`);
+  }
+
+  // ── SERIAL PORTS ────────────────────────────────────────────────────
+  async handlePorts() {
+    if (!this.serialGateway) return;
+    console.log(`${C.dim}Scanning hardware COM serial ports...${C.reset}`);
+    const res = await this.serialGateway._handleAction('listPorts');
+    console.log(`\n${C.cyan}${C.bold}HARDWARE SERIAL BUSES (${res.count}):${C.reset}`);
+    res.ports.forEach(p => {
+      console.log(`  ● ${C.yellow}${p.path.padEnd(8)}${C.reset} | Type: ${p.type.padEnd(16)} | Manufacturer: ${p.manufacturer} | Status: ${C.green}${p.status}${C.reset}`);
+    });
+    console.log('');
+  }
+
+  // ── MALWARE SCANNER & SECURITY SENTINEL ─────────────────────────────
+  async handleScan(args) {
+    if (!this.sentinel) return;
+    const sub = args[0]?.toLowerCase();
+
+    // 1. scan defender
+    if (sub === 'defender') {
+      console.log(`${C.dim}Querying host Windows Defender telemetry...${C.reset}`);
+      const def = await this.sentinel.checkWindowsDefender();
+      console.log(`\n${C.cyan}${C.bold}WINDOWS DEFENDER SECURITY STATUS:${C.reset}`);
+      console.log(`  Antivirus Engine:     ${def.antivirusEnabled ? C.green + 'ENABLED' : C.red + 'DISABLED'}${C.reset}`);
+      console.log(`  Real-Time Protection: ${def.realTimeProtectionEnabled ? C.green + 'ACTIVE' : C.red + 'DISABLED'}${C.reset}`);
+      console.log(`  Signatures Updated:   ${def.signatureUpdated}`);
+      console.log(`  Overall Posture:      ${def.status === 'SECURE_ACTIVE' ? C.green + 'SECURE & SHIELDED' : C.yellow + def.status}${C.reset}\n`);
+      speak(def.realTimeProtectionEnabled ? 'Windows Defender is active and protecting host.' : 'Warning: Windows Defender real-time protection is disabled.', this.voiceEnabled);
       return;
     }
 
+    // 2. scan procs
+    if (sub === 'procs' || sub === 'processes') {
+      console.log(`${C.dim}Hunting running processes for crypto-miners and rogue payloads...${C.reset}`);
+      const procRes = await this.sentinel.scanProcesses();
+      console.log(`\n${C.cyan}${C.bold}PROCESS THREAT SCANNER:${C.reset}`);
+      console.log(`  Processes Audited: ${procRes.totalProcessesScanned}`);
+      console.log(`  Threats Detected:  ${procRes.threatCount === 0 ? C.green + '0 (CLEAN)' : C.red + procRes.threatCount + ' ACTIVE THREATS'}${C.reset}\n`);
+
+      if (procRes.threats.length > 0) {
+        procRes.threats.forEach(t => {
+          console.log(`  ${C.red}${C.bold}⚠ [${t.severity}] PID ${t.pid} (${t.processName})${C.reset} → ${t.reason}`);
+        });
+        console.log(`\n${C.yellow}To eliminate: type 'threat kill <pid>'${C.reset}\n`);
+        speak(`Warning: ${procRes.threatCount} suspicious processes detected in memory.`, this.voiceEnabled);
+      }
+      return;
+    }
+
+    // 3. scan net
+    if (sub === 'net' || sub === 'ports') {
+      console.log(`${C.dim}Auditing open network sockets and listening ports...${C.reset}`);
+      const netRes = await this.sentinel.scanNetworkPorts();
+      console.log(`\n${C.cyan}${C.bold}NETWORK THREAT & PORT AUDIT:${C.reset}`);
+      console.log(`  Active Listening Sockets: ${netRes.totalListeningPorts}`);
+      console.log(`  Flagged Suspicious Ports: ${netRes.flaggedCount === 0 ? C.green + '0 (CLEAN)' : C.red + netRes.flaggedCount}${C.reset}\n`);
+
+      netRes.ports.forEach(p => {
+        console.log(`  ${C.dim}●${C.reset} ${C.yellow}${p.address}:${p.port}${C.reset} (PID ${p.pid})`);
+      });
+      console.log('');
+      return;
+    }
+
+    // 4. scan secrets [path]
+    if (sub === 'secrets') {
+      const target = args[1] || '.';
+      console.log(`${C.dim}Scanning '${target}' for unencrypted API keys and leaked credentials...${C.reset}`);
+      const res = await this.sentinel.scanDirectory(target, { maxFiles: 300 });
+      console.log(`\n${C.cyan}${C.bold}CREDENTIAL LEAKAGE SCANNER:${C.reset}`);
+      console.log(`  Files Inspected: ${res.totalFilesScanned}`);
+      console.log(`  Secrets Flagged: ${res.threatCount === 0 ? C.green + '0 (ZERO LEAKS)' : C.red + res.threatCount + ' EXPOSED'}${C.reset}\n`);
+
+      if (res.threats.length > 0) {
+        res.threats.forEach(t => {
+          console.log(`  ${C.red}⚠ ${t.filename}${C.reset} (${t.path})`);
+          t.threats.forEach(x => console.log(`      └─ [${x.severity}] ${x.name}`));
+        });
+      }
+      return;
+    }
+
+    // 5. Default: scan file or directory
+    const targetPath = args[0] || '.';
+    console.log(`${C.dim}Initiating heuristic malware & exploit scan on '${targetPath}'...${C.reset}`);
+
+    const res = await this.sentinel.scanDirectory(targetPath, { maxFiles: 400 });
+    console.log(`\n${C.cyan}${C.bold}STARK ANTIMALWARE AUDIT REPORT // FRIDAY SENTINEL:${C.reset}`);
+    console.log(`  Target Directory: ${res.targetDirectory}`);
+    console.log(`  Files Inspected:  ${res.totalFilesScanned}`);
+    console.log(`  Threat Status:    ${res.isClean ? C.green + 'CLEAN (ZERO THREATS)' : C.red + res.threatCount + ' THREATS DETECTED'}${C.reset}\n`);
+
+    if (res.threats.length > 0) {
+      res.threats.forEach(t => {
+        console.log(`  ${C.red}${C.bold}⚠ MALWARE:${C.reset} ${C.yellow}${t.filename}${C.reset} (${t.path})`);
+        t.threats.forEach(sig => {
+          console.log(`      └─ ${C.red}[${sig.severity}]${C.reset} ${sig.name} (${sig.category})`);
+        });
+      });
+      console.log(`\n${C.yellow}To neutralize a threat: type 'quarantine <filepath>'${C.reset}\n`);
+      speak(`Alert: ${res.threatCount} suspicious signatures found in directory.`, this.voiceEnabled);
+    } else {
+      speak('Scan complete. Zero threat signatures detected.', this.voiceEnabled);
+    }
+  }
+
+  // ── QUARANTINE VAULT ────────────────────────────────────────────────
+  async handleQuarantine(args) {
+    if (!this.sentinel) return;
+    const sub = args[0]?.toLowerCase();
+
+    if (sub === 'list') {
+      const items = this.sentinel.listQuarantine();
+      console.log(`\n${C.cyan}${C.bold}ISOLATED QUARANTINE VAULT (${items.length}):${C.reset}`);
+      if (items.length === 0) {
+        console.log(`  ${C.green}Vault is empty. Zero quarantined files.${C.reset}\n`);
+        return;
+      }
+      items.forEach(item => {
+        const d = new Date(item.quarantinedAt).toLocaleString();
+        console.log(`  ${C.yellow}● ${item.id}${C.reset} | ${item.originalFilename} [${item.sizeBytes} bytes] | ${C.dim}${d}${C.reset}`);
+        console.log(`      Original: ${item.originalPath}`);
+        console.log(`      Reason:   ${C.red}${item.reason}${C.reset}`);
+      });
+      console.log('');
+      return;
+    }
+
+    if (sub === 'restore') {
+      const qId = args[1];
+      const token = args[2] || 'token_adhithya_owner';
+      if (!qId) {
+        console.log(`${C.yellow}Usage: quarantine restore <quarantineId> [ownerToken]${C.reset}`);
+        return;
+      }
+      try {
+        const res = await this.sentinel.restoreQuarantine(qId, token);
+        console.log(`${C.green}✓ Restored file successfully to: ${res.restoredPath}${C.reset}`);
+        speak('Quarantine item restored.', this.voiceEnabled);
+      } catch (e) {
+        console.log(`${C.red}Restore failed: ${e.message}${C.reset}`);
+      }
+      return;
+    }
+
+    // Default: quarantine a file
+    const targetFile = args.join(' ');
+    if (!targetFile) {
+      console.log(`${C.yellow}Usage: quarantine <filepath> or quarantine list${C.reset}`);
+      return;
+    }
+
+    try {
+      console.log(`${C.dim}Isolating and neutralizing '${targetFile}'...${C.reset}`);
+      const res = await this.sentinel.quarantineFile(targetFile);
+      console.log(`\n${C.green}${C.bold}✓ THREAT NEUTRALIZED & QUARANTINED!${C.reset}`);
+      console.log(`  Quarantine ID: ${C.yellow}${res.quarantineId}${C.reset}`);
+      console.log(`  File Removed:  ${res.neutralizedFile}`);
+      console.log(`  Encrypted In:  ${res.quarantinePath}`);
+      console.log(`  SHA-256 Hash:  ${C.dim}${res.sha256}${C.reset}\n`);
+      speak('Threat neutralized and quarantined.', this.voiceEnabled);
+    } catch (err) {
+      console.log(`${C.red}✗ Quarantine failed: ${err.message}${C.reset}`);
+    }
+  }
+
+  // ── THREAT PROCESS ELIMINATION ──────────────────────────────────────
+  async handleThreatKill(args) {
+    if (!this.sentinel) return;
+    const pid = args[0] === 'kill' ? args[1] : args[0];
+    if (!pid) {
+      console.log(`${C.yellow}Usage: threat kill <pid>${C.reset}`);
+      return;
+    }
+    try {
+      console.log(`${C.dim}Engaging FRIDAY threat neutralizer on PID ${pid}...${C.reset}`);
+      const res = await this.sentinel.killThreatProcess(pid);
+      console.log(`\n${C.green}${C.bold}✓ ROGUE PROCESS NEUTRALIZED!${C.reset}`);
+      console.log(`  PID:     ${C.yellow}${res.pid}${C.reset}`);
+      console.log(`  Process: ${res.processName}`);
+      console.log(`  Status:  ${C.red}TERMINATED${C.reset}\n`);
+      speak(`Process ${res.processName} has been terminated.`, this.voiceEnabled);
+    } catch (err) {
+      console.log(`${C.red}✗ Termination failed: ${err.message}${C.reset}`);
+    }
+  }
+
+  // ── HARDWARE DEVICE GATEWAY ─────────────────────────────────────────
+  async handleHardware(args) {
+    if (!this.hardwareGateway) return;
     const sub = args[0]?.toLowerCase();
 
     if (sub === 'stop') {
@@ -296,26 +747,25 @@ ${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
       try {
         const res = this.hardwareGateway.resumeOperation(token);
         console.log(`${C.green}✓ Emergency stop disengaged. Hardware operations restored.${C.reset}`);
-        speak('Emergency stop disengaged. All hardware back online.', this.voiceEnabled);
+        speak('Emergency stop disengaged. All hardware restored.', this.voiceEnabled);
       } catch (e) {
         console.log(`${C.red}Resume failed: ${e.message}${C.reset}`);
       }
       return;
     }
 
-    // Default: list devices
     console.log(`\n${C.cyan}${C.bold}REGISTERED PHYSICAL & VIRTUAL HARDWARE:${C.reset}`);
     console.log(`Status: ${this.hardwareGateway.emergencyStopEngaged ? C.red + 'HALTED (E-STOP)' : C.green + 'OPERATIONAL'}${C.reset}\n`);
-
     for (const [id, dev] of this.hardwareGateway.registeredDevices.entries()) {
       console.log(`  ${C.yellow}● ${id.padEnd(20)}${C.reset} Type: ${dev.type.padEnd(18)} Status: ${C.green}${dev.status}${C.reset}`);
     }
     console.log('');
   }
 
+  // ── LOCAL CLI EXECUTION ─────────────────────────────────────────────
   async handleRun(command) {
     if (!command) {
-      console.log(`${C.yellow}Usage: run <command> (e.g. run git status, run node -v, run echo test)${C.reset}`);
+      console.log(`${C.yellow}Usage: run <command> (e.g. run git status, run node -v, run npm test)${C.reset}`);
       return;
     }
 
@@ -335,13 +785,13 @@ ${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
     }
   }
 
+  // ── MISSION PLANNING ────────────────────────────────────────────────
   async handlePlan(objective) {
     if (!objective) {
-      console.log(`${C.yellow}Usage: plan <objective> (e.g. plan Upgrade firmware on ESP32 sensor node)${C.reset}`);
+      console.log(`${C.yellow}Usage: plan <objective> (e.g. plan Calibrate ESP32 ADC and stream telemetry)${C.reset}`);
       return;
     }
-
-    console.log(`\n${C.cyan}${C.bold}SYNTHESIZING EXECUTIVE PLAN...${C.reset}`);
+    console.log(`\n${C.cyan}${C.bold}SYNTHESIZING EXECUTIVE MISSION PLAN...${C.reset}`);
     try {
       const plan = await this.executive.planObjective(objective);
       console.log(`Plan ID: ${C.yellow}${plan.id}${C.reset} | Status: ${C.green}${plan.status}${C.reset}`);
@@ -357,21 +807,7 @@ ${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
     }
   }
 
-  handleVoiceToggle(flag) {
-    if (flag === 'on' || flag === 'true') {
-      this.voiceEnabled = true;
-      console.log(`${C.green}✓ Voice synthesis ENABLED via Windows Speech API.${C.reset}`);
-      speak('Voice output enabled, sir.', true);
-    } else if (flag === 'off' || flag === 'false') {
-      this.voiceEnabled = false;
-      console.log(`${C.dim}Voice synthesis DISABLED.${C.reset}`);
-    } else {
-      this.voiceEnabled = !this.voiceEnabled;
-      console.log(`Voice synthesis ${this.voiceEnabled ? C.green + 'ENABLED' : C.dim + 'DISABLED'}${C.reset}`);
-      if (this.voiceEnabled) speak('Voice active.', true);
-    }
-  }
-
+  // ── SPECIALIST AGENTS ───────────────────────────────────────────────
   async handleAsk(agentName, query) {
     if (!agentName || !this.agents.has(agentName)) {
       console.log(`${C.yellow}Available specialists: ${Array.from(this.agents.keys()).join(', ')}${C.reset}`);
@@ -401,9 +837,9 @@ ${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
     speak(reply, this.voiceEnabled);
   }
 
+  // ── GENERAL CHAT ────────────────────────────────────────────────────
   async handleChat(message) {
     console.log(`\n${C.cyan}${C.bold}MINI-ADHY PERSONAL:${C.reset}`);
-    // Sovereign companion response logic
     const responses = [
       `I'm tracking that, Adhithya. The full specialist mesh is active, and the local PC execution boundary is clear. What shall we build or optimize next?`,
       `Understood. JARVIS and the team have logged this into episodic memory. All hardware channels are responding normally.`,
@@ -411,7 +847,6 @@ ${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
     ];
 
     let reply = '';
-    // If it's a coding or workshop query, give context-aware reply
     if (/status|health|diagnostic/i.test(message)) {
       reply = `All 11 agent nodes are synchronized with zero latency. Host ${os.hostname()} is running at nominal parameters.`;
     } else if (/hardware|sensor|esp32|pi|robot/i.test(message)) {
@@ -423,16 +858,114 @@ ${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
     }
 
     console.log(`  ${reply}\n`);
+    if (this.memoryStore) {
+      await this.memoryStore.logInteraction('USER', message);
+      await this.memoryStore.logInteraction('ASSISTANT', reply);
+    }
     speak(reply, this.voiceEnabled);
   }
 
-  shutdown() {
+  // ── EXECUTE VIA API ─────────────────────────────────────────────────
+  async executeApiDirective(commandStr) {
+    const raw = String(commandStr).trim();
+    const parts = raw.split(/\s+/);
+    const cmd = parts[0].toLowerCase();
+    const args = parts.slice(1).join(' ');
+
+    if (cmd === 'status') {
+      return {
+        uptimeSeconds: Math.floor((Date.now() - this.sessionStartTime) / 1000),
+        agentsOnline: this.agents.size,
+        hardwareDevices: this.hardwareGateway?.registeredDevices?.size || 0
+      };
+    }
+    if (cmd === 'sys') {
+      return await this.desktopControl._handleAction('getSystemStatus');
+    }
+    if (cmd === 'apps') {
+      return await this.desktopControl._handleAction('listOpenWindows');
+    }
+    if (cmd === 'run') {
+      return await this.localExecutor.executeCommand(args);
+    }
+    if (cmd === 'plan') {
+      return await this.executive.planObjective(args);
+    }
+    if (cmd === 'memo') {
+      return await this.memoryStore.remember(args, 'api_memo');
+    }
+    if (cmd === 'recall') {
+      return this.memoryStore.recall(args);
+    }
+    if (cmd === 'screen') {
+      return await this.desktopControl._handleAction('takeScreenshot');
+    }
+    return { response: `Directive '${cmd}' registered by Mini-Adhy Personal.` };
+  }
+
+  // ── CONTROLS & TOGGLES ──────────────────────────────────────────────
+  handleVoiceToggle(flag) {
+    if (flag === 'on' || flag === 'true') {
+      this.voiceEnabled = true;
+      console.log(`${C.green}✓ Voice synthesis ENABLED via Windows Speech API.${C.reset}`);
+      speak('Voice output enabled, sir.', true);
+    } else if (flag === 'off' || flag === 'false') {
+      this.voiceEnabled = false;
+      console.log(`${C.dim}Voice synthesis DISABLED.${C.reset}`);
+    } else {
+      this.voiceEnabled = !this.voiceEnabled;
+      console.log(`Voice synthesis ${this.voiceEnabled ? C.green + 'ENABLED' : C.dim + 'DISABLED'}${C.reset}`);
+      if (this.voiceEnabled) speak('Voice active.', true);
+    }
+  }
+
+  handleServerToggle(flag) {
+    if (flag === 'off') {
+      this.httpServer?.stop();
+      console.log(`${C.dim}Local HTTP Cockpit stopped.${C.reset}`);
+    } else {
+      this.httpServer?.start();
+      console.log(`${C.green}✓ Local HTTP Cockpit active on http://127.0.0.1:4242${C.reset}`);
+    }
+  }
+
+  printStatus() {
+    const uptimeSec = Math.floor((Date.now() - this.sessionStartTime) / 1000);
+    const mem = process.memoryUsage();
+    console.log(`
+${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
+  ${C.dim}Uptime:${C.reset}            ${uptimeSec}s
+  ${C.dim}Node Version:${C.reset}      ${process.version}
+  ${C.dim}Platform:${C.reset}          ${process.platform} (${os.arch()})
+  ${C.dim}Memory Heap:${C.reset}       ${Math.round(mem.heapUsed / 1024 / 1024)} MB / ${Math.round(mem.heapTotal / 1024 / 1024)} MB
+  ${C.dim}Active Agents:${C.reset}     ${this.agents.size} / 11 Online
+  ${C.dim}Hardware Devices:${C.reset}  ${this.hardwareGateway?.registeredDevices?.size || 0} Registered
+  ${C.dim}Persistent Memos:${C.reset}  ${this.memoryStore?.data?.notes?.length || 0} Saved
+  ${C.dim}HTTP Cockpit:${C.reset}      http://127.0.0.1:4242 [${this.httpServer?.isRunning ? C.green + 'RUNNING' : C.dim + 'STOPPED'}${C.reset}]
+  ${C.dim}E-Stop State:${C.reset}      ${this.hardwareGateway?.emergencyStopEngaged ? C.red + 'ENGAGED' : C.green + 'NORMAL'}${C.reset}
+  ${C.dim}Voice Synthesis:${C.reset}   ${this.voiceEnabled ? C.green + 'ENABLED' : C.dim + 'DISABLED'}${C.reset}
+    `);
+  }
+
+  printMesh() {
+    console.log(`\n${C.cyan}${C.bold}SPECIALIST AGENT MESH INTEGRITY:${C.reset}`);
+    for (const [name, agent] of this.agents.entries()) {
+      const clearance = agent.clearanceLevel || agent.permissionLevel || 'SAFE_AUTOMATION';
+      const role = agent.role || agent.category || 'Specialist';
+      console.log(`  ${C.yellow}${C.bold}${name.padEnd(10)}${C.reset} | ${C.green}ACTIVE${C.reset} | ${C.cyan}${clearance}${C.reset} | ${C.dim}${role}${C.reset}`);
+    }
+    console.log('');
+  }
+
+  async shutdown() {
     console.log(`\n${C.yellow}» Commencing graceful shutdown of Stark Workshop Daemon...${C.reset}`);
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
-    if (this.hardwareGateway) {
-      console.log(`  ${C.dim}Securing hardware devices...${C.reset}`);
+    if (this.httpServer) this.httpServer.stop();
+    if (this.memoryStore) {
+      console.log(`  ${C.dim}Persisting cognitive memory to disk...${C.reset}`);
+      await this.memoryStore.save();
     }
-    console.log(`  ${C.green}✓ State persisted to local session ledger.${C.reset}`);
+    console.log(`  ${C.green}✓ State persisted to data/personal_memory.json.${C.reset}`);
     console.log(`${C.cyan}${C.bold}» Workshop Daemon offline. Good day, sir.${C.reset}\n`);
     speak('Workshop daemon offline. Good day, sir.', this.voiceEnabled);
     process.exit(0);
@@ -453,21 +986,41 @@ async function run() {
 
   rl.prompt();
 
-  rl.on('line', async (line) => {
+  let isExecuting = false;
+  const commandQueue = [];
+
+  async function processCommandQueue() {
+    if (isExecuting || commandQueue.length === 0) return;
+    isExecuting = true;
+    const line = commandQueue.shift();
     try {
       await daemon.handleInput(line);
     } catch (err) {
       console.log(`${C.red}Error: ${err.message}${C.reset}`);
+    } finally {
+      isExecuting = false;
+      if (commandQueue.length > 0) {
+        processCommandQueue();
+      } else {
+        rl.prompt();
+      }
     }
-    rl.prompt();
+  }
+
+  rl.on('line', (line) => {
+    commandQueue.push(line);
+    processCommandQueue();
   });
 
-  rl.on('close', () => {
-    daemon.shutdown();
+  rl.on('close', async () => {
+    while (isExecuting || commandQueue.length > 0) {
+      await new Promise(r => setTimeout(r, 60));
+    }
+    await daemon.shutdown();
   });
 
-  process.on('SIGINT', () => {
-    daemon.shutdown();
+  process.on('SIGINT', async () => {
+    await daemon.shutdown();
   });
 }
 
@@ -475,4 +1028,3 @@ run().catch((err) => {
   console.error('Fatal Daemon Error:', err);
   process.exit(1);
 });
-

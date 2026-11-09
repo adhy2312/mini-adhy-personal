@@ -1,0 +1,40 @@
+{
+  "version": "2.0",
+  "owner": "Adhithya Mohan",
+  "createdAt": 1794231932205,
+  "lastSaved": 1794232704786,
+  "preferences": {
+    "voiceFeedback": true,
+    "defaultDomain": "embedded_systems_and_fullstack",
+    "tone": "stark_industries_executive"
+  },
+  "projects": {
+    "portfolio": {
+      "path": "d:\\portfolio\\portfolio",
+      "description": "Official portfolio website & sovereign AI showroom",
+      "activeTasks": [
+        "Production hardening verified",
+        "Glassmorphic live cognition updated"
+      ]
+    },
+    "mini_adhy_personal": {
+      "path": "d:\\portfolio\\mini-adhy-personal",
+      "description": "Autonomous personal AI companion & workshop daemon",
+      "activeTasks": [
+        "Stark daemon operational",
+        "Hardware gateway integration"
+      ]
+    }
+  },
+  "notes": [
+    {
+      "id": "memo_1794231936483_06d2",
+      "text": "Testing high-level autonomous Stark Daemon v3.0",
+      "category": "workshop_memo",
+      "tags": [],
+      "timestamp": 1794231936483
+    }
+  ],
+  "episodicLog": [],
+  "missions": []
+}
