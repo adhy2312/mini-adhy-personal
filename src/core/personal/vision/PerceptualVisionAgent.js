@@ -224,3 +224,4 @@ $ocrResult = $engine.RecognizeAsync($bitmap).GetAwaiter().GetResult()
 }
 
 export const perceptualVisionAgent = new PerceptualVisionAgent();
+

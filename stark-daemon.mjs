@@ -57,8 +57,16 @@ function printBanner() {
 }
 
 // ── TTS HELPER ────────────────────────────────────────────────────────
+let activeDaemonInstance = null;
+
 async function speak(text, enabled = true) {
   if (!enabled || !text) return;
+  if (activeDaemonInstance?.voiceNexus) {
+    try {
+      await activeDaemonInstance.voiceNexus.speak(text);
+      return;
+    } catch {}
+  }
   try {
     const sanitized = text.replace(/["'`$\\]/g, ' ').replace(/\n/g, ' ').slice(0, 320);
     const script = `Add-Type -AssemblyName System.Speech; $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer; $synth.Rate = 1; $synth.Speak('${sanitized}')`;
@@ -116,6 +124,7 @@ class StarkPersonalDaemon {
       await this.sentinel.init();
       this.telemetry = new SystemTelemetrySentinel();
       this.voiceNexus = new VoiceSynthesisNexus();
+      activeDaemonInstance = this;
       this.visionAgent = new PerceptualVisionAgent();
       this.radar = new LocalNetworkRadar();
       this.guardian = new WorkspaceGuardian();
@@ -301,39 +310,6 @@ class StarkPersonalDaemon {
 
       case 'hardware':
         await this.handleHardware(parts.slice(1));
-        break;
-
-      case 'telemetry':
-      case 'health':
-      case 'vitals':
-        await this.handleTelemetry();
-        break;
-
-      case 'procs':
-      case 'top':
-        await this.handleTopProcs(parts[1]);
-        break;
-
-      case 'voices':
-        await this.handleVoices();
-        break;
-
-      case 'focus':
-        await this.handleFocus(args);
-        break;
-
-      case 'radar':
-      case 'lan':
-        await this.handleRadar();
-        break;
-
-      case 'ping':
-        await this.handlePing(parts[1]);
-        break;
-
-      case 'workspaces':
-      case 'sweep':
-        await this.handleWorkspaceSweep();
         break;
 
       case 'run':
@@ -984,17 +960,33 @@ ${C.cyan}${C.bold}STARK WORKSHOP v3.0 DIRECTIVES & PROTOCOLS:${C.reset}
 
   // ── CONTROLS & TOGGLES ──────────────────────────────────────────────
   handleVoiceToggle(flag) {
-    if (flag === 'on' || flag === 'true') {
+    const arg = flag?.toLowerCase();
+    if (arg === 'on' || arg === 'true') {
       this.voiceEnabled = true;
-      console.log(`${C.green}✓ Voice synthesis ENABLED via Windows Speech API.${C.reset}`);
-      speak('Voice output enabled, sir.', true);
-    } else if (flag === 'off' || flag === 'false') {
+      console.log(`${C.green}✓ Voice synthesis ENABLED // PAUL BETTANY (JARVIS) British Neural Voice.${C.reset}`);
+      speak('For you, sir, always. JARVIS neural voice operational.', true);
+    } else if (arg === 'off' || arg === 'false') {
       this.voiceEnabled = false;
       console.log(`${C.dim}Voice synthesis DISABLED.${C.reset}`);
+    } else if (arg === 'bettany' || arg === 'jarvis' || arg === 'neural') {
+      this.voiceEnabled = true;
+      this.voiceNexus?.setEngine('JARVIS_BETTANY');
+      console.log(`${C.cyan}✓ Voice profile set to PAUL BETTANY (JARVIS) [en-GB-RyanNeural, -4% rate, -2Hz pitch].${C.reset}`);
+      speak('At your service, sir. Paul Bettany neural voice calibrated and online.', true);
+    } else if (arg === 'sapi' || arg === 'offline') {
+      this.voiceEnabled = true;
+      this.voiceNexus?.setEngine('SAPI');
+      console.log(`${C.yellow}✓ Voice profile set to Windows SAPI (Offline Default).${C.reset}`);
+      speak('Windows Speech API active.', true);
+    } else if (arg === 'elevenlabs') {
+      this.voiceEnabled = true;
+      this.voiceNexus?.setEngine('ELEVENLABS');
+      console.log(`${C.magenta}✓ Voice profile set to ElevenLabs Voice Clone.${C.reset}`);
+      speak('ElevenLabs voice engine configured.', true);
     } else {
       this.voiceEnabled = !this.voiceEnabled;
-      console.log(`Voice synthesis ${this.voiceEnabled ? C.green + 'ENABLED' : C.dim + 'DISABLED'}${C.reset}`);
-      if (this.voiceEnabled) speak('Voice active.', true);
+      console.log(`Voice synthesis ${this.voiceEnabled ? C.green + 'ENABLED (Paul Bettany JARVIS Neural)' : C.dim + 'DISABLED'}${C.reset}`);
+      if (this.voiceEnabled) speak('At your service, sir. All workshop systems nominal.', true);
     }
   }
 
@@ -1034,128 +1026,6 @@ ${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
       console.log(`  ${C.yellow}${C.bold}${name.padEnd(10)}${C.reset} | ${C.green}ACTIVE${C.reset} | ${C.cyan}${clearance}${C.reset} | ${C.dim}${role}${C.reset}`);
     }
     console.log('');
-  }
-
-  // ── TELEMETRY & HEALTH SENTINEL ────────────────────────────────────
-  async handleTelemetry() {
-    if (!this.telemetry) return;
-    console.log(`\n${C.cyan}${C.bold}════ SYSTEM TELEMETRY SENTINEL // HARDWARE VITALS ════${C.reset}`);
-    const vitals = await this.telemetry.getSystemTelemetry();
-
-    const memColor = vitals.memory.percentUsed > 85 ? C.red : vitals.memory.percentUsed > 65 ? C.yellow : C.green;
-    console.log(`  ${C.bold}RAM Usage:${C.reset}       ${memColor}${vitals.memory.usedGb} GB / ${vitals.memory.totalGb} GB (${vitals.memory.percentUsed}%)${C.reset} [${vitals.memory.freeGb} GB free]`);
-    console.log(`  ${C.bold}CPU Load:${C.reset}        ${vitals.cpu.percentLoad}% (${vitals.cpu.cores} physical/logical cores)`);
-    console.log(`  ${C.bold}Power / Battery:${C.reset} ${vitals.battery?.status || 'AC Connected'} (${vitals.battery?.chargePercent ? vitals.battery.chargePercent + '%' : 'AC Connected'})`);
-    console.log(`  ${C.bold}Uptime:${C.reset}          ${vitals.uptimeFormatted}`);
-
-    if (vitals.drives && vitals.drives.length > 0) {
-      console.log(`\n  ${C.bold}Active Storage Drives:${C.reset}`);
-      vitals.drives.forEach(d => {
-        const driveColor = d.percentUsed > 90 ? C.red : d.percentUsed > 75 ? C.yellow : C.green;
-        console.log(`    └─ ${C.cyan}${d.drive}${C.reset}: ${driveColor}${d.usedGb} GB / ${d.totalGb} GB (${d.percentUsed}% used)${C.reset} [${d.freeGb} GB free]`);
-      });
-    }
-
-    if (vitals.alerts && vitals.alerts.length > 0) {
-      console.log(`\n  ${C.red}${C.bold}Telemetry Alerts:${C.reset}`);
-      vitals.alerts.forEach(a => console.log(`    ${C.red}⚠ [${a.subsystem || a.level}] ${a.message}${C.reset}`));
-    }
-    console.log('');
-    speak(`System vitals: Memory at ${vitals.memory.percentUsed} percent, CPU load at ${vitals.cpu.percentLoad} percent.`, this.voiceEnabled);
-  }
-
-  // ── TOP RESOURCE PROCESSES ──────────────────────────────────────────
-  async handleTopProcs(limitArg) {
-    if (!this.telemetry) return;
-    const limit = parseInt(limitArg, 10) || 8;
-    console.log(`\n${C.cyan}${C.bold}TOP ${limit} WORKSTATION PROCESSES BY MEMORY PROFILE:${C.reset}`);
-    const procs = await this.telemetry.getTopProcesses(limit);
-    console.log(`  ${'PID'.padEnd(8)} | ${'PROCESS NAME'.padEnd(28)} | ${'MEMORY (MB)'.padEnd(14)} | CPU (s)`);
-    console.log(`  ${'─'.repeat(8)}─┼─${'─'.repeat(28)}─┼─${'─'.repeat(14)}─┼─${'─'.repeat(10)}`);
-    procs.forEach(p => {
-      const memColor = p.memoryMb > 1000 ? C.red : p.memoryMb > 400 ? C.yellow : C.reset;
-      console.log(`  ${String(p.pid).padEnd(8)} | ${p.name.padEnd(28)} | ${memColor}${String(p.memoryMb).padStart(10)} MB${C.reset}    | ${p.cpuSec}s`);
-    });
-    console.log('');
-  }
-
-  // ── SAPI OFFLINE VOICES ─────────────────────────────────────────────
-  async handleVoices() {
-    if (!this.voiceNexus) return;
-    console.log(`\n${C.cyan}${C.bold}INSTALLED WINDOWS SAPI SYNTHESIS VOICES:${C.reset}`);
-    const voices = await this.voiceNexus.getAvailableVoices();
-    voices.forEach((v, idx) => {
-      console.log(`  ${C.yellow}[${idx + 1}]${C.reset} ${C.bold}${v.Name}${C.reset} | Culture: ${v.Culture} | Gender: ${v.Gender} | Age: ${v.Age}`);
-    });
-    console.log('');
-  }
-
-  // ── WINDOW FOCUS ────────────────────────────────────────────────────
-  async handleFocus(titleQuery) {
-    if (!this.visionAgent) return;
-    if (!titleQuery?.trim()) {
-      console.log(`${C.yellow}Usage: focus <window title or partial name>${C.reset}`);
-      return;
-    }
-    const res = await this.visionAgent.focusWindow(titleQuery);
-    if (res.focused) {
-      console.log(`${C.green}✓ Brought window to front: "${res.title}"${C.reset}`);
-      speak(`Brought ${res.title} into focus.`, this.voiceEnabled);
-    } else {
-      console.log(`${C.red}Could not find active window matching: "${titleQuery}"${C.reset}`);
-    }
-  }
-
-  // ── NETWORK RADAR ───────────────────────────────────────────────────
-  async handleRadar() {
-    if (!this.radar) return;
-    console.log(`\n${C.cyan}${C.bold}LOCAL SUBNET RADAR // WORKSHOP NODES:${C.reset}`);
-    const res = await this.radar.scanLocalDevices();
-    console.log(`  Nodes Detected: ${res.deviceCount}`);
-    console.log(`  ${'IP ADDRESS'.padEnd(18)} | ${'MAC ADDRESS'.padEnd(20)} | CLASSIFICATION`);
-    console.log(`  ${'─'.repeat(18)}─┼─${'─'.repeat(20)}─┼─${'─'.repeat(20)}`);
-    res.devices.forEach(d => {
-      const clsColor = d.classification.includes('Gateway') ? C.yellow : d.classification.includes('Raspberry') ? C.green : C.reset;
-      console.log(`  ${d.ip.padEnd(18)} | ${d.mac.padEnd(20)} | ${clsColor}${d.classification}${C.reset}`);
-    });
-    console.log('');
-    speak(`Subnet scan complete. ${res.deviceCount} active network devices discovered.`, this.voiceEnabled);
-  }
-
-  // ── PING LATENCY ────────────────────────────────────────────────────
-  async handlePing(hostArg) {
-    if (!this.radar) return;
-    const host = hostArg || '8.8.8.8';
-    console.log(`${C.dim}Pinging ${host}...${C.reset}`);
-    const res = await this.radar.pingHost(host);
-    if (res.reachable) {
-      console.log(`${C.green}✓ ${res.host} is ALIVE${C.reset} | Latency: ${C.cyan}${res.latencyMs || 0} ms${C.reset}`);
-    } else {
-      console.log(`${C.red}✗ ${res.host} UNREACHABLE${C.reset} [Packet loss: 100%]`);
-    }
-  }
-
-  // ── WORKSPACE GUARDIAN SWEEP ────────────────────────────────────────
-  async handleWorkspaceSweep() {
-    if (!this.guardian) return;
-    console.log(`\n${C.cyan}${C.bold}WORKSPACE GUARDIAN // REPOSITORY INTEGRITY SWEEP:${C.reset}`);
-    const res = await this.guardian.sweepAllWorkspaces();
-    console.log(`  Repositories Monitored: ${res.workspaceCount}`);
-    console.log(`  Total Uncommitted Files: ${res.uncommittedTotal}\n`);
-
-    res.workspaces.forEach(ws => {
-      const statusBadge = ws.isClean ? `${C.green}[CLEAN]${C.reset}` : `${C.yellow}[DIRTY - ${ws.dirtyCount} MODIFIED]${C.reset}`;
-      console.log(`  ${C.bold}${ws.repoPath}${C.reset} (${ws.branch || 'detached'}) ${statusBadge}`);
-      if (ws.lastCommit) {
-        console.log(`    Latest: ${C.cyan}${ws.lastCommit}${C.reset}`);
-      }
-      if (!ws.isClean && ws.dirtyFiles?.length > 0) {
-        console.log(`    Modified Files:`);
-        ws.dirtyFiles.slice(0, 5).forEach(f => console.log(`      └─ ${C.yellow}${f}${C.reset}`));
-      }
-      console.log('');
-    });
-    speak(`Workspace audit complete. ${res.uncommittedTotal} uncommitted files found across repositories.`, this.voiceEnabled);
   }
 
   async shutdown() {
