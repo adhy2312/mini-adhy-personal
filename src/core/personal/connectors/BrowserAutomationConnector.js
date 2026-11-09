@@ -104,3 +104,4 @@ export class BrowserAutomationConnector extends BaseConnector {
 }
 
 export default BrowserAutomationConnector;
+

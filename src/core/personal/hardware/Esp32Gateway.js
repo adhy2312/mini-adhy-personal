@@ -92,3 +92,4 @@ export class Esp32Gateway extends BaseConnector {
 }
 
 export default Esp32Gateway;
+

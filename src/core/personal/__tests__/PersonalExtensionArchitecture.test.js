@@ -362,3 +362,4 @@ describe('Mini-Adhy Personal AI — Extension Architecture', () => {
     });
   });
 });
+

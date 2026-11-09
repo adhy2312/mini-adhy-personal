@@ -113,3 +113,4 @@ export class GitHubConnector extends BaseConnector {
 }
 
 export default GitHubConnector;
+

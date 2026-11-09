@@ -86,3 +86,4 @@ export class SerialGateway extends BaseConnector {
 }
 
 export default SerialGateway;
+

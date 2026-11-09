@@ -32,13 +32,23 @@ export class LocalExecutionAgent {
       'git',
       'node',
       'npm',
+      'npx',
       'python',
+      'python3',
+      'pip',
       'pytest',
       'echo',
       'dir',
       'ls',
       'cat',
-      'grep'
+      'grep',
+      'powershell',
+      'pwsh',
+      'curl',
+      'ping',
+      'whoami',
+      'hostname',
+      'type'
     ]);
   }
 
@@ -85,13 +95,53 @@ export class LocalExecutionAgent {
       throw new Error(`[LocalExecutionAgent] Execution blocked: ${validation.reason}`);
     }
 
+    let executionOutput = `[Sandboxed Execution] Command '${validation.executable}' accepted.`;
+    let isRealExecution = false;
+
+    // In a real Node environment, execute real system process with strict safety guards
+    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+      try {
+        const { exec } = await import('node:child_process');
+        const { promisify } = await import('node:util');
+        const execAsync = promisify(exec);
+        const { stdout, stderr } = await execAsync(command, {
+          cwd: this.workingDirectory,
+          timeout: this.timeoutMs,
+          maxBuffer: 1024 * 1024 * 5 // 5MB buffer limit
+        });
+        executionOutput = stdout || stderr || '[Execution completed with zero output]';
+        isRealExecution = true;
+      } catch (execErr) {
+        executionOutput = execErr.stdout || execErr.stderr || execErr.message;
+        const errRecord = {
+          id: `exec_err_${Date.now()}`,
+          command,
+          executable: validation.executable,
+          timestamp: Date.now(),
+          status: 'FAILED',
+          output: executionOutput,
+          error: execErr.message
+        };
+        this.executionHistory.push(errRecord);
+        return {
+          success: false,
+          commandId: errRecord.id,
+          executable: validation.executable,
+          output: executionOutput,
+          error: execErr.message,
+          executionTimestamp: errRecord.timestamp
+        };
+      }
+    }
+
     const record = {
       id: `exec_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       command,
       executable: validation.executable,
       timestamp: Date.now(),
       status: 'EXECUTED',
-      output: `[Sandboxed Execution] Command '${validation.executable}' accepted.`
+      output: executionOutput,
+      isReal: isRealExecution
     };
 
     this.executionHistory.push(record);
@@ -104,7 +154,8 @@ export class LocalExecutionAgent {
       commandId: record.id,
       executable: validation.executable,
       output: record.output,
-      executionTimestamp: record.timestamp
+      executionTimestamp: record.timestamp,
+      isReal: isRealExecution
     };
   }
 
@@ -114,3 +165,4 @@ export class LocalExecutionAgent {
 }
 
 export default LocalExecutionAgent;
+

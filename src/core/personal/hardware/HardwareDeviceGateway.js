@@ -153,3 +153,4 @@ export class HardwareDeviceGateway extends BaseConnector {
 }
 
 export default HardwareDeviceGateway;
+

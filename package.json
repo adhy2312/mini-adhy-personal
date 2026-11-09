@@ -39,6 +39,7 @@
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-scripts start",
+    "stark": "node --loader ./esm-loader.mjs stark-daemon.mjs",
     "build": "cross-env CI=false GENERATE_SOURCEMAP=false react-scripts build && cd studio && npm install && npx sanity build ../build/studio --yes",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

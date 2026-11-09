@@ -82,3 +82,4 @@ export class RaspberryPiGateway extends BaseConnector {
 }
 
 export default RaspberryPiGateway;
+
