@@ -34,3 +34,8 @@ data/audio/
 # Rust build artifacts
 target/
 src/native/rust/target/
+
+# EDA & Presence local artifacts
+data/eda/
+data/presence/
+data/quarantine_vault/

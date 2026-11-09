@@ -34,5 +34,18 @@ export * from './vision/PerceptualVisionAgent';
 export * from './radar/LocalNetworkRadar';
 export * from './workspace/WorkspaceGuardian';
 export * from './native/PolyglotNexus';
+export * from './presence/DigitalPresenceSynapse';
+export * from './expertise/UniversalExpertiseRegistry';
+export * from './engineering/ElectronicsEngineeringNexus';
+export * from './engineering/PcbDesignAutomation';
+export * from './software/SoftwareEngineeringDivision';
+export * from './itops/ITOperationsDivision';
+export * from './security/CyberDefenseIntelligence';
+export * from './terminal/ControlledTerminalOperator';
+export * from './data/DataIntelligenceEngine';
+export * from './knowledge/GlobalKnowledgeEngine';
+export * from './companion/EmpatheticCompanionNexus';
+export * from './decision/DecisionIntelligenceEngine';
+export * from './workflows/UniversalWorkflowEngine';
 export * from './executive/PersonalExecutiveAgent';
 

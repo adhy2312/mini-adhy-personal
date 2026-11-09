@@ -114,6 +114,19 @@ class StarkPersonalDaemon {
       const { LocalNetworkRadar } = await import('./src/core/personal/radar/LocalNetworkRadar.js');
       const { WorkspaceGuardian } = await import('./src/core/personal/workspace/WorkspaceGuardian.js');
       const { PolyglotNexus } = await import('./src/core/personal/native/PolyglotNexus.js');
+      const { DigitalPresenceSynapse } = await import('./src/core/personal/presence/DigitalPresenceSynapse.js');
+      const { UniversalExpertiseRegistry } = await import('./src/core/personal/expertise/UniversalExpertiseRegistry.js');
+      const { ElectronicsEngineeringNexus } = await import('./src/core/personal/engineering/ElectronicsEngineeringNexus.js');
+      const { PcbDesignAutomation } = await import('./src/core/personal/engineering/PcbDesignAutomation.js');
+      const { SoftwareEngineeringDivision } = await import('./src/core/personal/software/SoftwareEngineeringDivision.js');
+      const { ITOperationsDivision } = await import('./src/core/personal/itops/ITOperationsDivision.js');
+      const { CyberDefenseIntelligence } = await import('./src/core/personal/security/CyberDefenseIntelligence.js');
+      const { ControlledTerminalOperator } = await import('./src/core/personal/terminal/ControlledTerminalOperator.js');
+      const { DataIntelligenceEngine } = await import('./src/core/personal/data/DataIntelligenceEngine.js');
+      const { GlobalKnowledgeEngine } = await import('./src/core/personal/knowledge/GlobalKnowledgeEngine.js');
+      const { EmpatheticCompanionNexus } = await import('./src/core/personal/companion/EmpatheticCompanionNexus.js');
+      const { DecisionIntelligenceEngine } = await import('./src/core/personal/decision/DecisionIntelligenceEngine.js');
+      const { UniversalWorkflowEngine } = await import('./src/core/personal/workflows/UniversalWorkflowEngine.js');
 
       this.localExecutor = new LocalExecutionAgent();
       this.fileOps = new LocalFileOpsAgent();
@@ -131,6 +144,27 @@ class StarkPersonalDaemon {
       this.guardian = new WorkspaceGuardian();
       this.polyglot = new PolyglotNexus();
       const polyReport = await this.polyglot.initialize();
+      this.presence = new DigitalPresenceSynapse();
+      this.expertise = new UniversalExpertiseRegistry();
+      this.electronics = new ElectronicsEngineeringNexus();
+      this.pcb = new PcbDesignAutomation();
+      this.softwareEng = new SoftwareEngineeringDivision();
+      this.itOps = new ITOperationsDivision();
+      this.cyberSec = new CyberDefenseIntelligence();
+      this.terminalOperator = new ControlledTerminalOperator();
+      this.dataIntel = new DataIntelligenceEngine();
+      this.globalKnowledge = new GlobalKnowledgeEngine();
+      this.companion = new EmpatheticCompanionNexus();
+      this.decisionEngine = new DecisionIntelligenceEngine();
+      this.workflowEngine = new UniversalWorkflowEngine({
+        electronics: this.electronics,
+        pcb: this.pcb,
+        software: this.softwareEng,
+        itops: this.itOps,
+        cyber: this.cyberSec,
+        knowledge: this.globalKnowledge,
+        decision: this.decisionEngine
+      });
       this.executive = new PersonalExecutiveAgent({
         localExecutionAgent: this.localExecutor,
         hardwareGateway: this.hardwareGateway
@@ -165,6 +199,13 @@ class StarkPersonalDaemon {
       console.log(`    ${C.dim}├─${C.reset} ${C.green}Go Sentinel (stark-sentinel.exe)${C.reset}  [Sub-ms hardware telemetry & 1000-port radar]`);
       console.log(`    ${C.dim}├─${C.reset} ${C.green}Python Neural Nexus${C.reset}              [Paul Bettany Edge-TTS & Sparse Cosine Memory Engine]`);
       console.log(`    ${C.dim}└─${C.reset} ${C.green}Rust Cryptographic Vault (stark-vault.exe)${C.reset} [Zero-cost HMAC-SHA256 & Cognitive Quarantine]`);
+      console.log(`  ${C.magenta}${C.bold}✓ Universal Personal Operating System Online:${C.reset}`);
+      console.log(`    ${C.dim}├─${C.reset} ${C.green}Digital Presence Synapse${C.reset}         [Portable .stark-presence multi-device transport]`);
+      console.log(`    ${C.dim}├─${C.reset} ${C.green}Universal Expertise Registry${C.reset}     [${this.expertise.capabilities.size} professional capabilities active]`);
+      console.log(`    ${C.dim}├─${C.reset} ${C.green}Engineering & PCB EDA Automation${C.reset} [KiCad v7/v8 S-expression, ERC/DRC, SPICE & BOM]`);
+      console.log(`    ${C.dim}├─${C.reset} ${C.green}Controlled Terminal Operator${C.reset}     [Level 0-4 governance & secrets redaction]`);
+      console.log(`    ${C.dim}├─${C.reset} ${C.green}Cyber Defense SOC Operations${C.reset}     [Heuristics, encrypted quarantine & threat radar]`);
+      console.log(`    ${C.dim}└─${C.reset} ${C.green}Empathetic Companion & Decisions${C.reset} [Sentiment intent classifier & weighted matrices]`);
     } catch (err) {
       console.log(`  ${C.red}✗ Subsystem init error: ${err.message}${C.reset}`);
     }
@@ -379,6 +420,43 @@ class StarkPersonalDaemon {
         await this.handleSemanticSearch(args);
         break;
 
+      case 'what-can-you-do':
+      case 'capabilities':
+        this.handleCapabilities();
+        break;
+
+      case 'export-presence':
+      case 'presence-export':
+        await this.handleExportPresence();
+        break;
+
+      case 'import-presence':
+      case 'presence-import':
+        await this.handleImportPresence(parts[1]);
+        break;
+
+      case 'pcb-design':
+        await this.handlePcbDesign(parts[1]);
+        break;
+
+      case 'soc-status':
+      case 'soc':
+        this.handleSocStatus();
+        break;
+
+      case 'taskforce':
+        this.handleTaskForce(args);
+        break;
+
+      case 'decide':
+        this.handleDecision(args);
+        break;
+
+      case 'term':
+      case 'terminal-run':
+        await this.handleControlledTerminal(args);
+        break;
+
       case 'clear':
       case 'cls':
         printBanner();
@@ -433,6 +511,14 @@ ${C.cyan}${C.bold}STARK WORKSHOP v3.0 DIRECTIVES & PROTOCOLS:${C.reset}
   ${C.yellow}vault-audit <json>${C.reset}    Inspect cognitive memory bundle for quarantine via Rust
   ${C.yellow}jarvis-voice [text]${C.reset}   Synthesize Paul Bettany neural voice via Python Edge-TTS
   ${C.yellow}semantic-search <q>${C.reset}   Sub-5ms sparse cosine vector memory search via Python
+  ${C.yellow}capabilities${C.reset}          Live introspection of all verified professional domains
+  ${C.yellow}export-presence${C.reset}       Export portable .stark-presence digital presence bundle
+  ${C.yellow}import-presence <p>${C.reset}   Import and reconstitute digital presence from peer node
+  ${C.yellow}pcb-design <proj>${C.reset}     Generate KiCad S-expression schematic, PCB layout & BOM
+  ${C.yellow}soc-status${C.reset}            Display unified Security Operations Centre (SOC) posture
+  ${C.yellow}taskforce <goal>${C.reset}      JARVIS dynamically assembles specialist engineering team
+  ${C.yellow}decide <goal>${C.reset}         Synthesize rational multi-criteria decision matrix
+  ${C.yellow}term <command>${C.reset}        Execute terminal command under Level 0-4 governance
   ${C.yellow}ask <AGENT> <query>${C.reset}   Consult specific specialist (JARVIS, FRIDAY, EDITH, ULTRON, etc.)
   ${C.yellow}voice on / off${C.reset}        Toggle native Windows speech output
   ${C.yellow}server on / off${C.reset}       Toggle local HTTP Cockpit on http://127.0.0.1:4242
@@ -599,6 +685,137 @@ ${C.cyan}${C.bold}STARK WORKSHOP v3.0 DIRECTIVES & PROTOCOLS:${C.reset}
       console.log(`  [${idx + 1}] Score: ${C.green}${m.relevance_score}${C.reset} | ${m.content.slice(0, 80)}...`);
     });
     console.log('');
+  }
+
+  // ── UNIVERSAL OPERATING SYSTEM DIRECTIVES ────────────────────────────
+  handleCapabilities() {
+    if (!this.expertise) return;
+    const report = this.expertise.getIntrospectionReport();
+    console.log(`\n${C.cyan}${C.bold}MINI-ADHY UNIVERSAL CAPABILITIES REGISTRY (v${report.version}):${C.reset}`);
+    console.log(`  Total Professional Capabilities: ${report.totalCapabilities} across ${report.domainsCovered} domains.\n`);
+    for (const [domain, caps] of Object.entries(report.registry)) {
+      console.log(`  ${C.yellow}${domain}${C.reset}:`);
+      caps.forEach(c => {
+        console.log(`    ${C.dim}•${C.reset} ${C.green}${c.id}${C.reset} [${c.status}] - ${c.description}`);
+      });
+    }
+    console.log('');
+  }
+
+  async handleExportPresence() {
+    if (!this.presence) return;
+    console.log(`${C.dim}Packaging sovereign consciousness and continuous memory into .stark-presence bundle...${C.reset}`);
+    const res = await this.presence.exportPresenceBundle(this.memoryStore, {
+      archetype: 'MINI-ADHY / SOVEREIGN STARK PERSONAL AI',
+      owner: 'Adhithya Mohan'
+    });
+    console.log(`\n${C.green}${C.bold}✓ SOVEREIGN PRESENCE BUNDLE EXPORTED:${C.reset}`);
+    console.log(`  Target Path: ${C.cyan}${res.filePath}${C.reset}`);
+    console.log(`  Checksum:    ${res.checksum}`);
+    console.log(`  Total Notes: ${res.summary.totalNotes} | Total Projects: ${res.summary.totalProjects}\n`);
+    speak('Sovereign digital presence bundle exported successfully, sir. Ready for transfer.', this.voiceEnabled);
+  }
+
+  async handleImportPresence(bundlePath) {
+    if (!this.presence || !bundlePath) {
+      console.log(`${C.yellow}Usage: import-presence <path/to/bundle.stark-presence>${C.reset}`);
+      return;
+    }
+    try {
+      console.log(`${C.dim}Validating cryptographic seal and reconstituting memory state...${C.reset}`);
+      const res = await this.presence.importPresenceBundle(bundlePath, this.memoryStore);
+      console.log(`\n${C.green}${C.bold}✓ SOVEREIGN PRESENCE RECONSTITUTED:${C.reset}`);
+      console.log(`  Source Node:    ${res.sourceDevice?.name} (${res.sourceDevice?.id})`);
+      console.log(`  Notes Imported: ${res.notesImported} (Total: ${res.totalNotesNow})`);
+      console.log(`  Status:         ${res.status}\n`);
+      speak('Digital presence and life continuity memories reconstituted.', this.voiceEnabled);
+    } catch (err) {
+      console.log(`${C.red}✗ Presence import failed: ${err.message}${C.reset}`);
+    }
+  }
+
+  async handlePcbDesign(projectName = 'stark_quantum_power') {
+    if (!this.pcb) return;
+    console.log(`${C.dim}Generating complete KiCad v7/v8 project, schematic, and layout for '${projectName}'...${C.reset}`);
+    const res = await this.pcb.generateKiCadProject(projectName, {
+      components: [
+        { ref: 'R1', value: '10k', footprint: 'Resistor_SMD:R_0805_2012Metric', x: 20, y: 20 },
+        { ref: 'R2', value: '3.3k', footprint: 'Resistor_SMD:R_0805_2012Metric', x: 50, y: 20 },
+        { ref: 'C1', value: '100nF', footprint: 'Capacitor_SMD:C_0805_2012Metric', x: 20, y: 35 }
+      ],
+      nets: [
+        { name: 'VCC', connections: ['R1.1', 'R2.1'] },
+        { name: 'GND', connections: ['R1.2', 'R2.2', 'C1.2'] }
+      ]
+    });
+    console.log(`\n${C.green}${C.bold}✓ KICAD EDA PROJECT GENERATED:${C.reset}`);
+    console.log(`  Directory:  ${C.cyan}${res.projectFolder}${C.reset}`);
+    console.log(`  Files:      ${res.files.join(', ')}`);
+    console.log(`  ERC Status: ${res.erc.passed ? C.green + 'CLEAN' : C.red + 'VIOLATIONS'}${C.reset}`);
+    console.log(`  DRC Status: ${res.drc.passed ? C.green + 'CLEAN' : C.red + 'VIOLATIONS'}${C.reset}\n`);
+    speak('KiCad schematic, layout, and bill of materials synthesized, sir.', this.voiceEnabled);
+  }
+
+  handleSocStatus() {
+    if (!this.cyberSec) return;
+    const soc = this.cyberSec.generateSocDashboard();
+    console.log(`\n${C.cyan}${C.bold}UNIFIED SOC SECURITY OPERATIONS STATUS:${C.reset}`);
+    console.log(`  Defense Perimeter:  ${C.green}${soc.defenseStatus}${C.reset}`);
+    console.log(`  Host Node:          ${soc.host} (${soc.platform})`);
+    console.log(`  Quarantined Items:  ${soc.quarantinedItemsCount}`);
+    console.log(`  Incidents Logged:   ${soc.totalIncidentsLogged}\n`);
+  }
+
+  handleTaskForce(objective) {
+    if (!this.expertise) return;
+    const tf = this.expertise.assembleSpecialistTaskForce(objective || 'Diagnose computer and check defense');
+    console.log(`\n${C.cyan}${C.bold}JARVIS ASSEMBLED SPECIALIST TASK FORCE:${C.reset}`);
+    console.log(`  Task Force ID: ${tf.taskForceId}`);
+    console.log(`  Objective:     ${tf.objective}`);
+    console.log(`  Commander:     ${tf.commander}`);
+    console.log(`  Specialists:`);
+    tf.specialists.forEach((s, idx) => {
+      console.log(`    [${idx + 1}] ${C.green}${s.id}${C.reset} (${s.domain}) - ${s.role}`);
+    });
+    console.log('');
+    speak(`Specialist task force assembled under JARVIS command.`, this.voiceEnabled);
+  }
+
+  handleDecision(objective) {
+    if (!this.decisionEngine) return;
+    const res = this.decisionEngine.evaluateDecision({
+      objective: objective || 'Select primary database architecture',
+      criteria: [
+        { name: 'Performance', weight: 3 },
+        { name: 'Reliability', weight: 4 },
+        { name: 'Developer Velocity', weight: 2 }
+      ],
+      options: [
+        { name: 'PostgreSQL Distributed', scores: { Performance: 8, Reliability: 9, 'Developer Velocity': 8 } },
+        { name: 'SQLite Embedded Monolith', scores: { Performance: 9, Reliability: 8, 'Developer Velocity': 9 } },
+        { name: 'Cloud Firestore', scores: { Performance: 7, Reliability: 7, 'Developer Velocity': 8 } }
+      ]
+    });
+    console.log(`\n${C.cyan}${C.bold}RATIONAL DECISION INTELLIGENCE RECOMMENDATION:${C.reset}`);
+    console.log(`  Objective:          ${res.objective}`);
+    console.log(`  Recommended Choice: ${C.green}${res.recommendedOption}${C.reset} (Score: ${res.recommendedScore}/10)`);
+    console.log(`  Rationale:          ${res.rationale}\n`);
+  }
+
+  async handleControlledTerminal(cmd) {
+    if (!this.terminalOperator || !cmd) {
+      console.log(`${C.yellow}Usage: term <command>${C.reset}`);
+      return;
+    }
+    console.log(`${C.dim}Auditing and executing command under Level 0-4 governance...${C.reset}`);
+    try {
+      const res = await this.terminalOperator.executeCommand(cmd);
+      console.log(`\n${C.green}✓ Level ${res.tier} Execution Success (${res.durationMs}ms):${C.reset}`);
+      if (res.stdout) console.log(res.stdout);
+      if (res.stderr) console.log(`${C.yellow}${res.stderr}${C.reset}`);
+    } catch (err) {
+      console.log(`\n${C.red}✗ Command Error: ${err.message}${C.reset}\n`);
+    }
   }
 
   // ── LAUNCH APP ──────────────────────────────────────────────────────
