@@ -100,6 +100,11 @@ class StarkPersonalDaemon {
       const { ProactiveScheduler } = await import('./src/core/personal/automation/ProactiveScheduler.js');
       const { StarkServer } = await import('./src/core/personal/server/StarkServer.js');
       const { StarkMalwareDefenseSentinel } = await import('./src/core/personal/security/StarkMalwareDefenseSentinel.js');
+      const { SystemTelemetrySentinel } = await import('./src/core/personal/telemetry/SystemTelemetrySentinel.js');
+      const { VoiceSynthesisNexus } = await import('./src/core/personal/voice/VoiceSynthesisNexus.js');
+      const { PerceptualVisionAgent } = await import('./src/core/personal/vision/PerceptualVisionAgent.js');
+      const { LocalNetworkRadar } = await import('./src/core/personal/radar/LocalNetworkRadar.js');
+      const { WorkspaceGuardian } = await import('./src/core/personal/workspace/WorkspaceGuardian.js');
 
       this.localExecutor = new LocalExecutionAgent();
       this.fileOps = new LocalFileOpsAgent();
@@ -109,6 +114,11 @@ class StarkPersonalDaemon {
       this.memoryStore = new PersonalMemoryStore();
       this.sentinel = new StarkMalwareDefenseSentinel();
       await this.sentinel.init();
+      this.telemetry = new SystemTelemetrySentinel();
+      this.voiceNexus = new VoiceSynthesisNexus();
+      this.visionAgent = new PerceptualVisionAgent();
+      this.radar = new LocalNetworkRadar();
+      this.guardian = new WorkspaceGuardian();
       this.executive = new PersonalExecutiveAgent({
         localExecutionAgent: this.localExecutor,
         hardwareGateway: this.hardwareGateway
@@ -133,6 +143,11 @@ class StarkPersonalDaemon {
       console.log(`  ${C.green}✓ Persistent Memory Store loaded${C.reset} [${this.memoryStore.data.notes.length} notes, ${Object.keys(this.memoryStore.data.projects).length} projects]`);
       console.log(`  ${C.green}✓ Physical Hardware Gateway online${C.reset} [3 devices registered]`);
       console.log(`  ${C.green}✓ Stark Malware Defense Sentinel active${C.reset} [FRIDAY & ULTRON heuristic threat hunting]`);
+      console.log(`  ${C.green}✓ System Telemetry Sentinel online${C.reset} [CPU, RAM, Disks, Power profiling]`);
+      console.log(`  ${C.green}✓ Voice Synthesis Nexus connected${C.reset} [100% offline SAPI audio engine]`);
+      console.log(`  ${C.green}✓ Perceptual Vision Agent online${C.reset} [Window enumeration, active focus & OCR]`);
+      console.log(`  ${C.green}✓ Local Network Radar initialized${C.reset} [ARP subnet discovery & diagnostics]`);
+      console.log(`  ${C.green}✓ Workspace Guardian active${C.reset} [Git integrity across developer repos]`);
       console.log(`  ${C.green}✓ Local HTTP Cockpit Server active${C.reset} [http://127.0.0.1:4242]`);
     } catch (err) {
       console.log(`  ${C.red}✗ Subsystem init error: ${err.message}${C.reset}`);
@@ -286,6 +301,39 @@ class StarkPersonalDaemon {
 
       case 'hardware':
         await this.handleHardware(parts.slice(1));
+        break;
+
+      case 'telemetry':
+      case 'health':
+      case 'vitals':
+        await this.handleTelemetry();
+        break;
+
+      case 'procs':
+      case 'top':
+        await this.handleTopProcs(parts[1]);
+        break;
+
+      case 'voices':
+        await this.handleVoices();
+        break;
+
+      case 'focus':
+        await this.handleFocus(args);
+        break;
+
+      case 'radar':
+      case 'lan':
+        await this.handleRadar();
+        break;
+
+      case 'ping':
+        await this.handlePing(parts[1]);
+        break;
+
+      case 'workspaces':
+      case 'sweep':
+        await this.handleWorkspaceSweep();
         break;
 
       case 'run':
@@ -879,6 +927,37 @@ ${C.cyan}${C.bold}STARK WORKSHOP v3.0 DIRECTIVES & PROTOCOLS:${C.reset}
         hardwareDevices: this.hardwareGateway?.registeredDevices?.size || 0
       };
     }
+    if (cmd === 'telemetry' || cmd === 'health') {
+      return this.telemetry ? await this.telemetry.getSystemTelemetry() : {};
+    }
+    if (cmd === 'procs' || cmd === 'top') {
+      const limit = parseInt(args || '10', 10);
+      return this.telemetry ? await this.telemetry.getTopProcesses(limit) : [];
+    }
+    if (cmd === 'speak') {
+      return this.voiceNexus ? await this.voiceNexus.speak(args) : {};
+    }
+    if (cmd === 'voices') {
+      return this.voiceNexus ? await this.voiceNexus.getAvailableVoices() : [];
+    }
+    if (cmd === 'windows') {
+      return this.visionAgent ? await this.visionAgent.getOpenWindows() : [];
+    }
+    if (cmd === 'active') {
+      return this.visionAgent ? await this.visionAgent.getActiveWindow() : null;
+    }
+    if (cmd === 'focus') {
+      return this.visionAgent ? await this.visionAgent.focusWindow(args) : {};
+    }
+    if (cmd === 'radar' || cmd === 'lan') {
+      return this.radar ? await this.radar.scanLocalDevices() : {};
+    }
+    if (cmd === 'ping') {
+      return this.radar ? await this.radar.pingHost(args || '8.8.8.8') : {};
+    }
+    if (cmd === 'workspaces' || cmd === 'sweep') {
+      return this.guardian ? await this.guardian.sweepAllWorkspaces() : {};
+    }
     if (cmd === 'sys') {
       return await this.desktopControl._handleAction('getSystemStatus');
     }
@@ -955,6 +1034,128 @@ ${C.cyan}${C.bold}STARK WORKSHOP SYSTEM READOUT:${C.reset}
       console.log(`  ${C.yellow}${C.bold}${name.padEnd(10)}${C.reset} | ${C.green}ACTIVE${C.reset} | ${C.cyan}${clearance}${C.reset} | ${C.dim}${role}${C.reset}`);
     }
     console.log('');
+  }
+
+  // ── TELEMETRY & HEALTH SENTINEL ────────────────────────────────────
+  async handleTelemetry() {
+    if (!this.telemetry) return;
+    console.log(`\n${C.cyan}${C.bold}════ SYSTEM TELEMETRY SENTINEL // HARDWARE VITALS ════${C.reset}`);
+    const vitals = await this.telemetry.getSystemTelemetry();
+
+    const memColor = vitals.memory.percentUsed > 85 ? C.red : vitals.memory.percentUsed > 65 ? C.yellow : C.green;
+    console.log(`  ${C.bold}RAM Usage:${C.reset}       ${memColor}${vitals.memory.usedGb} GB / ${vitals.memory.totalGb} GB (${vitals.memory.percentUsed}%)${C.reset} [${vitals.memory.freeGb} GB free]`);
+    console.log(`  ${C.bold}CPU Load:${C.reset}        ${vitals.cpu.percentLoad}% (${vitals.cpu.cores} physical/logical cores)`);
+    console.log(`  ${C.bold}Power / Battery:${C.reset} ${vitals.battery?.status || 'AC Connected'} (${vitals.battery?.chargePercent ? vitals.battery.chargePercent + '%' : 'AC Connected'})`);
+    console.log(`  ${C.bold}Uptime:${C.reset}          ${vitals.uptimeFormatted}`);
+
+    if (vitals.drives && vitals.drives.length > 0) {
+      console.log(`\n  ${C.bold}Active Storage Drives:${C.reset}`);
+      vitals.drives.forEach(d => {
+        const driveColor = d.percentUsed > 90 ? C.red : d.percentUsed > 75 ? C.yellow : C.green;
+        console.log(`    └─ ${C.cyan}${d.drive}${C.reset}: ${driveColor}${d.usedGb} GB / ${d.totalGb} GB (${d.percentUsed}% used)${C.reset} [${d.freeGb} GB free]`);
+      });
+    }
+
+    if (vitals.alerts && vitals.alerts.length > 0) {
+      console.log(`\n  ${C.red}${C.bold}Telemetry Alerts:${C.reset}`);
+      vitals.alerts.forEach(a => console.log(`    ${C.red}⚠ [${a.subsystem || a.level}] ${a.message}${C.reset}`));
+    }
+    console.log('');
+    speak(`System vitals: Memory at ${vitals.memory.percentUsed} percent, CPU load at ${vitals.cpu.percentLoad} percent.`, this.voiceEnabled);
+  }
+
+  // ── TOP RESOURCE PROCESSES ──────────────────────────────────────────
+  async handleTopProcs(limitArg) {
+    if (!this.telemetry) return;
+    const limit = parseInt(limitArg, 10) || 8;
+    console.log(`\n${C.cyan}${C.bold}TOP ${limit} WORKSTATION PROCESSES BY MEMORY PROFILE:${C.reset}`);
+    const procs = await this.telemetry.getTopProcesses(limit);
+    console.log(`  ${'PID'.padEnd(8)} | ${'PROCESS NAME'.padEnd(28)} | ${'MEMORY (MB)'.padEnd(14)} | CPU (s)`);
+    console.log(`  ${'─'.repeat(8)}─┼─${'─'.repeat(28)}─┼─${'─'.repeat(14)}─┼─${'─'.repeat(10)}`);
+    procs.forEach(p => {
+      const memColor = p.memoryMb > 1000 ? C.red : p.memoryMb > 400 ? C.yellow : C.reset;
+      console.log(`  ${String(p.pid).padEnd(8)} | ${p.name.padEnd(28)} | ${memColor}${String(p.memoryMb).padStart(10)} MB${C.reset}    | ${p.cpuSec}s`);
+    });
+    console.log('');
+  }
+
+  // ── SAPI OFFLINE VOICES ─────────────────────────────────────────────
+  async handleVoices() {
+    if (!this.voiceNexus) return;
+    console.log(`\n${C.cyan}${C.bold}INSTALLED WINDOWS SAPI SYNTHESIS VOICES:${C.reset}`);
+    const voices = await this.voiceNexus.getAvailableVoices();
+    voices.forEach((v, idx) => {
+      console.log(`  ${C.yellow}[${idx + 1}]${C.reset} ${C.bold}${v.Name}${C.reset} | Culture: ${v.Culture} | Gender: ${v.Gender} | Age: ${v.Age}`);
+    });
+    console.log('');
+  }
+
+  // ── WINDOW FOCUS ────────────────────────────────────────────────────
+  async handleFocus(titleQuery) {
+    if (!this.visionAgent) return;
+    if (!titleQuery?.trim()) {
+      console.log(`${C.yellow}Usage: focus <window title or partial name>${C.reset}`);
+      return;
+    }
+    const res = await this.visionAgent.focusWindow(titleQuery);
+    if (res.focused) {
+      console.log(`${C.green}✓ Brought window to front: "${res.title}"${C.reset}`);
+      speak(`Brought ${res.title} into focus.`, this.voiceEnabled);
+    } else {
+      console.log(`${C.red}Could not find active window matching: "${titleQuery}"${C.reset}`);
+    }
+  }
+
+  // ── NETWORK RADAR ───────────────────────────────────────────────────
+  async handleRadar() {
+    if (!this.radar) return;
+    console.log(`\n${C.cyan}${C.bold}LOCAL SUBNET RADAR // WORKSHOP NODES:${C.reset}`);
+    const res = await this.radar.scanLocalDevices();
+    console.log(`  Nodes Detected: ${res.deviceCount}`);
+    console.log(`  ${'IP ADDRESS'.padEnd(18)} | ${'MAC ADDRESS'.padEnd(20)} | CLASSIFICATION`);
+    console.log(`  ${'─'.repeat(18)}─┼─${'─'.repeat(20)}─┼─${'─'.repeat(20)}`);
+    res.devices.forEach(d => {
+      const clsColor = d.classification.includes('Gateway') ? C.yellow : d.classification.includes('Raspberry') ? C.green : C.reset;
+      console.log(`  ${d.ip.padEnd(18)} | ${d.mac.padEnd(20)} | ${clsColor}${d.classification}${C.reset}`);
+    });
+    console.log('');
+    speak(`Subnet scan complete. ${res.deviceCount} active network devices discovered.`, this.voiceEnabled);
+  }
+
+  // ── PING LATENCY ────────────────────────────────────────────────────
+  async handlePing(hostArg) {
+    if (!this.radar) return;
+    const host = hostArg || '8.8.8.8';
+    console.log(`${C.dim}Pinging ${host}...${C.reset}`);
+    const res = await this.radar.pingHost(host);
+    if (res.reachable) {
+      console.log(`${C.green}✓ ${res.host} is ALIVE${C.reset} | Latency: ${C.cyan}${res.latencyMs || 0} ms${C.reset}`);
+    } else {
+      console.log(`${C.red}✗ ${res.host} UNREACHABLE${C.reset} [Packet loss: 100%]`);
+    }
+  }
+
+  // ── WORKSPACE GUARDIAN SWEEP ────────────────────────────────────────
+  async handleWorkspaceSweep() {
+    if (!this.guardian) return;
+    console.log(`\n${C.cyan}${C.bold}WORKSPACE GUARDIAN // REPOSITORY INTEGRITY SWEEP:${C.reset}`);
+    const res = await this.guardian.sweepAllWorkspaces();
+    console.log(`  Repositories Monitored: ${res.workspaceCount}`);
+    console.log(`  Total Uncommitted Files: ${res.uncommittedTotal}\n`);
+
+    res.workspaces.forEach(ws => {
+      const statusBadge = ws.isClean ? `${C.green}[CLEAN]${C.reset}` : `${C.yellow}[DIRTY - ${ws.dirtyCount} MODIFIED]${C.reset}`;
+      console.log(`  ${C.bold}${ws.repoPath}${C.reset} (${ws.branch || 'detached'}) ${statusBadge}`);
+      if (ws.lastCommit) {
+        console.log(`    Latest: ${C.cyan}${ws.lastCommit}${C.reset}`);
+      }
+      if (!ws.isClean && ws.dirtyFiles?.length > 0) {
+        console.log(`    Modified Files:`);
+        ws.dirtyFiles.slice(0, 5).forEach(f => console.log(`      └─ ${C.yellow}${f}${C.reset}`));
+      }
+      console.log('');
+    });
+    speak(`Workspace audit complete. ${res.uncommittedTotal} uncommitted files found across repositories.`, this.voiceEnabled);
   }
 
   async shutdown() {

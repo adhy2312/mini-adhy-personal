@@ -28,5 +28,10 @@ export * from './automation/ProactiveScheduler';
 export * from './dashboard/PersonalDashboardService';
 export * from './security/PersonalSecurityAudit';
 export * from './security/StarkMalwareDefenseSentinel';
+export * from './telemetry/SystemTelemetrySentinel';
+export * from './voice/VoiceSynthesisNexus';
+export * from './vision/PerceptualVisionAgent';
+export * from './radar/LocalNetworkRadar';
+export * from './workspace/WorkspaceGuardian';
 export * from './executive/PersonalExecutiveAgent';
 

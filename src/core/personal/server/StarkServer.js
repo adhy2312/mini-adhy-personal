@@ -1,9 +1,15 @@
 /**
  * ════════════════════════════════════════════════════════════════════
- *  STARK SERVER — LOCAL HTTP API & CYBER HUD COCKPIT
+ *  STARK SERVER v3.0 — HIGH-LEVEL LOCAL HTTP API & CYBER HUD COCKPIT
  * ════════════════════════════════════════════════════════════════════
- * Exposes a lightweight, zero-dependency local HTTP API on port 4242
- * so Adhithya can interact with Mini-Adhy via CLI, browser, or scripts.
+ * Exposes a zero-dependency local HTTP API on port 4242 connecting
+ * the workstation, browser, and scripts to Mini-Adhy's core engines:
+ * • Telemetry: CPU, RAM, Disk, and Process health
+ * • Voice: 100% offline Windows speech synthesis (SAPI)
+ * • Vision: Open windows, active focus, and OCR extraction
+ * • Network Radar: Subnet device discovery & ping latency
+ * • Workspace Guardian: Git integrity across developer folders
+ * • Security: Stark Malware Defense Sentinel scanner & quarantine
  */
 
 import http from 'node:http';
@@ -40,7 +46,7 @@ export class StarkServer {
         if (pathname === '/api/status' && req.method === 'GET') {
           const status = {
             status: 'ONLINE',
-            daemon: 'Stark Workshop Daemon v2.5',
+            daemon: 'Stark Workshop Daemon v3.0',
             uptimeSeconds: Math.floor((Date.now() - this.daemon.sessionStartTime) / 1000),
             agentsOnline: this.daemon.agents.size,
             hardwareDevices: this.daemon.hardwareGateway?.registeredDevices?.size || 0,
@@ -53,7 +59,121 @@ export class StarkServer {
           return;
         }
 
-        // ── 2. API: AGENTS MESH ──
+        // ── 2. API: TELEMETRY ──
+        if (pathname === '/api/telemetry/system' && req.method === 'GET') {
+          const data = this.daemon.telemetry ? await this.daemon.telemetry.getSystemTelemetry() : {};
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(data, null, 2));
+          return;
+        }
+
+        if (pathname === '/api/telemetry/processes' && req.method === 'GET') {
+          const limit = parseInt(parsedUrl.query.limit || '10', 10);
+          const procs = this.daemon.telemetry ? await this.daemon.telemetry.getTopProcesses(limit) : [];
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ total: procs.length, processes: procs }, null, 2));
+          return;
+        }
+
+        // ── 3. API: VOICE SYNTHESIS ──
+        if (pathname === '/api/voice/speak' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body || '{}');
+              const text = data.text || data.message;
+              if (!text) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Missing text parameter.' }));
+                return;
+              }
+              const result = this.daemon.voiceNexus 
+                ? await this.daemon.voiceNexus.speak(text, data)
+                : { success: false, error: 'Voice Nexus not initialized.' };
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(result, null, 2));
+            } catch (e) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: e.message }));
+            }
+          });
+          return;
+        }
+
+        if (pathname === '/api/voice/voices' && req.method === 'GET') {
+          const voices = this.daemon.voiceNexus ? await this.daemon.voiceNexus.getAvailableVoices() : [];
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ count: voices.length, voices }, null, 2));
+          return;
+        }
+
+        // ── 4. API: VISION & WINDOWS ──
+        if (pathname === '/api/vision/windows' && req.method === 'GET') {
+          const windows = this.daemon.visionAgent ? await this.daemon.visionAgent.getOpenWindows() : [];
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ count: windows.length, windows }, null, 2));
+          return;
+        }
+
+        if (pathname === '/api/vision/active' && req.method === 'GET') {
+          const win = this.daemon.visionAgent ? await this.daemon.visionAgent.getActiveWindow() : null;
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ activeWindow: win }, null, 2));
+          return;
+        }
+
+        // ── 5. API: LOCAL NETWORK RADAR ──
+        if (pathname === '/api/radar/scan' && req.method === 'GET') {
+          const radarData = this.daemon.radar ? await this.daemon.radar.scanLocalDevices() : {};
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(radarData, null, 2));
+          return;
+        }
+
+        if (pathname === '/api/radar/ping' && req.method === 'GET') {
+          const host = parsedUrl.query.host || '8.8.8.8';
+          const pingResult = this.daemon.radar ? await this.daemon.radar.pingHost(host) : {};
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(pingResult, null, 2));
+          return;
+        }
+
+        // ── 6. API: WORKSPACE GUARDIAN ──
+        if (pathname === '/api/workspace/status' && req.method === 'GET') {
+          const status = this.daemon.guardian ? await this.daemon.guardian.sweepAllWorkspaces() : {};
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(status, null, 2));
+          return;
+        }
+
+        // ── 7. API: MALWARE DEFENSE SENTINEL ──
+        if (pathname === '/api/security/scan' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body || '{}');
+              const targetPath = data.path || process.cwd();
+              const scanResult = this.daemon.sentinel ? await this.daemon.sentinel.scanPath(targetPath) : {};
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(scanResult, null, 2));
+            } catch (e) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: e.message }));
+            }
+          });
+          return;
+        }
+
+        if (pathname === '/api/security/quarantine' && req.method === 'GET') {
+          const list = this.daemon.sentinel ? this.daemon.sentinel.listQuarantined() : [];
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ count: list.length, items: list }, null, 2));
+          return;
+        }
+
+        // ── 8. API: AGENTS MESH ──
         if (pathname === '/api/agents' && req.method === 'GET') {
           const mesh = [];
           for (const [name, agent] of this.daemon.agents.entries()) {
@@ -70,7 +190,7 @@ export class StarkServer {
           return;
         }
 
-        // ── 3. API: MEMORIES ──
+        // ── 9. API: MEMORIES ──
         if (pathname === '/api/memories' && req.method === 'GET') {
           const q = parsedUrl.query.q || '';
           const notes = this.daemon.memoryStore ? this.daemon.memoryStore.recall(q, 20) : [];
@@ -79,7 +199,7 @@ export class StarkServer {
           return;
         }
 
-        // ── 4. API: COMMAND EXECUTION (POST) ──
+        // ── 10. API: DIRECTIVE COMMAND (POST) ──
         if (pathname === '/api/command' && req.method === 'POST') {
           let body = '';
           req.on('data', chunk => { body += chunk; });
@@ -103,7 +223,7 @@ export class StarkServer {
           return;
         }
 
-        // ── 5. DEFAULT: STARK CYBER HUD HTML ──
+        // ── 11. DEFAULT: CYBER HUD COCKPIT HTML ──
         if (pathname === '/' && req.method === 'GET') {
           const html = this._generateHudHtml();
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -142,61 +262,93 @@ export class StarkServer {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>STARK WORKSHOP COCKPIT // MINI-ADHY</title>
+  <title>STARK WORKSHOP COCKPIT v3.0 // MINI-ADHY</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
-    body { background: #050b14; color: #e0f2fe; padding: 24px; min-height: 100vh; }
+    body { background: #030712; color: #e0f2fe; padding: 24px; min-height: 100vh; }
     .header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(14,165,233,0.3); padding-bottom:16px; margin-bottom:24px; }
-    .title { font-size:1.4rem; font-weight:800; color:#38bdf8; letter-spacing:0.1em; }
-    .badge { padding:4px 12px; background:rgba(14,165,233,0.2); border:1px solid #38bdf8; border-radius:9999px; font-size:0.75rem; font-weight:700; color:#38bdf8; }
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; }
-    .card { background:rgba(15,23,42,0.85); border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
-    .card h3 { font-size:0.85rem; color:#0284c7; letter-spacing:0.08em; margin-bottom:12px; }
-    .stat { font-size:1.8rem; font-weight:800; color:#ffffff; }
-    .input-box { display:flex; gap:10px; margin-top:24px; }
-    input { flex:1; background:rgba(15,23,42,0.9); border:1px solid #0284c7; border-radius:8px; padding:12px 16px; color:#ffffff; font-size:0.9rem; outline:none; }
-    button { background:#0284c7; color:#fff; border:none; border-radius:8px; padding:12px 24px; font-weight:700; cursor:pointer; }
-    button:hover { background:#0369a1; }
-    pre { background:#030712; padding:14px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); font-size:0.8rem; overflow:auto; max-height:220px; color:#7dd3fc; }
+    .title { font-size:1.35rem; font-weight:800; color:#38bdf8; letter-spacing:0.08em; display:flex; align-items:center; gap:10px; }
+    .badge { padding:4px 14px; background:rgba(14,165,233,0.15); border:1px solid #38bdf8; border-radius:9999px; font-size:0.75rem; font-weight:700; color:#38bdf8; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:18px; margin-bottom:24px; }
+    .card { background:rgba(15,23,42,0.85); border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:18px; box-shadow:0 8px 24px rgba(0,0,0,0.4); position:relative; overflow:hidden; }
+    .card h3 { font-size:0.8rem; color:#0284c7; letter-spacing:0.08em; margin-bottom:10px; display:flex; justify-content:space-between; }
+    .stat { font-size:1.6rem; font-weight:800; color:#ffffff; }
+    .stat-sub { font-size:0.72rem; color:#94a3b8; margin-top:4px; }
+    .voice-box { display:flex; gap:10px; margin-bottom:18px; background:rgba(15,23,42,0.6); padding:14px; border-radius:12px; border:1px solid rgba(56,189,248,0.2); }
+    .input-box { display:flex; gap:10px; margin-bottom:18px; }
+    input { flex:1; background:rgba(15,23,42,0.9); border:1px solid #0284c7; border-radius:8px; padding:12px 16px; color:#ffffff; font-size:0.88rem; outline:none; }
+    input:focus { border-color:#38bdf8; box-shadow:0 0 10px rgba(56,189,248,0.3); }
+    button { background:#0284c7; color:#fff; border:none; border-radius:8px; padding:12px 20px; font-weight:700; cursor:pointer; transition:all 0.15s ease; font-size:0.82rem; }
+    button:hover { background:#0369a1; transform:translateY(-1px); }
+    .btn-voice { background:#10b981; }
+    .btn-voice:hover { background:#059669; }
+    .btn-sec { background:#dc2626; }
+    .btn-sec:hover { background:#b91c1c; }
+    pre { background:#020617; padding:14px; border-radius:10px; border:1px solid rgba(56,189,248,0.2); font-size:0.78rem; overflow:auto; max-height:260px; color:#7dd3fc; line-height:1.45; }
+    .hud-tabs { display:flex; gap:8px; margin-bottom:12px; }
+    .tab { padding:6px 14px; border-radius:6px; background:rgba(255,255,255,0.06); font-size:0.75rem; font-weight:700; cursor:pointer; color:#94a3b8; border:1px solid transparent; }
+    .tab:hover, .tab.active { background:rgba(14,165,233,0.2); color:#38bdf8; border-color:rgba(56,189,248,0.3); }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="title">⚡ STARK WORKSHOP COCKPIT // MINI-ADHY</div>
-    <div class="badge">● ONLINE // LOCALHOST:4242</div>
+    <div class="title">⚡ STARK WORKSHOP COCKPIT v3.0 // MINI-ADHY</div>
+    <div class="badge">● ONLINE // 127.0.0.1:4242</div>
   </div>
+
   <div class="grid">
     <div class="card">
-      <h3>SPECIALIST MESH</h3>
+      <h3>SPECIALIST MESH <span>JARVIS &amp; ULTRON</span></h3>
       <div class="stat">${this.daemon.agents.size} AGENTS</div>
-      <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">JARVIS, FRIDAY, EDITH, ULTRON, DUM-E, HERMES, etc.</p>
+      <div class="stat-sub">Sovereign autonomous coordination</div>
     </div>
     <div class="card">
-      <h3>PHYSICAL HARDWARE</h3>
+      <h3>HARDWARE NEXUS <span>UART / GPIO</span></h3>
       <div class="stat">${this.daemon.hardwareGateway?.registeredDevices?.size || 0} DEVICES</div>
-      <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">ESP32 Core S3, Raspberry Pi 5, UART Bus</p>
+      <div class="stat-sub">ESP32 Core S3, Raspberry Pi 5</div>
     </div>
     <div class="card">
-      <h3>PERSISTENT MEMORY</h3>
+      <h3>MALWARE SENTINEL <span>DEFENSE</span></h3>
+      <div class="stat" id="statQuarantine">ACTIVE</div>
+      <div class="stat-sub">Heuristic sweep &amp; XOR quarantine</div>
+    </div>
+    <div class="card">
+      <h3>PERSISTENT MEMORY <span>SEMANTIC</span></h3>
       <div class="stat">${this.daemon.memoryStore?.data?.notes?.length || 0} MEMOS</div>
-      <p style="font-size:0.75rem; color:#94a3b8; margin-top:6px;">Durable episodic and semantic state</p>
+      <div class="stat-sub">Long-term life continuity store</div>
     </div>
   </div>
+
+  <!-- Voice Synthesis Nexus -->
+  <div class="voice-box">
+    <input id="voiceInput" type="text" placeholder="Type words for Jarvis to speak out loud through PC speakers..." />
+    <button class="btn-voice" onclick="speakText()">🔊 SPEAK (SAPI)</button>
+  </div>
+
+  <!-- Directive Command Form -->
   <div class="input-box">
-    <input id="cmdInput" type="text" placeholder="Type a directive (e.g. status, brief, run git status, memo Buy STM32) ..." />
-    <button onclick="sendCmd()">EXECUTE</button>
+    <input id="cmdInput" type="text" placeholder="Type directive (e.g. status, telemetry, scan, sweep, windows, memo Meeting at 3pm)..." />
+    <button onclick="sendCmd()">EXECUTE DIRECTIVE</button>
   </div>
-  <div style="margin-top:20px;">
-    <h3 style="font-size:0.8rem; color:#0284c7; margin-bottom:8px;">TERMINAL FEED</h3>
-    <pre id="output">Standing by for directives...</pre>
+
+  <!-- HUD Action Bar -->
+  <div class="hud-tabs">
+    <button class="tab active" onclick="fetchApi('/api/telemetry/system')">💻 Telemetry</button>
+    <button class="tab" onclick="fetchApi('/api/telemetry/processes?limit=8')">⚡ Top Processes</button>
+    <button class="tab" onclick="fetchApi('/api/vision/windows')">🪟 Open Windows</button>
+    <button class="tab" onclick="fetchApi('/api/radar/scan')">📡 Network Radar</button>
+    <button class="tab" onclick="fetchApi('/api/workspace/status')">📁 Workspaces</button>
+    <button class="tab" onclick="fetchApi('/api/security/quarantine')">🛡️ Quarantine Vault</button>
   </div>
+
+  <pre id="output">Jarvis Standby Feed. Standing by for directives or telemetry queries...</pre>
+
   <script>
     async function sendCmd() {
       const input = document.getElementById('cmdInput');
-      const out = document.getElementById('output');
       const val = input.value.trim();
       if(!val) return;
-      out.textContent = 'Executing: ' + val + '...';
+      document.getElementById('output').textContent = 'Executing directive: ' + val + '...';
       try {
         const res = await fetch('/api/command', {
           method: 'POST',
@@ -204,13 +356,46 @@ export class StarkServer {
           body: JSON.stringify({ command: val })
         });
         const data = await res.json();
-        out.textContent = JSON.stringify(data.result || data, null, 2);
+        document.getElementById('output').textContent = JSON.stringify(data.result || data, null, 2);
       } catch(e) {
-        out.textContent = 'Error: ' + e.message;
+        document.getElementById('output').textContent = 'Error: ' + e.message;
       }
     }
+
+    async function speakText() {
+      const input = document.getElementById('voiceInput');
+      const val = input.value.trim();
+      if(!val) return;
+      document.getElementById('output').textContent = 'Speaking through PC speakers: "' + val + '"...';
+      try {
+        const res = await fetch('/api/voice/speak', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ text: val })
+        });
+        const data = await res.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      } catch(e) {
+        document.getElementById('output').textContent = 'Speech error: ' + e.message;
+      }
+    }
+
+    async function fetchApi(endpoint) {
+      document.getElementById('output').textContent = 'Querying ' + endpoint + '...';
+      try {
+        const res = await fetch(endpoint);
+        const data = await res.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      } catch(e) {
+        document.getElementById('output').textContent = 'API Error: ' + e.message;
+      }
+    }
+
     document.getElementById('cmdInput').addEventListener('keydown', (e) => {
       if(e.key === 'Enter') sendCmd();
+    });
+    document.getElementById('voiceInput').addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') speakText();
     });
   </script>
 </body>
@@ -219,4 +404,3 @@ export class StarkServer {
 }
 
 export default StarkServer;
-
