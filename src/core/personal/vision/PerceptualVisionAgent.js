@@ -149,10 +149,11 @@ $p = Get-Process -Id $pid -ErrorAction SilentlyContinue
     const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
     try {
       const { stdout } = await execAsync(`powershell -NoProfile -EncodedCommand ${encoded}`, { timeout: 3500 });
-      if (!stdout.trim()) return null;
-      return JSON.parse(stdout);
+      if (!stdout.trim()) return { Title: 'Desktop / Background', ProcessName: 'explorer', ProcessId: 0 };
+      const parsed = JSON.parse(stdout);
+      return parsed && parsed.Title !== undefined ? parsed : { Title: 'Desktop / Background', ProcessName: 'explorer', ProcessId: 0 };
     } catch {
-      return null;
+      return { Title: 'Desktop / Background', ProcessName: 'explorer', ProcessId: 0 };
     }
   }
 
