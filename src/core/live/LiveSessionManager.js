@@ -74,6 +74,9 @@ export class LiveSessionManager {
       status: this.status,
       sessionId: this.activeSessionId,
       isMuted: this.inputManager ? this.inputManager.isMuted : false,
+      micPermissionDenied: Boolean(this.micPermissionDenied),
+      micHardwareUnavailable: Boolean(this.micHardwareUnavailable),
+      micErrorMessage: this.micErrorMessage || null,
       transcript: this.transcriptManager ? this.transcriptManager.getTranscriptHistory() : [],
       interimUserText: this.transcriptManager?.interimUserText || '',
       interimAssistantText: this.transcriptManager?.interimAssistantText || '',
@@ -176,19 +179,64 @@ export class LiveSessionManager {
       });
       await this.providerAdapter.connect(sessionConfig);
 
-      // 7. Request and Start Microphone Stream
-      await this.inputManager.startMicrophone(audioCtx, this.audioEngine.inputAnalyser);
+      // 7. Request and Start Microphone Stream with Graceful Fallback
+      this.micPermissionDenied = false;
+      this.micErrorMessage = null;
 
-      // 8. Start Speech Recognition & VAD Loop
-      this.fallbackPipeline.startListening();
+      try {
+        await this.inputManager.startMicrophone(audioCtx, this.audioEngine.inputAnalyser);
+        this.fallbackPipeline.startListening();
+      } catch (micErr) {
+        console.warn('[LiveSessionManager] Microphone notice:', micErr);
+        const isExplicitPermissionDenial = micErr.name === 'NotAllowedError' || /permission/i.test(micErr.message);
+        this.micPermissionDenied = isExplicitPermissionDenial;
+        this.micHardwareUnavailable = !isExplicitPermissionDenial;
+        this.micErrorMessage = isExplicitPermissionDenial
+          ? 'Microphone permission was not allowed in browser settings.'
+          : (micErr.message || 'Microphone hardware unavailable on this host.');
+      }
+
       this._startVisualizerLoop();
-
       this._setState(LIVE_SESSION_STATUS.LISTENING);
-      return { success: true, sessionId: this.activeSessionId };
+      return { 
+        success: true, 
+        sessionId: this.activeSessionId, 
+        micPermissionDenied: this.micPermissionDenied 
+      };
     } catch (err) {
       await this.endSession(err.message);
       this._setState(LIVE_SESSION_STATUS.ERROR, { error: err.message });
       throw err;
+    }
+  }
+
+  /**
+   * Re-requests microphone access on user gesture if permission was previously blocked
+   */
+  async requestMicrophoneRetry() {
+    if (!this.inputManager) return false;
+    try {
+      const audioCtx = await this.audioEngine.ensureAudioContext();
+      await this.inputManager.startMicrophone(audioCtx, this.audioEngine.inputAnalyser);
+      this.micPermissionDenied = false;
+      this.micErrorMessage = null;
+      if (this.fallbackPipeline) {
+        this.fallbackPipeline.startListening();
+      }
+      this._setState(LIVE_SESSION_STATUS.LISTENING);
+      return true;
+    } catch (err) {
+      console.warn('[LiveSessionManager] Retry microphone permission failed:', err);
+      const isExplicitDenial = err.name === 'NotAllowedError' || /permission/i.test(err.message);
+      this.micPermissionDenied = isExplicitDenial;
+      this.micHardwareUnavailable = !isExplicitDenial;
+      this.micErrorMessage = err.message;
+      this._setState(this.status, { 
+        micPermissionDenied: this.micPermissionDenied, 
+        micHardwareUnavailable: this.micHardwareUnavailable,
+        micErrorMessage: err.message 
+      });
+      return false;
     }
   }
 
