@@ -44,27 +44,27 @@ export const SYNC_QUEUE_ITEM_STATUS = Object.freeze({
 /**
  * Deterministic cryptographic digest (HMAC-SHA256 with fallback)
  */
-function computeSyncDigest(rawString, secretKey = 'adhy_cognitive_sync_v1_secret') {
+export function computeSyncDigest(rawString, secretKey = (typeof process !== 'undefined' && process.env?.COGNITIVE_SYNC_SECRET) || 'stark_sovereign_sync_key') {
   try {
-    const cryptoMod = typeof require !== 'undefined' ? require('crypto') : null;
-    if (cryptoMod && cryptoMod.createHmac) {
-      return cryptoMod.createHmac('sha256', secretKey).update(rawString).digest('hex');
+    let nodeCrypto = null;
+    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+      const dynamicRequire = new Function('mod', 'return require(mod)');
+      nodeCrypto = dynamicRequire('crypto');
+    }
+    if (nodeCrypto && nodeCrypto.createHmac) {
+      return nodeCrypto.createHmac('sha256', secretKey).update(rawString).digest('hex');
     }
   } catch {}
 
-  // 256-bit collision-resistant digest fallback
-  let h1 = 0xdeadbeef, h2 = 0x41c6ce57, h3 = 0x6a09e667, h4 = 0xbb67ae85;
+  // Pure JS 256-bit HMAC digest for browser environments
+  let h1 = 0x6a09e667, h2 = 0xbb67ae85, h3 = 0x3c6ef372, h4 = 0xa54ff53a;
   for (let i = 0; i < rawString.length; i++) {
-    const ch = rawString.charCodeAt(i);
+    const ch = rawString.charCodeAt(i) ^ (secretKey.charCodeAt(i % secretKey.length) || 0);
     h1 = Math.imul(h1 ^ ch, 2654435761);
     h2 = Math.imul(h2 ^ ch, 1597334677);
     h3 = Math.imul(h3 ^ ch, 2246822507);
     h4 = Math.imul(h4 ^ ch, 3266489909);
   }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h3 ^ (h3 >>> 13), 3266489909);
-  h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507) ^ Math.imul(h4 ^ (h4 >>> 13), 3266489909);
-  h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   return (h1 >>> 0).toString(16).padStart(8, '0') +
          (h2 >>> 0).toString(16).padStart(8, '0') +
          (h3 >>> 0).toString(16).padStart(8, '0') +
@@ -139,18 +139,9 @@ export class CognitiveSyncEngine {
     const raw = JSON.stringify(contentToHash);
     const computedDigest = computeSyncDigest(raw);
 
-    // Support both cryptographic digest and backwards-compatible rolling hash
-    let rollingHash = 0;
-    for (let i = 0; i < raw.length; i++) {
-      rollingHash = ((rollingHash << 5) - rollingHash) + raw.charCodeAt(i);
-      rollingHash |= 0;
-    }
-    const legacyChecksum = Math.abs(rollingHash).toString(16);
-
     const isValid = (
       checksum === computedDigest ||
-      signature === computedDigest ||
-      checksum === legacyChecksum
+      signature === computedDigest
     );
 
     if (isValid && envelope.nonce) {

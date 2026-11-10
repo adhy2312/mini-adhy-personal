@@ -127,7 +127,9 @@ class StarkPersonalDaemon {
       const { EmpatheticCompanionNexus } = await import('./src/core/personal/companion/EmpatheticCompanionNexus.js');
       const { DecisionIntelligenceEngine } = await import('./src/core/personal/decision/DecisionIntelligenceEngine.js');
       const { UniversalWorkflowEngine } = await import('./src/core/personal/workflows/UniversalWorkflowEngine.js');
+      const { ComputerOperator } = await import('./src/core/personal/local/ComputerOperator.js');
 
+      this.computerOperator = new ComputerOperator();
       this.localExecutor = new LocalExecutionAgent();
       this.fileOps = new LocalFileOpsAgent();
       this.desktopControl = new DesktopControlConnector();

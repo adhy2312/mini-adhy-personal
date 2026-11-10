@@ -99,6 +99,50 @@ export class UniversalWorkflowEngine {
   }
 
   /**
+   * WORKFLOW F: SDR & RF Electronics Design & Field Viability Analysis
+   */
+  async executeSdrRfWorkflow({ targetFrequencyHz = 433920000, distanceMeters = 500, txPowerDbm = 14, platform = 'RTL-SDR' }) {
+    const steps = [];
+
+    // Step 1: Link Budget & Path Loss
+    const linkBudget = this.electronics.calculateRfLinkBudget({
+      frequencyHz: targetFrequencyHz,
+      distanceMeters,
+      txPowerDbm
+    });
+    steps.push({ step: 1, name: 'RF Link Budget & Free Space Path Loss', status: 'SUCCESS', details: linkBudget });
+
+    // Step 2: Antenna Physical Dimensions
+    const antenna = this.electronics.calculateAntennaDimensions({ targetFrequencyHz });
+    steps.push({ step: 2, name: 'Antenna Geometry & Quarter-Wave Sizing', status: 'SUCCESS', details: antenna });
+
+    // Step 3: Cascaded Receiver Noise Figure
+    const noiseFigure = this.electronics.calculateCascadedNoiseFigure([
+      { name: 'LNA_Frontend', gainDb: 18, noiseFigureDb: 1.2 },
+      { name: 'Bandpass_Filter', gainDb: -1.5, noiseFigureDb: 1.5 },
+      { name: 'SDR_Mixer_ADC', gainDb: 25, noiseFigureDb: 6.0 }
+    ]);
+    steps.push({ step: 3, name: 'Receiver Cascaded Noise Figure (Friis)', status: 'SUCCESS', details: noiseFigure });
+
+    // Step 4: SDR Platform Hardware Profiling
+    const sdrProfile = this.electronics.getSdrPlatformProfile(platform);
+    steps.push({ step: 4, name: 'SDR Hardware Profile Selection', status: 'SUCCESS', details: sdrProfile });
+
+    return {
+      workflow: 'WORKFLOW_F_SDR_RF_ELECTRONICS',
+      targetFrequencyHz,
+      linkViable: linkBudget.isLinkViable,
+      linkMarginDb: linkBudget.linkMarginDb,
+      quarterWaveElementMm: antenna.quarterWaveElementMm,
+      totalSystemGainDb: noiseFigure.totalSystemGainDb,
+      cascadedNoiseFigureDb: noiseFigure.cascadedNoiseFigureDb,
+      sdrPlatform: sdrProfile.chipset,
+      steps,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
    * WORKFLOW F: Personal Decision Matrix
    */
   async executeDecisionWorkflow(decisionSpec) {

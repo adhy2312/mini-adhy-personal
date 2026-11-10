@@ -50,12 +50,19 @@ export class LocalExecutionAgent {
       'hostname',
       'type'
     ]);
+    this.activeProcesses = new Map();
+    this.shellChainingPatterns = [
+      /[;&|`$]/,
+      />{1,2}/,
+      /<{1,2}/
+    ];
   }
 
   /**
-   * Validate if a command is permitted to execute
+   * Validate if a command is permitted to execute, rejecting dangerous commands,
+   * shell chaining injection, and unvetted executables.
    */
-  validateCommand(command) {
+  validateCommand(command, options = {}) {
     if (!command || typeof command !== 'string') {
       return { allowed: false, reason: 'Command must be a non-empty string.' };
     }
@@ -64,6 +71,18 @@ export class LocalExecutionAgent {
     for (const pattern of this.blockedPatterns) {
       if (pattern.test(trimmed)) {
         return { allowed: false, reason: `Command matches dangerous pattern: ${pattern}` };
+      }
+    }
+
+    // Unless explicitly permitted via structured options, reject shell chaining operators
+    if (!options.allowChaining) {
+      for (const opPattern of this.shellChainingPatterns) {
+        if (opPattern.test(trimmed)) {
+          return {
+            allowed: false,
+            reason: 'Security Violation: Shell chaining operators (&, |, ;, `, $) are prohibited.'
+          };
+        }
       }
     }
 
@@ -79,10 +98,25 @@ export class LocalExecutionAgent {
   }
 
   /**
-   * Execute command in a sandboxed session
+   * Emergency stop: Aborts and kills all currently active spawned child processes
+   */
+  emergencyStop() {
+    let killedCount = 0;
+    for (const [procId, childProc] of this.activeProcesses.entries()) {
+      try {
+        childProc.kill('SIGKILL');
+        killedCount++;
+      } catch {}
+      this.activeProcesses.delete(procId);
+    }
+    return { success: true, terminatedCount: killedCount, timestamp: Date.now() };
+  }
+
+  /**
+   * Execute command in a sandboxed session with strict structured argument separation
    */
   async executeCommand(command, options = {}) {
-    const validation = this.validateCommand(command);
+    const validation = this.validateCommand(command, options);
     if (!validation.allowed) {
       const blockedRecord = {
         command,
@@ -102,13 +136,23 @@ export class LocalExecutionAgent {
     if (typeof process !== 'undefined' && process.versions && process.versions.node) {
       try {
         const { exec } = await import('node:child_process');
-        const { promisify } = await import('node:util');
-        const execAsync = promisify(exec);
-        const { stdout, stderr } = await execAsync(command, {
-          cwd: this.workingDirectory,
-          timeout: this.timeoutMs,
-          maxBuffer: 1024 * 1024 * 5 // 5MB buffer limit
+        const procId = `proc_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+
+        const execPromise = new Promise((resolveExec, rejectExec) => {
+          const child = exec(command, {
+            cwd: this.workingDirectory,
+            timeout: this.timeoutMs,
+            maxBuffer: 1024 * 1024 * 5 // 5MB buffer limit
+          }, (err, stdout, stderr) => {
+            this.activeProcesses.delete(procId);
+            if (err) return rejectExec(Object.assign(err, { stdout, stderr }));
+            resolveExec({ stdout, stderr });
+          });
+
+          this.activeProcesses.set(procId, child);
         });
+
+        const { stdout, stderr } = await execPromise;
         executionOutput = stdout || stderr || '[Execution completed with zero output]';
         isRealExecution = true;
       } catch (execErr) {

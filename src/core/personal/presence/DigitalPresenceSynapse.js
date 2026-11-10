@@ -98,6 +98,21 @@ export class DigitalPresenceSynapse {
   }
 
   /**
+   * Convenience export helper returning direct archive path and SHA-256 seal
+   */
+  async exportPresence(statePayload = {}) {
+    const memoryStoreMock = { data: { notes: statePayload.notes || [], state: statePayload } };
+    const res = await this.exportPresenceBundle(memoryStoreMock, statePayload, statePayload);
+    return {
+      status: 'EXPORTED_AND_SEALED',
+      archivePath: res.filePath,
+      filePath: res.filePath,
+      sha256Seal: res.checksum,
+      checksum: res.checksum
+    };
+  }
+
+  /**
    * Imports a .stark-presence bundle from another device and verifies cryptographic integrity
    */
   async importPresenceBundle(bundlePath, memoryStore = null) {
@@ -161,6 +176,19 @@ export class DigitalPresenceSynapse {
       status: 'PRESENCE_VALIDATED',
       sourceDevice: payload.sourceDevice,
       payload
+    };
+  }
+
+  /**
+   * Convenience import helper returning reconstituted state
+   */
+  async importPresence(bundlePath) {
+    const res = await this.importPresenceBundle(bundlePath);
+    const state = res.payload?.memoryPayload?.state || res.payload?.identityState || res.payload || {};
+    return {
+      status: 'RECONSTITUTED_SUCCESSFULLY',
+      state,
+      payload: res.payload
     };
   }
 

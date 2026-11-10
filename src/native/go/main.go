@@ -203,7 +203,7 @@ func main() {
 		fmt.Println(string(out))
 
 	case "daemon":
-		addr := ":" + strconv.Itoa(*port)
+		addr := "127.0.0.1:" + strconv.Itoa(*port)
 		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{"status":"STARK_SENTINEL_ONLINE","uptime":"` + time.Since(startTime).String() + `"}`))

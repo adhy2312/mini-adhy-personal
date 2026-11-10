@@ -183,7 +183,7 @@ export class PolyglotNexus {
    */
   async queryPythonTelemetry() {
     return new Promise((resolve, reject) => {
-      execFile('python', [this.pythonScript, 'telemetry'], { timeout: 5000 }, (error, stdout, stderr) => {
+      execFile('python', [this.pythonScript, 'telemetry'], { timeout: 15000 }, (error, stdout, stderr) => {
         if (error) return reject(new Error(stderr || error.message));
         try {
           resolve(JSON.parse(stdout));
@@ -224,7 +224,7 @@ export class PolyglotNexus {
     try {
       fs.writeFileSync(tempFile, JSON.stringify(candidates), 'utf-8');
       return await new Promise((resolve, reject) => {
-        execFile('python', [this.pythonScript, 'rank-memories', '--query', query, '--candidates-file', tempFile], { timeout: 8000 }, (error, stdout, stderr) => {
+        execFile('python', [this.pythonScript, 'rank-memories', '--query', query, '--candidates-file', tempFile], { timeout: 15000 }, (error, stdout, stderr) => {
           if (error) return reject(new Error(stderr || error.message));
           try {
             resolve(JSON.parse(stdout));

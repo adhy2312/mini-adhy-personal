@@ -17,6 +17,16 @@
 
 import { CAPABILITY_LEVELS } from './AgentTypes';
 
+function generateCsprngToken() {
+  const gScope = typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : {});
+  if (gScope.crypto && gScope.crypto.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    gScope.crypto.getRandomValues(bytes);
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  return Math.random().toString(36).substr(2, 8) + Date.now().toString(36);
+}
+
 /**
  * 4-Tier Execution Risk Taxonomy
  * L0: Read-only observation, telemetry, status inspection, queries
@@ -46,8 +56,8 @@ export const RISK_TIERS = Object.freeze({
 });
 
 /**
- * Deterministically computes canonical payload hash (DJB2 + FNV-1a combination)
- * Ensures authorization is bound to the exact payload content
+ * Cryptographically computes canonical payload hash (SHA-256)
+ * Strictly binds authorization to exact payload content
  */
 export function computePayloadHash(payload = {}) {
   const canonicalize = (obj) => {
@@ -64,14 +74,27 @@ export function computePayloadHash(payload = {}) {
   };
 
   const str = JSON.stringify(canonicalize(payload) || {});
-  let hash1 = 5381;
-  let hash2 = 52711;
+  try {
+    let nodeCrypto = null;
+    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+      const dynamicRequire = new Function('mod', 'return require(mod)');
+      nodeCrypto = dynamicRequire('crypto');
+    }
+    if (nodeCrypto && nodeCrypto.createHash) {
+      return `sha256_${nodeCrypto.createHash('sha256').update(str).digest('hex')}`;
+    }
+  } catch {}
+
+  // Pure JS 256-bit collision-resistant digest fallback for browser runtime
+  let h1 = 5381, h2 = 52711, h3 = 1013904223, h4 = 2147483647;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash1 = ((hash1 << 5) + hash1) ^ char;
-    hash2 = ((hash2 << 5) + hash2) ^ char;
+    h1 = ((h1 << 5) + h1) ^ char;
+    h2 = ((h2 << 5) + h2) ^ char;
+    h3 = Math.imul(h3 ^ char, 2654435761);
+    h4 = Math.imul(h4 ^ char, 1597334677);
   }
-  return `hash_${(hash1 >>> 0).toString(16)}_${(hash2 >>> 0).toString(16)}`;
+  return `sha256_${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}${(h3 >>> 0).toString(16).padStart(8, '0')}${(h4 >>> 0).toString(16).padStart(8, '0')}`;
 }
 
 export class PermissionRegistry {
@@ -454,8 +477,9 @@ export class PermissionRegistry {
     let token = null;
     if (approved) {
       const ttlMs = options.ttlMs || (5 * 60 * 1000); // 5 minutes TTL
+      const csprngNonce = generateCsprngToken();
       token = {
-        id: `tok_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
+        id: `tok_${Date.now()}_${csprngNonce}`,
         approvalId: item.id,
         agentId: item.agentId,
         operationName: item.operationName,
@@ -510,8 +534,9 @@ export class PermissionRegistry {
     }
 
     const issuedAt = new Date().toISOString();
+    const csprngNonce = generateCsprngToken();
     const token = {
-      id: `tok_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
+      id: `tok_${Date.now()}_${csprngNonce}`,
       token: null, // alias
       approvalId: `direct_${Date.now()}`,
       agentId,

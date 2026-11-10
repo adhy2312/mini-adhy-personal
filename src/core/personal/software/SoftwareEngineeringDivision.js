@@ -91,6 +91,96 @@ export class SoftwareEngineeringDivision {
   }
 
   /**
+   * Diagnostic Root Cause Analysis: Parses error stack traces and logs
+   */
+  analyzeErrorStack(errorLog = '') {
+    if (!errorLog || typeof errorLog !== 'string') {
+      return { diagnosed: false, reason: 'Empty error log provided' };
+    }
+
+    const lines = errorLog.split(/\r?\n/);
+    const stackFrames = [];
+    let errorType = 'UNKNOWN_EXCEPTION';
+    let errorMessage = '';
+
+    for (const line of lines) {
+      const matchErr = line.match(/^([A-Za-z]+Error|Exception):\s*(.+)$/);
+      if (matchErr && !errorMessage) {
+        errorType = matchErr[1];
+        errorMessage = matchErr[2];
+      }
+
+      // Match stack frame supporting Windows drive letters (e.g. D:\... or /home/...)
+      const matchFrame = line.match(/^\s*at\s+(?:([A-Za-z0-9_$.<>]+)\s+\()?((?:[A-Za-z]:)?[^()]+):(\d+):(\d+)\)?$/);
+      if (matchFrame) {
+        stackFrames.push({
+          functionName: matchFrame[1] || '<anonymous>',
+          file: matchFrame[2].trim(),
+          line: parseInt(matchFrame[3], 10),
+          column: parseInt(matchFrame[4], 10)
+        });
+      }
+    }
+
+    const probableRootCause = stackFrames[0] || null;
+
+    return {
+      diagnosed: true,
+      errorType,
+      errorMessage,
+      primaryFaultLocation: probableRootCause ? `${probableRootCause.file}:${probableRootCause.line}` : 'UNRESOLVED',
+      stackDepth: stackFrames.length,
+      stackFrames: stackFrames.slice(0, 5),
+      recommendedAction: errorType.includes('Import') || errorType.includes('Module')
+        ? 'Check file path export names and dependencies.'
+        : errorType.includes('Type')
+          ? 'Add null-guard or verify parameter types.'
+          : 'Inspect line in reproduction test case.'
+    };
+  }
+
+  /**
+   * Generates a unified git-style diff preview without mutating target file
+   */
+  generatePatchDiff(originalContent = '', modifiedContent = '', filePath = 'code.js') {
+    const origLines = originalContent.split('\n');
+    const modLines = modifiedContent.split('\n');
+
+    const diffLines = [
+      `--- a/${filePath}`,
+      `+++ b/${filePath}`,
+      `@@ -1,${origLines.length} +1,${modLines.length} @@`
+    ];
+
+    let changesCount = 0;
+    const maxLen = Math.max(origLines.length, modLines.length);
+
+    for (let i = 0; i < maxLen; i++) {
+      const o = origLines[i];
+      const m = modLines[i];
+
+      if (o === undefined && m !== undefined) {
+        diffLines.push(`+ ${m}`);
+        changesCount++;
+      } else if (o !== undefined && m === undefined) {
+        diffLines.push(`- ${o}`);
+        changesCount++;
+      } else if (o !== m) {
+        diffLines.push(`- ${o}`);
+        diffLines.push(`+ ${m}`);
+        changesCount++;
+      }
+    }
+
+    return {
+      filePath,
+      hasChanges: changesCount > 0,
+      changesCount,
+      unifiedDiff: diffLines.join('\n')
+    };
+  }
+
+  /**
    * Executes automated tests with timeout and diagnostic capture
    */
   async runAutomatedTests(repoPath = this.rootDir, customCmd = null) {

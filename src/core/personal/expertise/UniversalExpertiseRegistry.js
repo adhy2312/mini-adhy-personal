@@ -51,12 +51,20 @@ export class UniversalExpertiseRegistry {
   assembleSpecialistTaskForce(objective, domainHints = []) {
     const matchedCaps = [];
     const query = objective.toLowerCase();
+    const queryWords = query.split(/[\s,._\-\/]+/).filter(w => w.length >= 2);
 
     for (const [id, cap] of this.capabilities.entries()) {
-      const matchInId = id.toLowerCase().includes(query);
-      const matchInDesc = cap.description.toLowerCase().includes(query);
-      const matchInDomain = domainHints.some(h => cap.domain.toLowerCase().includes(h.toLowerCase()));
-      const keywordMatch = (cap.requiredKnowledge || []).some(k => query.includes(k.toLowerCase()));
+      const idLower = id.toLowerCase();
+      const descLower = cap.description.toLowerCase();
+      const domainLower = cap.domain.toLowerCase();
+
+      const matchInId = queryWords.some(w => idLower.includes(w));
+      const matchInDesc = queryWords.some(w => descLower.includes(w));
+      const matchInDomain = domainHints.some(h => domainLower.includes(h.toLowerCase()));
+      const keywordMatch = (cap.requiredKnowledge || []).some(k => {
+        const kLower = k.toLowerCase();
+        return queryWords.some(w => kLower.includes(w));
+      });
 
       if (matchInId || matchInDesc || matchInDomain || keywordMatch) {
         matchedCaps.push(cap);
@@ -142,6 +150,20 @@ export class UniversalExpertiseRegistry {
       safetyRestrictions: ['Design rule clearance verification mandatory before physical manufacturing'],
       verificationProcedures: ['Automated DRC collision checks, netlist completeness validation'],
       requiredPermissions: 'LEVEL_2_REVERSIBLE',
+      implementationStatus: 'ACTIVE'
+    });
+
+    this.registerCapability({
+      capabilityId: 'SDR_RF_COMMUNICATIONS_ENGINEERING',
+      domain: 'ELECTRONICS_ENGINEERING',
+      description: 'Software Defined Radio (SDR) engineering, RF link budget calculations (FSPL, Friis), antenna sizing (dipole, monopole), cascaded noise figure modeling, and SDR platform hardware profiling',
+      requiredKnowledge: ['RF engineering', 'SDR', 'Friis transmission equation', 'Antenna design', 'Noise figure', 'I/Q sampling', 'RTL-SDR', 'HackRF', 'PlutoSDR'],
+      availableTools: ['ElectronicsEngineeringNexus', 'SDR_Hardware_Profiler', 'RF_LinkBudget_Solver'],
+      inputRequirements: ['Target frequency, transmit power, distance, antenna gains, receiver sensitivity'],
+      outputRequirements: ['Link margin dB, physical antenna dimensions mm, cascaded noise figure dB, SDR profile'],
+      safetyRestrictions: ['Observe regional RF spectrum transmission power regulations (FCC, ITU, WPC)'],
+      verificationProcedures: ['Link margin safety calculation, Friis equation verification'],
+      requiredPermissions: 'LEVEL_0_READONLY',
       implementationStatus: 'ACTIVE'
     });
 

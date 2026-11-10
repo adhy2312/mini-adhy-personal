@@ -27,8 +27,23 @@ export class StarkServer {
     if (this.isRunning) return;
 
     this.server = http.createServer(async (req, res) => {
-      // CORS headers for local cockpit integration
-      res.setHeader('Access-Control-Allow-Origin', '*');
+      const origin = req.headers.origin;
+      const isLocalOrigin = !origin || 
+        origin.startsWith('http://localhost') || 
+        origin.startsWith('http://127.0.0.1') || 
+        origin.startsWith('https://localhost');
+
+      if (origin && isLocalOrigin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+      } else if (!origin) {
+        res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:' + this.port);
+      } else {
+        // Block cross-origin requests from external internet websites
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'FORBIDDEN_CROSS_ORIGIN: Local cockpit only accepts loopback origins.' }));
+        return;
+      }
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -223,7 +238,51 @@ export class StarkServer {
           return;
         }
 
-        // ── 11. DEFAULT: CYBER HUD COCKPIT HTML ──
+        // ── 11. API v1: COMPUTER OPERATOR & SYSTEM AUTOMATION (PHASE 1) ──
+        if (pathname === '/api/v1/system/telemetry' && req.method === 'GET') {
+          const telemetry = this.daemon.computerOperator
+            ? await this.daemon.computerOperator.getSystemTelemetry()
+            : (this.daemon.telemetry ? await this.daemon.telemetry.getSystemTelemetry() : {});
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ version: '1.0', telemetry }, null, 2));
+          return;
+        }
+
+        if (pathname === '/api/v1/system/emergency-stop' && req.method === 'POST') {
+          const stopResult = this.daemon.computerOperator
+            ? this.daemon.computerOperator.emergencyStop()
+            : { status: 'EMERGENCY_STOP_RECORDED' };
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, action: 'EMERGENCY_STOP', result: stopResult }, null, 2));
+          return;
+        }
+
+        if (pathname === '/api/v1/applications/launch' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', async () => {
+            try {
+              const data = JSON.parse(body || '{}');
+              const app = data.application || data.app;
+              if (!app) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Missing application name.' }));
+                return;
+              }
+              const result = this.daemon.computerOperator
+                ? await this.daemon.computerOperator.launchApplication(app, data.args || [])
+                : { success: false, error: 'ComputerOperator not available.' };
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(result, null, 2));
+            } catch (err) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+          return;
+        }
+
+        // ── 12. DEFAULT: CYBER HUD COCKPIT HTML ──
         if (pathname === '/' && req.method === 'GET') {
           const html = this._generateHudHtml();
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });

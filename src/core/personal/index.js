@@ -17,6 +17,7 @@ export * from './connectors/BrowserAutomationConnector';
 export * from './connectors/DesktopControlConnector';
 export * from './local/LocalExecutionAgent';
 export * from './local/LocalFileOpsAgent';
+export * from './local/ComputerOperator';
 export * from './memory/PersonalMemoryStore';
 export * from './server/StarkServer';
 export * from './hardware/HardwareDeviceGateway';
